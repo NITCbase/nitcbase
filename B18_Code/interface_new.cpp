@@ -1,48 +1,87 @@
 //
 // Created by Gokul Sreekumar on 16/08/21.
 //
-
 #include <iostream>
+#include "define/constants.h"
+#include "define/errors.h"
 #include "interface_new.h"
+#include "schema.h"
 #include "Disk.h"
+
 using namespace std;
 
-void displayHelp();
+void display_help();
+
+void print_errormsg(int ret);
+
+vector<string> strip_whitespace(string input_command);
+
+void string_to_char(string x, char *a, int size);
+
 
 int regexMatchAndExecute(const string input_command) {
-	if(regex_match(input_command, help)) {
-		displayHelp();
-	} else if(regex_match(input_command, ex)) {
+	smatch m;
+	if (regex_match(input_command, help)) {
+		display_help();
+	} else if (regex_match(input_command, ex)) {
 		return -1;
-	} else if(regex_match(input_command,fdisk)) {
+	} else if (regex_match(input_command, fdisk)) {
 		Disk disk; // For Calling the constructor and making a new disk file
 		Disk::formatDisk();
 
 		// TODO: Do the meta() function here
-		cout<<"Disk formatted"<<endl;
-	}
-	else {
+		cout << "Disk formatted" << endl;
+
+	} else if (regex_match(input_command, create_table)) {
+		regex_search(input_command, m, create_table);
+
+		string table_name = m[3];
+		char relname[16];
+		string_to_char(table_name, relname, 15);
+
+		regex_search(input_command, m, temp);
+		string attrs = m[0];
+		vector<string> words = strip_whitespace(attrs);
+
+		int no_attrs = words.size() / 2;
+		char attribute[no_attrs][16];
+		int type_attr[no_attrs];
+
+		for (int i = 0, k = 0; i < no_attrs; i++, k += 2) {
+			string_to_char(words[k], attribute[i], 15);
+			if (words[k + 1] == "STR")
+				type_attr[i] = STRING;
+			else if (words[k + 1] == "NUMBER")
+				type_attr[i] = NUMBER;
+		}
+		int ret = createRel(relname, no_attrs, attribute, type_attr);
+		if (ret == SUCCESS) {
+			cout << "Relation created successfully" << endl;
+		} else {
+			print_errormsg(ret);
+		}
+
+	} else {
 		cout << "Syntax Error" << endl;
 	}
 	return 0;
 }
 
 int main() {
-	while(true) {
+	while (true) {
 		cout << "# ";
 		string input_command;
 		smatch m;
-		getline(cin,input_command);
+		getline(cin, input_command);
 
 		int res = regexMatchAndExecute(input_command);
-		if(res == -1) {
+		if (res == -1) {
 			return 0;
 		}
 	}
 }
 
-void displayHelp()
-{
+void displayHelp() {
 	printf("fdisk \n\t -Format disk \n\n");
 	printf("import <filename> \n\t -loads relations from the UNIX filesystem to the XFS disk. \n\n");
 	printf("export <tablename> <filename> \n\t -export a relation from XFS disk to UNIX file system. \n\n");
@@ -68,4 +107,92 @@ void displayHelp()
 	printf("SELECT Attribute1,Attribute2,.. FROM source_relation1 JOIN source_relation2 INTO target_relation WHERE source_relation1.attribute1 = source_relation2.attribute2 ; \n\t-creates a new relation by equi-join of both the source relations with the attributes specified \n\n");
 	printf("exit \n\t-Exit the interface\n");
 	return;
+}
+
+void print_errormsg(int ret) {
+	//cout<<ret<<endl;
+	if (ret == FAILURE)
+		cout << "Error:Command Failed" << endl;
+	else if (ret == E_OUTOFBOUND)
+		cout << "Error: out of bound" << endl;
+	else if (ret == E_FREESLOT)
+		cout << "Error: Free slot" << endl;
+	else if (ret == E_NOINDEX)
+		cout << "Error: No index" << endl;
+	else if (ret == E_DISKFULL)
+		cout << "Error:Disk has insufficient space" << endl;
+	else if (ret == E_INVALIDBLOCK)
+		cout << "Error: Invalid block" << endl;
+	else if (ret == E_RELNOTEXIST)
+		cout << "Error:Relation does not exist" << endl;
+	else if (ret == E_RELEXIST)
+		cout << "Error:Relation already exists" << endl;
+	else if (ret == E_ATTRNOTEXIST)
+		cout << "Error:Attribute does not exist" << endl;
+	else if (ret == E_ATTREXIST)
+		cout << "Error:Attribute already exists" << endl;
+	else if (ret == E_CACHEFULL)
+		cout << "Error:Cache is full" << endl;
+	else if (ret == E_RELNOTOPEN)
+		cout << "Error:Relation is not open" << endl;
+	else if (ret == E_NOTOPEN)
+		cout << "Error:Relation is not open" << endl;
+	else if (ret == E_NATTRMISMATCH)
+		cout << "Error:Mismatch in number of attributes" << endl;
+	else if (ret == E_DUPLICATEATTR)
+		cout << "Error:Duplicate attributes detected" << endl;
+	else if (ret == E_RELOPEN)
+		cout << "Error:Relation is open" << endl;
+	else if (ret == E_ATTRTYPEMISMATCH)
+		cout << "Error:Mismatch in attribute type" << endl;
+	else if (ret == E_INVALID)
+		cout << "Error:Invaid index or argument" << endl;
+}
+
+vector<string> strip_whitespace(string input_command) {
+	vector<string> words;
+	string temp = "";
+	for (int i = 0; i < input_command.length(); i++) {
+		if (input_command[i] == '(' || input_command[i] == ')') {
+			if (temp != "") {
+				words.push_back(temp);
+			}
+			temp = "";
+		} else if (input_command[i] == ',') {
+			if (temp != "") {
+				words.push_back(temp);
+			}
+			temp = "";
+		} else if (input_command[i] == ' ' || input_command[i] == ';') {
+			if (temp != "") {
+				words.push_back(temp);
+			}
+			temp = "";
+		} else {
+			temp = temp + input_command[i];
+		}
+
+	}
+	if (temp != "")
+		words.push_back(temp);
+	for (auto i = words.begin(); i != words.end(); i++) {
+
+		//cout<<*i<<endl;
+	}
+	return words;
+}
+
+void string_to_char(string x, char *a, int size) {
+	int i;
+	if (size == 15) {
+		for (i = 0; i < x.size() && i < 15; i++)
+			a[i] = x[i];
+		a[i] = '\0';
+	} else {
+		for (i = 0; i < size; i++) {
+			a[i] = x[i];
+		}
+		a[i] = '\0';
+	}
+
 }

@@ -1,3 +1,6 @@
+#ifndef B18_CODE_CONSTANTS_H
+#define B18_CODE_CONSTANTS_H
+
 #define BLOCK_SIZE 2048
 #define ATTR_SIZE 16
 #define DISK_BLOCKS 8192
@@ -6,8 +9,8 @@
 #define SUCCESS 0
 #define FAILURE -1
 
-#define USED 1 
-#define UNUSED 0 
+#define USED 1
+#define UNUSED 0
 #define ALLOTED 2
 
 #define REC 0
@@ -31,3 +34,4 @@
 
 #define RELCAT_RELID 0
 #define ATTRCAT_RELID 1
+#endif //B18_CODE_CONSTANTS_H
