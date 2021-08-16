@@ -6,3 +6,9 @@
 
 # Igonre .idea folder files
 /Archive/.idea/
+
+# Ignore cmake debug files
+/B18_Code/cmake-build-debug
+
+# Igonre .idea folder files
+/B18_Code/.idea
