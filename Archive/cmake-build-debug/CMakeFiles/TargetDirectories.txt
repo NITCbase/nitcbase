@@ -1,3 +1,0 @@
-/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/gokulsreekumar/NITCBase/nitcbase/Archive/cmake-build-debug/CMakeFiles/NITCbase.dir
