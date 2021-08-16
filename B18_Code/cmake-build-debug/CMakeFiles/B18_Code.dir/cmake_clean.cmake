@@ -2,7 +2,7 @@ file(REMOVE_RECURSE
   "B18_Code"
   "B18_Code.pdb"
   "CMakeFiles/B18_Code.dir/Disk.cpp.o"
-  "CMakeFiles/B18_Code.dir/main.cpp.o"
+  "CMakeFiles/B18_Code.dir/interface_new.cpp.o"
 )
 
 # Per-language clean rules from dependency scanning.

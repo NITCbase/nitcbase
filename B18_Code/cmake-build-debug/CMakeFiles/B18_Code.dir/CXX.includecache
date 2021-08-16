@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/Disk.cpp
+cstdio
+-
+../define/constants.h
+/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/define/constants.h
+Disk.h
+/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/Disk.h
+iostream
+-
+
+/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/Disk.h
+
+/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/define/constants.h
+

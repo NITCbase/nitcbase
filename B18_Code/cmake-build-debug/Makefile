@@ -67,10 +67,10 @@ RM = /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code
+CMAKE_SOURCE_DIR = /Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug
+CMAKE_BINARY_DIR = /Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,9 +99,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/cmake-build-debug/CMakeFiles /Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/cmake-build-debug//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/cmake-build-debug/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -169,32 +169,32 @@ Disk.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/B18_Code.dir/build.make CMakeFiles/B18_Code.dir/Disk.cpp.s
 .PHONY : Disk.cpp.s
 
-main.o: main.cpp.o
+interface_new.o: interface_new.cpp.o
 
-.PHONY : main.o
+.PHONY : interface_new.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/B18_Code.dir/build.make CMakeFiles/B18_Code.dir/main.cpp.o
-.PHONY : main.cpp.o
+interface_new.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/B18_Code.dir/build.make CMakeFiles/B18_Code.dir/interface_new.cpp.o
+.PHONY : interface_new.cpp.o
 
-main.i: main.cpp.i
+interface_new.i: interface_new.cpp.i
 
-.PHONY : main.i
+.PHONY : interface_new.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/B18_Code.dir/build.make CMakeFiles/B18_Code.dir/main.cpp.i
-.PHONY : main.cpp.i
+interface_new.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/B18_Code.dir/build.make CMakeFiles/B18_Code.dir/interface_new.cpp.i
+.PHONY : interface_new.cpp.i
 
-main.s: main.cpp.s
+interface_new.s: interface_new.cpp.s
 
-.PHONY : main.s
+.PHONY : interface_new.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/B18_Code.dir/build.make CMakeFiles/B18_Code.dir/main.cpp.s
-.PHONY : main.cpp.s
+interface_new.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/B18_Code.dir/build.make CMakeFiles/B18_Code.dir/interface_new.cpp.s
+.PHONY : interface_new.cpp.s
 
 # Help Target
 help:
@@ -208,9 +208,9 @@ help:
 	@echo "... Disk.o"
 	@echo "... Disk.i"
 	@echo "... Disk.s"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... interface_new.o"
+	@echo "... interface_new.i"
+	@echo "... interface_new.s"
 .PHONY : help
 
 

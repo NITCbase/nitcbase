@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/Disk.cpp" "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/B18_Code.dir/Disk.cpp.o"
-  "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/main.cpp" "/Users/gokulsreekumar/NITCBase/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/B18_Code.dir/main.cpp.o"
+  "/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/Disk.cpp" "/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/B18_Code.dir/Disk.cpp.o"
+  "/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/interface_new.cpp" "/Users/gokulsreekumar/Documents/NITCBase-All/nitcbase/B18_Code/cmake-build-debug/CMakeFiles/B18_Code.dir/interface_new.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "AppleClang")
 
