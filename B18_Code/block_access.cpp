@@ -2,6 +2,9 @@
 // Created by Jessiya Joy on 17/08/21.
 //
 #include <stdio.h>
+#include <string>
+#include "define/constants.h"
+#include "define/errors.h"
 #include "disk_structures.h"
 
 HeadInfo getHeader(int blockNum);
@@ -36,7 +39,7 @@ int ba_insert(int relid, Attribute *rec)
 	if(first_block == -1)
 	{
 		blkno = getFreeRecBlock();
-		relcat_entry[3].ival = blkno;
+		relcat_entry[3].nval = blkno;
 		HeadInfo *H = (HeadInfo*)malloc(sizeof(HeadInfo));
 		H->blockType = REC;
 		H->pblock = -1;
@@ -53,11 +56,11 @@ int ba_insert(int relid, Attribute *rec)
 
 	recId recid = getFreeSlot(blkno);
 
-	relcat_entry[4].ival = recid.block;
-	//cout<<"blk no: "<<relcat_entry[4].ival<<" ";
+	relcat_entry[4].nval = recid.block;
+	//cout<<"blk no: "<<relcat_entry[4].nval<<" ";
 	setRelCatEntry(relid, relcat_entry);
 	getRelCatEntry(relid, relcat_entry);
-	//cout<<relcat_entry[3].ival<<"\n";
+	//cout<<relcat_entry[3].nval<<"\n";
 	if(recid.block == -1 && recid.slot == -1)
 	{         //free slot can not be found
 		return FAILURE;
@@ -70,7 +73,7 @@ int ba_insert(int relid, Attribute *rec)
 	setHeader(&header, recid.block); //arg
 
 	//increasing number of entries in relation catalog entry
-	relcat_entry[2].ival = relcat_entry[2].ival + 1;
+	relcat_entry[2].nval = relcat_entry[2].nval + 1;
 	setRelCatEntry(relid, relcat_entry);
 
 	return SUCCESS;
@@ -107,7 +110,7 @@ void getSlotmap(unsigned char * SlotMap,int blockNum)
 {
 	FILE *disk = fopen("disk", "rb+");
 	fseek(disk, blockNum*BLOCK_SIZE, SEEK_SET);
-	struct recBlock R;
+	RecBlock R;
 	fread(&R, BLOCK_SIZE, 1, disk);
 	int numSlots = R.numSlots;
 	memcpy(SlotMap, R.slotMap_Records, numSlots);
@@ -168,7 +171,7 @@ recId getFreeSlot(int block_num)
 	{
 		//rec_buffer = Buffer::getRecBuffer(block_num);
 		//header = rec_buffer->getheader();
-		header=getheader(block_num);
+		header=getHeader(block_num);
 		num_slots = header.numSlots;
 		next_block_num = header.rblock;
 		num_attrs=header.numAttrs;
@@ -205,13 +208,13 @@ recId getFreeSlot(int block_num)
 	}
 	//block_num = rec_buffer->getBlockNum();
 	//setting header values
-	header = getheader(block_num);
+	header = getHeader(block_num);
 	header.lblock = prev_block_num;
 	header.numSlots = num_slots;
 	header.rblock=-1;
 	//was not there before: Athira
 	header.numAttrs=num_attrs;
-	setheader(&header,block_num);
+	setHeader(&header,block_num);
 	//setting slotmap
 	unsigned char slotmap[num_slots];
 	getSlotmap(slotmap,block_num);
@@ -222,9 +225,9 @@ recId getFreeSlot(int block_num)
 	//recid
 	recid = {block_num, 0};
 	//setting prev_block_num rblock to new block
-	header=getheader(prev_block_num);
+	header=getHeader(prev_block_num);
 	header.rblock = block_num;
-	setheader(&header,prev_block_num);
+	setHeader(&header,prev_block_num);
 	return recid;
 }
 
@@ -245,7 +248,7 @@ int getRecord(Attribute *rec, int blockNum, int slotNum)
 
 	if(BlockType == REC)
 	{
-		struct recBlock R;
+		RecBlock R;
 		fseek(disk, blockNum*BLOCK_SIZE, SEEK_SET);
 		fread(&R, BLOCK_SIZE, 1, disk);
 		int numSlots=R.numSlots;
@@ -282,7 +285,7 @@ int getRecord(Attribute *rec, int blockNum, int slotNum)
 int setRecord(union Attribute *rec,int blockNum,int slotNum)
 {
 	//cout<<"setrrrr\n";
-	struct HeadInfo header=getheader(blockNum);
+	struct HeadInfo header=getHeader(blockNum);
 	int numOfSlots=header.numSlots;
 	int numAttrs=header.numAttrs;
 	//cout<<numOfSlots;
