@@ -4,6 +4,78 @@
 #include <stdio.h>
 #include "disk_structures.h"
 
+HeadInfo getHeader(int blockNum);
+void setHeader(struct HeadInfo *header, int blockNum);
+void getSlotmap(unsigned char * SlotMap,int blockNum);
+void setSlotmap(unsigned char * SlotMap,int no_of_slots,int blockNum);
+int getFreeRecBlock();
+recId getFreeSlot(int block_num);
+int getRecord(Attribute *rec, int blockNum, int slotNum);
+int setRecord(union Attribute *rec,int blockNum,int slotNum);
+int getRelCatEntry(int rel_id, Attribute *relcat_entry);
+int setRelCatEntry(int rel_id,union Attribute * relcat_entry);
+
+/* Jess
+ *
+ */
+int ba_insert(int relid, Attribute *rec)
+{
+	Attribute relcat_entry[6];
+	getRelCatEntry(relid, relcat_entry);
+
+	int num_attrs = relcat_entry[1].nval;
+	int first_block = relcat_entry[3].nval;
+	int num_slots = relcat_entry[5].nval;
+
+	Attribute attrcat_entry[6];
+	HeadInfo header;
+
+	unsigned char slotmap[num_slots];
+	int blkno = first_block;
+
+	if(first_block == -1)
+	{
+		blkno = getFreeRecBlock();
+		relcat_entry[3].ival = blkno;
+		HeadInfo *H = (HeadInfo*)malloc(sizeof(HeadInfo));
+		H->blockType = REC;
+		H->pblock = -1;
+		H->lblock = -1;
+		H->rblock = -1;
+		H->numEntries = 0;
+		H->numAttrs = num_attrs;
+		H->numSlots = num_slots;
+		setHeader(H, blkno);
+		getSlotmap(slotmap, blkno);
+		memset(slotmap, '0', sizeof(slotmap)); //all slots are free
+		setSlotmap(slotmap, num_slots, blkno);
+	}
+
+	recId recid = getFreeSlot(blkno);
+
+	relcat_entry[4].ival = recid.block;
+	//cout<<"blk no: "<<relcat_entry[4].ival<<" ";
+	setRelCatEntry(relid, relcat_entry);
+	getRelCatEntry(relid, relcat_entry);
+	//cout<<relcat_entry[3].ival<<"\n";
+	if(recid.block == -1 && recid.slot == -1)
+	{         //free slot can not be found
+		return FAILURE;
+	}
+	setRecord(rec,recid.block, recid.slot);
+
+	//since record is inserted number of entries is increased by 1
+	header = getHeader(recid.block);  //arg
+	header.numEntries = header.numEntries + 1; // increased number of entires in block
+	setHeader(&header, recid.block); //arg
+
+	//increasing number of entries in relation catalog entry
+	relcat_entry[2].ival = relcat_entry[2].ival + 1;
+	setRelCatEntry(relid, relcat_entry);
+
+	return SUCCESS;
+}
+
 /* Jess
  * Reads header for 'blockNum'th block from disk
  */
@@ -311,65 +383,3 @@ int setRelCatEntry(int rel_id,union Attribute * relcat_entry)
 		}
 	}
 }
-
-/* Jess
- *
- */
-int ba_insert(int relid, Attribute *rec)
-{
-	Attribute relcat_entry[6];
-	getRelCatEntry(relid, relcat_entry);
-
-	int num_attrs = relcat_entry[1].nval;
-	int first_block = relcat_entry[3].nval;
-	int num_slots = relcat_entry[5].nval;
-
-	Attribute attrcat_entry[6];
-	HeadInfo header;
-
-	unsigned char slotmap[num_slots];
-	int blkno = first_block;
-
-	if(first_block == -1)
-	{
-		blkno = getFreeRecBlock();
-		relcat_entry[3].ival = blkno;
-		HeadInfo *H = (HeadInfo*)malloc(sizeof(HeadInfo));
-		H->blockType = REC;
-		H->pblock = -1;
-		H->lblock = -1;
-		H->rblock = -1;
-		H->numEntries = 0;
-		H->numAttrs = num_attrs;
-		H->numSlots = num_slots;
-		setHeader(H, blkno);
-		getSlotmap(slotmap, blkno);
-		memset(slotmap, '0', sizeof(slotmap)); //all slots are free
-		setSlotmap(slotmap, num_slots, blkno);
-	}
-
-	recId recid = getFreeSlot(blkno);
-
-	relcat_entry[4].ival = recid.block;
-	//cout<<"blk no: "<<relcat_entry[4].ival<<" ";
-	setRelCatEntry(relid, relcat_entry);
-	getRelCatEntry(relid, relcat_entry);
-	//cout<<relcat_entry[3].ival<<"\n";
-	if(recid.block == -1 && recid.slot == -1)
-	{         //free slot can not be found
-		return FAILURE;
-	}
-	setRecord(rec,recid.block, recid.slot);
-
-	//since record is inserted number of entries is increased by 1
-	header = getHeader(recid.block);  //arg
-	header.numEntries = header.numEntries + 1; // increased number of entires in block
-	setHeader(&header, recid.block); //arg
-
-	//increasing number of entries in relation catalog entry
-	relcat_entry[2].ival = relcat_entry[2].ival + 1;
-	setRelCatEntry(relid, relcat_entry);
-
-	return SUCCESS;
-}
-
