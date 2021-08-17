@@ -14,9 +14,9 @@ void display_help();
 
 void print_errormsg(int ret);
 
-vector<string> strip_whitespace(string input_command);
+vector<string> extract_tokens(string input_command);
 
-void string_to_char(string x, char *a, int size);
+void string_to_char_array(string x, char *a, int size);
 
 
 int regexMatchAndExecute(const string input_command) {
@@ -37,21 +37,21 @@ int regexMatchAndExecute(const string input_command) {
 
 		string table_name = m[3];
 		char relname[16];
-		string_to_char(table_name, relname, 15);
+		string_to_char_array(table_name, relname, 15);
 
 		regex_search(input_command, m, temp);
 		string attrs = m[0];
-		vector<string> words = strip_whitespace(attrs);
+		vector<string> words = extract_tokens(attrs);
 
 		int no_attrs = words.size() / 2;
 		char attribute[no_attrs][16];
 		int type_attr[no_attrs];
 
 		for (int i = 0, k = 0; i < no_attrs; i++, k += 2) {
-			string_to_char(words[k], attribute[i], 15);
+			string_to_char_array(words[k], attribute[i], 15);
 			if (words[k + 1] == "STR")
 				type_attr[i] = STRING;
-			else if (words[k + 1] == "NUMBER")
+			else if (words[k + 1] == "NUM")
 				type_attr[i] = NUMBER;
 		}
 		int ret = createRel(relname, no_attrs, attribute, type_attr);
@@ -81,7 +81,7 @@ int main() {
 	}
 }
 
-void displayHelp() {
+void display_help() {
 	printf("fdisk \n\t -Format disk \n\n");
 	printf("import <filename> \n\t -loads relations from the UNIX filesystem to the XFS disk. \n\n");
 	printf("export <tablename> <filename> \n\t -export a relation from XFS disk to UNIX file system. \n\n");
@@ -110,7 +110,6 @@ void displayHelp() {
 }
 
 void print_errormsg(int ret) {
-	//cout<<ret<<endl;
 	if (ret == FAILURE)
 		cout << "Error:Command Failed" << endl;
 	else if (ret == E_OUTOFBOUND)
@@ -149,40 +148,38 @@ void print_errormsg(int ret) {
 		cout << "Error:Invaid index or argument" << endl;
 }
 
-vector<string> strip_whitespace(string input_command) {
-	vector<string> words;
-	string temp = "";
+vector<string> extract_tokens(string input_command) {
+	// tokenize with whitespace and brackets as delimiter
+	vector<string> tokens;
+	string token = "";
 	for (int i = 0; i < input_command.length(); i++) {
 		if (input_command[i] == '(' || input_command[i] == ')') {
-			if (temp != "") {
-				words.push_back(temp);
+			if (token != "") {
+				tokens.push_back(token);
 			}
-			temp = "";
+			token = "";
 		} else if (input_command[i] == ',') {
-			if (temp != "") {
-				words.push_back(temp);
+			if (token != "") {
+				tokens.push_back(token);
 			}
-			temp = "";
+			token = "";
 		} else if (input_command[i] == ' ' || input_command[i] == ';') {
-			if (temp != "") {
-				words.push_back(temp);
+			if (token != "") {
+				tokens.push_back(token);
 			}
-			temp = "";
+			token = "";
 		} else {
-			temp = temp + input_command[i];
+			token = token + input_command[i];
 		}
-
 	}
-	if (temp != "")
-		words.push_back(temp);
-	for (auto i = words.begin(); i != words.end(); i++) {
+	if (token != "")
+		tokens.push_back(token);
 
-		//cout<<*i<<endl;
-	}
-	return words;
+	return tokens;
 }
 
-void string_to_char(string x, char *a, int size) {
+void string_to_char_array(string x, char *a, int size) {
+	// Reducing size of string to the size provided
 	int i;
 	if (size == 15) {
 		for (i = 0; i < x.size() && i < 15; i++)
@@ -194,5 +191,4 @@ void string_to_char(string x, char *a, int size) {
 		}
 		a[i] = '\0';
 	}
-
 }

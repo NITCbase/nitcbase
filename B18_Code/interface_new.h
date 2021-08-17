@@ -19,7 +19,7 @@ std::regex list_all("\\s*(ls|LS)\\s*");
 std::regex ex("\\s*(EXIT|exit)\\s*\\s*");
 
 /* DDL Commands*/
-std::regex create_table("\\s*(CREATE|create)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*\\(\\s*([A-Za-z0-9_-]+\\s+(INT|STR|FLOAT),\\s*)*([A-Za-z0-9_-]+\\s+(INT|STR|FLOAT))\\s*\\)\\s*;");
+std::regex create_table("\\s*(CREATE|create)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*\\(\\s*([A-Za-z0-9_-]+\\s+(STR|NUM),\\s*)*([A-Za-z0-9_-]+\\s+(STR|NUM))\\s*\\)\\s*;");
 std::regex drop_table("\\s*(DROP|drop)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*;\\s*");
 std::regex open_table("\\s*(OPEN|open)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*;\\s*");
 std::regex close_table("\\s*(CLOSE|close)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*;\\s*");

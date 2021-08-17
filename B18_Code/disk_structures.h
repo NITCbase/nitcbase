@@ -4,6 +4,8 @@
 
 #ifndef B18_CODE_DISK_STRUCTURES_H
 #define B18_CODE_DISK_STRUCTURES_H
+
+#include <cstdint>
 #include "define/constants.h"
 typedef int relId;
 typedef struct recId {

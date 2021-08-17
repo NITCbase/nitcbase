@@ -12,3 +12,7 @@
 
 # Igonre .idea folder files
 /B18_Code/.idea
+
+/B18_Code/XFS-Interface/cmake-build-debug
+
+/B18_Code/XFS-Interface/.idea
