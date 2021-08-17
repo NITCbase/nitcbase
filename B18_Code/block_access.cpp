@@ -1,15 +1,14 @@
 //
 // Created by Jessiya Joy on 17/08/21.
 //
+#include <stdio.h>
 #include "disk_structures.h"
 
-
 /* Jess
- * Returns the header for the 'blockNum'th block
+ * Reads header for 'blockNum'th block from disk
  */
 HeadInfo getHeader(int blockNum)
 {
-	//int BlockType=getBlockType(blockNum);
 	HeadInfo header;
 	FILE *disk = fopen("disk", "rb");
 	fseek(disk, blockNum*BLOCK_SIZE, SEEK_SET);
@@ -19,13 +18,13 @@ HeadInfo getHeader(int blockNum)
 }
 
 /* Jess
- *
+ * Writes header for 'blockNum'th block into disk
  */
-void setHeader(struct HeadInfo *header,int blockNum)
+void setHeader(struct HeadInfo *header, int blockNum)
 {
-	FILE *disk=fopen("disk","rb+");
-	fseek(disk,blockNum*BLOCK_SIZE,SEEK_SET);
-	fwrite(header,32,1,disk);
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, blockNum*BLOCK_SIZE, SEEK_SET);
+	fwrite(header, 32, 1, disk);
 	fclose(disk);
 }
 
@@ -34,12 +33,12 @@ void setHeader(struct HeadInfo *header,int blockNum)
  */
 void getSlotmap(unsigned char * SlotMap,int blockNum)
 {
-	FILE *disk=fopen("disk","rb+");
-	fseek(disk,blockNum*2048,SEEK_SET);
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, blockNum*BLOCK_SIZE, SEEK_SET);
 	struct recBlock R;
-	fread(&R,2048,1,disk);
-	int numSlots=R.numSlots;
-	memcpy(SlotMap,R.slotMap_Records,numSlots);
+	fread(&R, BLOCK_SIZE, 1, disk);
+	int numSlots = R.numSlots;
+	memcpy(SlotMap, R.slotMap_Records, numSlots);
 	fclose(disk);
 }
 
@@ -48,9 +47,9 @@ void getSlotmap(unsigned char * SlotMap,int blockNum)
  */
 void setSlotmap(unsigned char * SlotMap,int no_of_slots,int blockNum)
 {
-	FILE *disk=fopen("disk","rb+");
-	fseek(disk,blockNum*2048+32,SEEK_SET);
-	fwrite(SlotMap,no_of_slots,1,disk);
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, blockNum*BLOCK_SIZE + 32, SEEK_SET);
+	fwrite(SlotMap, no_of_slots, 1, disk);
 	fclose(disk);
 }
 
@@ -59,19 +58,20 @@ void setSlotmap(unsigned char * SlotMap,int no_of_slots,int blockNum)
  */
 int getFreeRecBlock()
 {
-	FILE *disk=fopen("disk","rb+");
-	fseek(disk,0,SEEK_SET);
+	FILE *disk = fopen("disk","rb+");
+	fseek(disk, 0, SEEK_SET);
 	unsigned char blockAllocationMap[4*BLOCK_SIZE];
-	fread(blockAllocationMap,4*BLOCK_SIZE,1,disk);
+	fread(blockAllocationMap, 4*BLOCK_SIZE, 1, disk);
+
 	int iter;
-	for(iter=0;iter<4*BLOCK_SIZE;iter++)
+	for(iter = 0; iter < 4*BLOCK_SIZE; iter++)
 	{
-		if((int32_t)(blockAllocationMap[iter])==UNUSED_BLK)
+		if((int32_t)(blockAllocationMap[iter]) == UNUSED_BLK)
 		{
 			//cout<<"in getfreerecblk: "<<"\n";
-			blockAllocationMap[iter]=(unsigned char)REC;
-			fseek(disk,0,SEEK_SET);
-			fwrite(blockAllocationMap,2048*4,1,disk);
+			blockAllocationMap[iter] = (unsigned char)REC;
+			fseek(disk, 0, SEEK_SET);
+			fwrite(blockAllocationMap,BLOCK_SIZE*4, 1, disk);
 			fclose(disk);
 			return iter;
 		}
@@ -106,17 +106,17 @@ recId getFreeSlot(int block_num)
 		getSlotmap(slotmap,block_num);
 		//searching for free slot in block (block_num)
 		int iter;
-		for(iter = 0; iter< num_slots; iter++)
+		for(iter = 0; iter < num_slots; iter++)
 		{
-			if(slotmap[iter] =='0')
+			if(slotmap[iter] == '0')
 			{
 				break;
 			}
 		}
 		if(iter < num_slots)
 		{
-			slotmap[iter]='1';
-			setSlotmap(slotmap,num_slots,block_num);
+			slotmap[iter] = '1';
+			setSlotmap(slotmap, num_slots, block_num);
 			recid = {block_num, iter};
 			return recid;
 		}
@@ -239,12 +239,12 @@ int setRecord(union Attribute *rec,int blockNum,int slotNum)
 	}
 	else if(BlockType==IND_INTERNAL)
 	{
-		//to be done
+		//TODO
 
 	}
 	else if(BlockType==IND_LEAF)
 	{
-		//to be done
+		//TODO
 	}
 	else
 	{
