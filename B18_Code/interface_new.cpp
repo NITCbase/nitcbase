@@ -7,6 +7,7 @@
 #include "interface_new.h"
 #include "schema.h"
 #include "Disk.h"
+#include "OpenRelTable.h"
 
 using namespace std;
 
@@ -68,6 +69,19 @@ int regexMatchAndExecute(const string input_command) {
 }
 
 int main() {
+	// TODO : change to MAX_OPEN
+	/*
+	 * Initializing Open Relation Table
+	 */
+	for (int i = 0; i < MAXOPEN; ++i) {
+		if(i == RELCAT_RELID)
+			strcpy(OpenRelTable[i], "RELATIONCAT");
+		else if(i == ATTRCAT_RELID)
+			strcpy(OpenRelTable[i], "ATTRIBUTECAT");
+		else
+			strcpy(OpenRelTable[i], "NULL");
+	}
+
 	while (true) {
 		cout << "# ";
 		string input_command;

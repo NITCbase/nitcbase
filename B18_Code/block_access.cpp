@@ -1,12 +1,13 @@
 //
 // Created by Jessiya Joy on 17/08/21.
 //
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include "define/constants.h"
 #include "define/errors.h"
 #include "disk_structures.h"
 #include "schema.h"
+#include "OpenRelTable.h"
 
 int getBlockType(int blocknum);
 
@@ -368,7 +369,6 @@ int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
 
 
 void add_disk_metainfo() {
-	struct HeadInfo h;
 	union Attribute rec[6];
 	struct HeadInfo *H = (struct HeadInfo *) malloc(sizeof(struct HeadInfo));
 
@@ -395,7 +395,6 @@ void add_disk_metainfo() {
 			slot_map[i] = '0';
 	}
 	setSlotmap(slot_map, 20, 4);
-	unsigned char temp[20];
 
 	// TODO: use the set_headerInfo, make_relcatrec and make_attrcatrec function in schema.cpp
 
