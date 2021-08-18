@@ -2,12 +2,11 @@
 // Created by Gokul Sreekumar on 06/06/21.
 //
 #include <cstdio>
-#include "../define/constants.h"
+#include "define/constants.h"
 #include "Disk.h"
 
 Disk::Disk() {
-	// TODO: Take this offsect global
-	const int offset = 16*1024*1024; //16MB
+	const int offset = DISK_SIZE; //16MB
 	FILE *disk = fopen("disk","wb+");
 	fseek(disk, 0, SEEK_SET);
 	// TODO: Use memset here
@@ -43,7 +42,7 @@ void Disk::formatDisk() {
 
 	FILE *disk = fopen("disk","wb+");
 	const int reserved = 6;
-	const int offset = 16*1024*1024;
+	const int offset = DISK_SIZE;
 	fseek(disk, 0, SEEK_SET);
 
 	// First Five Entries set to 1
