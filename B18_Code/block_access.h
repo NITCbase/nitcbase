@@ -6,5 +6,6 @@
 #define B18_CODE_BLOCK_ACCESS_H
 
 int ba_insert(int relid, Attribute *rec);
+void add_disk_metainfo();
 
 #endif //B18_CODE_BLOCK_ACCESS_H

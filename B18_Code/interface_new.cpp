@@ -8,6 +8,7 @@
 #include "schema.h"
 #include "Disk.h"
 #include "OpenRelTable.h"
+#include "block_access.h"
 
 using namespace std;
 
@@ -30,7 +31,7 @@ int regexMatchAndExecute(const string input_command) {
 		Disk disk; // For Calling the constructor and making a new disk file
 		Disk::formatDisk();
 
-		// TODO: Do the meta() function here
+		add_disk_metainfo();
 		cout << "Disk formatted" << endl;
 
 	} else if (regex_match(input_command, create_table)) {
@@ -68,6 +69,7 @@ int regexMatchAndExecute(const string input_command) {
 	return 0;
 }
 
+char OpenRelTable[MAXOPEN][16];
 int main() {
 	// TODO : change to MAX_OPEN
 	/*
