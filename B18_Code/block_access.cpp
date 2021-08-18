@@ -6,6 +6,7 @@
 #include "define/constants.h"
 #include "define/errors.h"
 #include "disk_structures.h"
+#include "schema.h"
 
 int getBlockType(int blocknum);
 
@@ -48,6 +49,7 @@ int ba_insert(int relid, Attribute *rec) {
 	if (first_block == -1) {
 		blockNum = getFreeRecBlock();
 		relcat_entry[3].nval = blockNum;
+		// TODO: Take make_headerInfo() function out
 		HeadInfo *H = (HeadInfo *) malloc(sizeof(HeadInfo));
 		H->blockType = REC;
 		H->pblock = -1;
@@ -65,6 +67,7 @@ int ba_insert(int relid, Attribute *rec) {
 	recId recid = getFreeSlot(blockNum);
 
 	relcat_entry[4].nval = recid.block;
+	// TODO: Remove All Comments
 	//cout<<"blk no: "<<relcat_entry[4].nval<<" ";
 	setRelCatEntry(relid, relcat_entry);
 	getRelCatEntry(relid, relcat_entry);
@@ -361,4 +364,182 @@ int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
 			return SUCCESS;
 		}
 	}
+}
+
+
+void add_disk_metainfo() {
+	struct HeadInfo h;
+	union Attribute rec[6];
+	struct HeadInfo *H = (struct HeadInfo *) malloc(sizeof(struct HeadInfo));
+
+	/*
+	 * Set the header for Block 4 - First Block of Relation Catalog
+	 */
+	H->blockType = REC;
+	H->pblock = -1;
+	H->lblock = -1;
+	H->rblock = -1;
+	H->numEntries = 2;
+	H->numAttrs = 6;
+	H->numSlots = 20;
+	setHeader(H, 4);
+
+	/*
+	 * Set the slot allocation map for Block 4
+	 */
+	unsigned char slot_map[20];
+	for (int i = 0; i < 20; i++) {
+		if (i == 0 || i == 1)
+			slot_map[i] = '1';
+		else
+			slot_map[i] = '0';
+	}
+	setSlotmap(slot_map, 20, 4);
+	unsigned char temp[20];
+
+	// TODO: use the set_headerInfo, make_relcatrec and make_attrcatrec function in schema.cpp
+
+	/*
+	 * Create and Add 2 Records into Block 4 (Relation Catalog)
+	 *  - First for Relation Catalog Relation (Block 4 itself is used for this relation)
+	 *  - Second for Attribute Catalog Relation (Block 5 is used for this relation)
+	 */
+	strcpy(rec[0].sval, "RELATIONCAT");
+	rec[1].nval = 6;
+	rec[2].nval = 2;
+	rec[3].nval = 4;
+	rec[4].nval = 4;
+	rec[5].nval = 20;
+	setRecord(rec, 4, 0);
+
+	strcpy(rec[0].sval, "ATTRIBUTECAT");
+	rec[1].nval = 6;
+	rec[2].nval = 12;
+	rec[3].nval = 5;
+	rec[4].nval = 5;
+	rec[5].nval = 20;
+	setRecord(rec, 4, 1);
+
+	/*
+	 * Set the header for Block 5 - First Block of Attribute Catalog
+	 */
+	H->blockType = REC;
+	H->pblock = -1;
+	H->lblock = -1;
+	H->rblock = -1;
+	H->numEntries = 12;
+	H->numAttrs = 6;
+	H->numSlots = 20;
+	setHeader(H, 5);
+
+	/*
+	 * Set the slot allocation map for Block 5
+	 */
+	for (int i = 0; i < 20; i++) {
+		if (i >= 0 && i <= 11)
+			slot_map[i] = '1';
+		else
+			slot_map[i] = '0';
+	}
+	setSlotmap(slot_map, 20, 5);
+
+	/*
+	 *  Create Entries for every attribute for Relation Catalog and Attribute Catalog
+	 */
+	strcpy(rec[0].sval, "RELATIONCAT");
+	strcpy(rec[1].sval, "RelName");
+	rec[2].nval = STRING;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 0;
+	setRecord(rec, 5, 0);
+
+	strcpy(rec[0].sval, "RELATIONCAT");
+	strcpy(rec[1].sval, "#Attributes");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 1;
+	setRecord(rec, 5, 1);
+
+	strcpy(rec[0].sval, "RELATIONCAT");
+	strcpy(rec[1].sval, "#Records");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 2;
+	setRecord(rec, 5, 2);
+
+	strcpy(rec[0].sval, "RELATIONCAT");
+	strcpy(rec[1].sval, "FirstBlock");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 3;
+	setRecord(rec, 5, 3);
+
+	strcpy(rec[0].sval, "RELATIONCAT");
+	strcpy(rec[1].sval, "LastBlock");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 4;
+	setRecord(rec, 5, 4);
+
+	strcpy(rec[0].sval, "RELATIONCAT");
+	strcpy(rec[1].sval, "#Slots");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 5;
+	setRecord(rec, 5, 5);
+
+	strcpy(rec[0].sval, "ATTRIBUTECAT");
+	strcpy(rec[1].sval, "RelName");
+	rec[2].nval = STRING;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 0;
+	setRecord(rec, 5, 6);
+
+	strcpy(rec[0].sval, "ATTRIBUTECAT");
+	strcpy(rec[1].sval, "AttributeName");
+	rec[2].nval = STRING;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 1;
+	setRecord(rec, 5, 7);
+
+	strcpy(rec[0].sval, "ATTRIBUTECAT");
+	strcpy(rec[1].sval, "AttributeType");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 2;
+	setRecord(rec, 5, 8);
+
+	strcpy(rec[0].sval, "ATTRIBUTECAT");
+	strcpy(rec[1].sval, "PrimaryFlag");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 3;
+	setRecord(rec, 5, 9);
+
+	strcpy(rec[0].sval, "ATTRIBUTECAT");
+	strcpy(rec[1].sval, "RootBlock");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 4;
+	setRecord(rec, 5, 10);
+
+	strcpy(rec[0].sval, "ATTRIBUTECAT");
+	strcpy(rec[1].sval, "Offset");
+	rec[2].nval = INT;
+	rec[3].nval = -1;
+	rec[4].nval = -1;
+	rec[5].nval = 5;
+	setRecord(rec, 5, 11);
+
 }

@@ -6,7 +6,7 @@
 #include <string>
 
 int check_duplicate_attributes(int nAttrs, char attrs[][ATTR_SIZE]);
-Attribute *make_relcatrec(char relname[16], int nAttrs, int nRecords, int firstBlock, int lastBlock);
+Attribute* make_relcatrec(char relname[16], int nAttrs, int nRecords, int firstBlock, int lastBlock);
 Attribute* make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], int attrtype, int rootBlock, int offset);
 
 /*gokul
@@ -72,7 +72,7 @@ Attribute *make_relcatrec(char relname[ATTR_SIZE], int nAttrs, int nRecords, int
 /*gokul
  * Creates and returns an Attrbiute Catalog Record Entry with the parameters provided as argument
  */
-Attribute* make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], int attrtype, int rootBlock, int offset) {
+Attribute *make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], int attrtype, int rootBlock, int offset) {
 	int primaryFlag = -1; // presently unused
 	Attribute *attrcatrec = (Attribute *) malloc(sizeof(Attribute) * 6);
 	strcpy(attrcatrec[0].sval, relname);
