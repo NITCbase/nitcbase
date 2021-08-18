@@ -29,7 +29,7 @@ int getRelCatEntry(int rel_id, Attribute *relcat_entry);
 
 int setRelCatEntry(int rel_id, Attribute *relcat_entry);
 
-/* Jess
+/*
  *
  */
 int ba_insert(int relid, Attribute *rec) {
@@ -95,7 +95,7 @@ int getBlockType(int blocknum) {
 	return (int32_t) (blockAllocationMap[blocknum]);
 }
 
-/* Jess
+/*
  * Reads header for 'blockNum'th block from disk
  */
 HeadInfo getHeader(int blockNum) {
@@ -107,7 +107,7 @@ HeadInfo getHeader(int blockNum) {
 	return header;
 }
 
-/* Jess
+/*
  * Writes header for 'blockNum'th block into disk
  */
 void setHeader(struct HeadInfo *header, int blockNum) {
@@ -117,7 +117,7 @@ void setHeader(struct HeadInfo *header, int blockNum) {
 	fclose(disk);
 }
 
-/* Jess
+/*
  * Reads slotmap for 'blockNum'th block from disk
  */
 void getSlotmap(unsigned char *SlotMap, int blockNum) {
@@ -130,7 +130,7 @@ void getSlotmap(unsigned char *SlotMap, int blockNum) {
 	fclose(disk);
 }
 
-/* Jess
+/*
  * Writes slotmap for 'blockNum'th block into disk
  */
 void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
@@ -140,7 +140,7 @@ void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
 	fclose(disk);
 }
 
-/* Jess
+/*
  *
  */
 int getFreeRecBlock() {
@@ -163,8 +163,10 @@ int getFreeRecBlock() {
 	return FAILURE;
 }
 
-/* Jess
- *
+/* Finds a free slot either from :
+ *      - the block numbered 'block_num' or
+ *      - next blocks in the linked list or
+ *      - a newly allotted block
  */
 recId getFreeSlot(int block_num) {
 	recId recid = {-1, -1};
@@ -211,7 +213,8 @@ recId getFreeSlot(int block_num) {
 
 	// no blocks are available in disk
 	if (block_num == -1) {
-		return recid; // no free slot can be found
+		// no free slot can be found, return {-1, -1}
+		return recid;
 	}
 
 	//setting header for new record block
@@ -240,8 +243,8 @@ recId getFreeSlot(int block_num) {
 	return recid;
 }
 
-/* Jess
- * Stores the record given by blockNum & slotNum in the memory location pointed by rec
+/*
+ * Reads record from disk
  */
 int getRecord(Attribute *rec, int blockNum, int slotNum) {
 	HeadInfo Header;
@@ -263,13 +266,16 @@ int getRecord(Attribute *rec, int blockNum, int slotNum) {
 		if (*((int32_t *) (R.slotMap_Records + slotNum)) == 0)
 			return E_FREESLOT;
 		int numAttrs = R.numAttrs;
-		// it should be R.slotmprecords+32+...???
-		memcpy(rec, (R.slotMap_Records + numSlots + (slotNum * numAttrs * ATTR_SIZE)), numAttrs * 16);
+
+		/* offset :
+		 *         slotmap size ( = numSlots ) +
+		 *         size of records coming before current record ( = slotNum * numAttrs * ATTR_SIZE )
+		 */
+		memcpy(rec, (R.slotMap_Records + numSlots + (slotNum * numAttrs * ATTR_SIZE)), numAttrs * ATTR_SIZE);
 		fclose(disk);
 		return SUCCESS;
 	} else if (BlockType == IND_INTERNAL) {
 		//TODO
-
 	} else if (BlockType == IND_LEAF) {
 		//TODO
 	} else {
@@ -279,61 +285,43 @@ int getRecord(Attribute *rec, int blockNum, int slotNum) {
 }
 
 
-/* Jess
- *
+/*
+ * Writes record into disk
  */
 int setRecord(Attribute *rec, int blockNum, int slotNum) {
-	//cout<<"setrrrr\n";
 	struct HeadInfo header = getHeader(blockNum);
 	int numOfSlots = header.numSlots;
 	int numAttrs = header.numAttrs;
-	//cout<<numOfSlots;
 
 	if (slotNum < 0 || slotNum > numOfSlots - 1)
 		return E_OUTOFBOUND;
-	//cout<<"hereee!!!\n";
 
 	int BlockType = getBlockType(blockNum);
-	//cout<<BlockType<<endl;
-	//cout<<"BLOCK "<<blockNum<<"\n";
 	FILE *disk = fopen("disk", "rb+");
+
 	if (BlockType == REC) {
-		/*struct recBlock R;
-		fseek(disk,blockNum*BLOCK_SIZE,SEEK_SET);
-		fread(&R,BLOCK_SIZE,1,disk);
-		int numAttrs=R.numAttrs;
-		int numSlots=R.numSlots;*/
-		//if(blockNum==5&&slotNum>11)
+		/* offset :
+		 *          size of blocks coming before current block ( = blockNum * BLOCK_SIZE ) +
+		 *          header size ( = 32 ) +
+		 *          slotmap size ( = numSlots ) +
+		 *          size of records coming before current record ( = slotNum * numAttrs * ATTR_SIZE )
+		 */
 		fseek(disk, blockNum * BLOCK_SIZE + 32 + numOfSlots + slotNum * numAttrs * ATTR_SIZE, SEEK_SET);
 		fwrite(rec, numAttrs * ATTR_SIZE, 1, disk);
 		fclose(disk);
 		return SUCCESS;
-
 	} else if (BlockType == IND_INTERNAL) {
 		//TODO
-
 	} else if (BlockType == IND_LEAF) {
 		//TODO
 	} else {
 		fclose(disk);
 		return FAILURE;
 	}
-	/*unsigned char* bufferPtr = getBufferPtr();
-	int numOfAttrib=((int32_t) (bufferPtr + 5*4));
-	int numOfSlots=((int32_t) (bufferPtr + 6*4));
-	if(slotNum < 0 || slotNum > numOfSlots - 1)
-		return E_OUTOFBOUND;
-	unsigned char *slotMap = new unsigned char;
-	getSlotMap(slotMap);
-	if((int32_t*)(slotMap + slotNum) == 0)
-	    return E_FREESLOT;
-	memcpy((void*)(bufferPtr + 32 + numOfSlots + (slotNum*numOfAttrib)ATTR_SIZE), (void)rec, numOfAttrib*ATTR_SIZE);
-	return SUCCESS;*/
 }
 
-/* Jess
- * Stores the relation catalogue entry of the relation with id rel_id
- * in memory location pointed to by relcat_entry
+/*
+ * Reads relation catalogue entry from disk
  */
 int getRelCatEntry(int rel_id, Attribute *relcat_entry) {
 	if (rel_id < 0 || rel_id >= MAXOPEN)
@@ -353,8 +341,8 @@ int getRelCatEntry(int rel_id, Attribute *relcat_entry) {
 	return FAILURE;
 }
 
-/* Jess
- *
+/*
+ * Writes relation catalogue entry into disk
  */
 int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
 	if (rel_id < 0 || rel_id >= MAXOPEN)
