@@ -34,7 +34,7 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 	Attribute *relcatrec = make_relcatrec(relname, nAttrs, 0, -1,
 	                                      -1);   // Relcat Entry: relname, #attrs, #records, first_blk, #slots_per_blk
 
-	flag = ba_insert(0, relcatrec);
+	flag = ba_insert(RELCAT_RELID, relcatrec);
 
 	if (flag != SUCCESS) {
 		// TODO: ba_delete(relname);
@@ -44,7 +44,7 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 	for (int offset = 0; offset < nAttrs; offset++) {
 		Attribute *attrcatrec = make_attrcatrec(relname, attrs[offset], attrtypes[offset], -1, offset); // Attrcat Entry : relname, attr_name, attr_type, primaryflag, root_blk, offset
 
-		flag = ba_insert(1, attrcatrec);
+		flag = ba_insert(ATTRCAT_RELID, attrcatrec);
 
 		if (flag != SUCCESS) {
 			// TODO: ba_delete(relname);
