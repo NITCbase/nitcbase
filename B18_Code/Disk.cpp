@@ -36,21 +36,52 @@ int Disk::writeBlock(unsigned char *block, int blockNum) {
 	fclose(disk);
 }
 
-void Disk::formatDisk() {
-	// Formats the disk
-	// Set the reserved entries in block allocation map
+//void Disk::formatDisk() {
+//	// Formats the disk
+//	// Set the reserved entries in block allocation map
+//
+//	FILE *disk = fopen("disk","wb+");
+//	const int reserved = 6;
+//	const int offset = DISK_SIZE;
+//	fseek(disk, 0, SEEK_SET);
+//
+//	// First Five Entries set to 1
+//	for(int i=0; i<reserved; i++){
+//		fputc(1, disk);
+//	}
+//	// All other entries to zero
+//	for(int i=reserved; i<offset; i++){
+//		fputc(0, disk);
+//	}
+//	fclose(disk);
+//}
 
-	FILE *disk = fopen("disk","wb+");
+/*
+ * Formats the disk
+ * Set the reserved entries in block allocation map
+ */
+void Disk::formatDisk() {
+	FILE *disk = fopen("disk", "wb+");
 	const int reserved = 6;
 	const int offset = DISK_SIZE;
-	fseek(disk, 0, SEEK_SET);
 
-	// First Five Entries set to 1
-	for(int i=0; i<reserved; i++){
-		fputc(1, disk);
+	fseek(disk, 0, SEEK_SET);
+	unsigned char ch[BLOCK_SIZE * 4];
+
+	// Reserved Entries in Block Allocation Map (Used)
+	for (int i = 0; i < reserved; i++) {
+		if (i >= 0 && i <= 3)
+			ch[i] = (unsigned char) 1;
+		else
+			ch[i] = (unsigned char) REC;
 	}
-	// All other entries to zero
-	for(int i=reserved; i<offset; i++){
+
+	// Remaining entries are marked Unused
+	for (int i = reserved; i < BLOCK_SIZE * 4; i++)
+		ch[i] = (unsigned char) UNUSED_BLK;
+	fwrite(ch, BLOCK_SIZE * 4, 1, disk);
+
+	for (int i = reserved; i < offset; i++) {
 		fputc(0, disk);
 	}
 	fclose(disk);

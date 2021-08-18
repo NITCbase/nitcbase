@@ -32,7 +32,7 @@ int getRelCatEntry(int rel_id, Attribute *relcat_entry);
 int setRelCatEntry(int rel_id, Attribute *relcat_entry);
 
 /*
- *
+ *  Inserts the Record into the given Relation
  */
 int ba_insert(int relid, Attribute *rec) {
 	Attribute relcat_entry[6];
@@ -90,6 +90,9 @@ int ba_insert(int relid, Attribute *rec) {
 	return SUCCESS;
 }
 
+/*
+ * Retrieves whether the block is occupied or not
+ */
 int getBlockType(int blocknum) {
 	FILE *disk = fopen("disk", "rb");
 	fseek(disk, 0, SEEK_SET);

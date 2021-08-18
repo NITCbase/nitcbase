@@ -31,8 +31,16 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 		return E_DUPLICATEATTR;
 	}
 
-	Attribute *relcatrec = make_relcatrec(relname, nAttrs, 0, -1,
-	                                      -1);   // Relcat Entry: relname, #attrs, #records, first_blk, #slots_per_blk
+//	Attribute *relcatrec = make_relcatrec(relname, nAttrs, 0, -1,
+//	                                      -1);   // Relcat Entry: relname, #attrs, #records, first_blk, #slots_per_blk
+
+	Attribute relcatrec[6];
+	strcpy(relcatrec[0].sval,relname);
+	relcatrec[1].nval=nAttrs;
+	relcatrec[2].nval=0;
+	relcatrec[3].nval=-1;//first block=-1 ,earlier it was 0
+	relcatrec[4].nval=-1;
+	relcatrec[5].nval=(2016/(16*nAttrs+1));
 
 	flag = ba_insert(RELCAT_RELID, relcatrec);
 
