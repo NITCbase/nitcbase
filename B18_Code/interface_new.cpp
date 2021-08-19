@@ -1,6 +1,12 @@
 //
 // Created by Gokul Sreekumar on 16/08/21.
 //
+// TODO : rename interface_new.cpp to interface.cpp
+/*
+ * TODO : add batchfile command
+ * regex,
+ */
+// TODO : review if we need to keep ';' at the end of commands
 #include <iostream>
 #include "define/constants.h"
 #include "define/errors.h"
@@ -9,6 +15,7 @@
 #include "Disk.h"
 #include "OpenRelTable.h"
 #include "block_access.h"
+#include "external_fs_commands.h"
 
 using namespace std;
 
@@ -25,16 +32,42 @@ int regexMatchAndExecute(const string input_command) {
 	smatch m;
 	if (regex_match(input_command, help)) {
 		display_help();
-	} else if (regex_match(input_command, ex)) {
+	}
+	else if (regex_match(input_command, ex)) {
 		return -1;
-	} else if (regex_match(input_command, fdisk)) {
+	}
+	else if (regex_match(input_command, fdisk)) {
 		Disk disk; // For Calling the constructor and making a new disk file
 		Disk::formatDisk();
 
 		add_disk_metainfo();
 		cout << "Disk formatted" << endl;
 
-	} else if (regex_match(input_command, create_table)) {
+	}
+	else if(regex_match(input_command,dump_rel))
+	{
+		// TODO :  dump_relcat();
+		cout<<"Dumped relation catalog to $HOME/NITCBase/xfs-interface/relation_catalog"<<endl;
+		return 0;
+	}
+	else if(regex_match(input_command,dump_attr))
+	{
+		// TODO : dump_attrcat();
+		cout<<"Dumped attribute catalog to $HOME/NITCBase/xfs-interface/attribute_catalog"<<endl;
+		return 0;
+	}
+	else if(regex_match(input_command,dump_bmap))
+	{
+		// TODO : db();
+		cout<<"Dumped block allocation map to $HOME/NITCBase/xfs-interface/block_allocation_map"<<endl;
+		return 0;
+	}
+	else if(regex_match(input_command,list_all))
+	{
+		ls();
+		return 0;
+	}
+	else if (regex_match(input_command, create_table)) {
 		regex_search(input_command, m, create_table);
 
 		string table_name = m[3];
@@ -63,7 +96,8 @@ int regexMatchAndExecute(const string input_command) {
 			print_errormsg(ret);
 		}
 
-	} else {
+	}
+	else {
 		cout << "Syntax Error" << endl;
 	}
 	return 0;

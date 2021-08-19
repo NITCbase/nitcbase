@@ -8,5 +8,8 @@
 int ba_insert(int relid, Attribute *rec);
 int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
 void add_disk_metainfo();
+HeadInfo getHeader(int blockNum);
+void getSlotmap(unsigned char *SlotMap, int blockNum);
+int getRecord(Attribute *rec, int blockNum, int slotNum);
 
 #endif //B18_CODE_BLOCK_ACCESS_H

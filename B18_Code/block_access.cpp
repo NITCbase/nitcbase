@@ -237,7 +237,7 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 
 /*
  * Retrieves whether the block is occupied or not
- * If occupied returns the type of occupied block (REC: 0, IND_INTERNAL: 1, IND_LEAF: 2)
+ * If occupied returns the type of occupied block (REC: 0, IND_NUMBERERNAL: 1, IND_LEAF: 2)
  * If Not returns UNUSED_BLK: 3
  */
 int getBlockType(int blocknum) {
@@ -631,7 +631,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "RELATIONCAT");
 	strcpy(rec[1].sval, "#Attributes");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 1;
@@ -639,7 +639,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "RELATIONCAT");
 	strcpy(rec[1].sval, "#Records");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 2;
@@ -647,7 +647,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "RELATIONCAT");
 	strcpy(rec[1].sval, "FirstBlock");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 3;
@@ -655,7 +655,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "RELATIONCAT");
 	strcpy(rec[1].sval, "LastBlock");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 4;
@@ -663,7 +663,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "RELATIONCAT");
 	strcpy(rec[1].sval, "#Slots");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 5;
@@ -687,7 +687,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "ATTRIBUTECAT");
 	strcpy(rec[1].sval, "AttributeType");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 2;
@@ -695,7 +695,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "ATTRIBUTECAT");
 	strcpy(rec[1].sval, "PrimaryFlag");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 3;
@@ -703,7 +703,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "ATTRIBUTECAT");
 	strcpy(rec[1].sval, "RootBlock");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 4;
@@ -711,7 +711,7 @@ void add_disk_metainfo() {
 
 	strcpy(rec[0].sval, "ATTRIBUTECAT");
 	strcpy(rec[1].sval, "Offset");
-	rec[2].nval = INT;
+	rec[2].nval = NUMBER;
 	rec[3].nval = -1;
 	rec[4].nval = -1;
 	rec[5].nval = 5;
