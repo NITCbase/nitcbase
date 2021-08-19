@@ -41,7 +41,6 @@ int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType
  *  Inserts the Record into the given Relation
  */
 int ba_insert(int relid, Attribute *rec) {
-	// TODO: Cleanup ba_insert
 	Attribute relcat_entry[6];
 	getRelCatEntry(relid, relcat_entry);
 
@@ -57,6 +56,7 @@ int ba_insert(int relid, Attribute *rec) {
 	if (first_block == -1) {
 		blockNum = getFreeRecBlock();
 		relcat_entry[3].nval = blockNum;
+
 		// TODO: Take make_headerInfo() function out
 		HeadInfo *H = (HeadInfo *) malloc(sizeof(HeadInfo));
 		H->blockType = REC;
@@ -68,30 +68,29 @@ int ba_insert(int relid, Attribute *rec) {
 		H->numSlots = num_slots;
 		setHeader(H, blockNum);
 		getSlotmap(slotmap, blockNum);
-		memset(slotmap, '0', sizeof(slotmap)); //all slots are free
+
+		// set all slots as free
+		memset(slotmap, '0', sizeof(slotmap));
 		setSlotmap(slotmap, num_slots, blockNum);
 	}
 
 	recId recid = getFreeSlot(blockNum);
 
-	relcat_entry[4].nval = recid.block;
-	// TODO: Remove All Comments
-	//cout<<"blk no: "<<relcat_entry[4].nval<<" ";
-	setRelCatEntry(relid, relcat_entry);
-	getRelCatEntry(relid, relcat_entry);
-	//cout<<relcat_entry[3].nval<<"\n";
-	if (recid.block == -1 && recid.slot == -1) {         //free slot can not be found
+	// no free slot found
+	if (recid.block == -1 && recid.slot == -1) {
 		return FAILURE;
 	}
 	setRecord(rec, recid.block, recid.slot);
 
-	//since record is inserted number of entries is increased by 1
-	header = getHeader(recid.block);  //arg
-	header.numEntries = header.numEntries + 1; // increased number of entires in block
-	setHeader(&header, recid.block); //arg
+	// increment #entries in header (as record is inserted)
+	header = getHeader(recid.block);
+	header.numEntries = header.numEntries + 1;
+	setHeader(&header, recid.block);
 
-	//increasing number of entries in relation catalog entry
+	// increment #entries in relation catalog entry
 	relcat_entry[2].nval = relcat_entry[2].nval + 1;
+	// update last block in relation catalogue entry
+	relcat_entry[4].nval = recid.block;
 	setRelCatEntry(relid, relcat_entry);
 
 	return SUCCESS;
