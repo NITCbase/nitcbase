@@ -35,6 +35,7 @@ int setRelCatEntry(int rel_id, Attribute *relcat_entry);
  *  Inserts the Record into the given Relation
  */
 int ba_insert(int relid, Attribute *rec) {
+	// TODO: Cleanup ba_insert
 	Attribute relcat_entry[6];
 	getRelCatEntry(relid, relcat_entry);
 
@@ -92,6 +93,8 @@ int ba_insert(int relid, Attribute *rec) {
 
 /*
  * Retrieves whether the block is occupied or not
+ * If occupied returns the type of occupied block (REC: 0, IND_INTERNAL: 1, IND_LEAF: 2)
+ * If Not returns UNUSED_BLK: 3
  */
 int getBlockType(int blocknum) {
 	FILE *disk = fopen("disk", "rb");
@@ -115,7 +118,7 @@ HeadInfo getHeader(int blockNum) {
 }
 
 /*
- * Writes header for 'blockNum'th block into disk
+ * Writes header for 'blockNum'th block into disk given the header information
  */
 void setHeader(struct HeadInfo *header, int blockNum) {
 	FILE *disk = fopen("disk", "rb+");
@@ -138,7 +141,7 @@ void getSlotmap(unsigned char *SlotMap, int blockNum) {
 }
 
 /*
- * Writes slotmap for 'blockNum'th block into disk
+ * Writes slotmap for 'blockNum'th block into disk given the number of blocks occupied
  */
 void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
 	FILE *disk = fopen("disk", "rb+");
@@ -172,8 +175,8 @@ int getFreeRecBlock() {
 
 /* Finds a free slot either from :
  *      - the block numbered 'block_num' or
- *      - next blocks in the linked list or
- *      - a newly allotted block
+ *      - next blocks in the linked list of blocks for the relation or
+ *      - a newly allotted block for the relation
  */
 recId getFreeSlot(int block_num) {
 	recId recid = {-1, -1};
@@ -251,7 +254,7 @@ recId getFreeSlot(int block_num) {
 }
 
 /*
- * Reads record from disk
+ * Reads record from disk given blockNum and slotNum
  */
 int getRecord(Attribute *rec, int blockNum, int slotNum) {
 	HeadInfo Header;
@@ -375,6 +378,7 @@ void add_disk_metainfo() {
 	union Attribute rec[6];
 	struct HeadInfo *H = (struct HeadInfo *) malloc(sizeof(struct HeadInfo));
 
+	// TODO: use the set_headerInfo, make_relcatrec and make_attrcatrec function in schema.cpp
 	/*
 	 * Set the header for Block 4 - First Block of Relation Catalog
 	 */
@@ -398,8 +402,6 @@ void add_disk_metainfo() {
 			slot_map[i] = '0';
 	}
 	setSlotmap(slot_map, 20, 4);
-
-	// TODO: use the set_headerInfo, make_relcatrec and make_attrcatrec function in schema.cpp
 
 	/*
 	 * Create and Add 2 Records into Block 4 (Relation Catalog)
