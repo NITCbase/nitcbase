@@ -98,9 +98,9 @@ int ba_insert(int relid, Attribute *rec) {
 }
 
 /*
- *  Searches the relation specified to find the 'next' record from the given 'prev'
- *  that satisfies the op condition on attribute attrval
- *  Uses the b+ tree if target attribute is indexed, otherwise, it does linear search
+ *  Searches the relation specified to find the 'next' record starting from the given 'prev' record
+ *  that satisfies the op condition on given attrval
+ *  Uses the b+ tree if target attribute is indexed, otherwise, linear search
  */
 int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op,
               recId *prev_recid) {
