@@ -82,7 +82,7 @@ void Disk::formatDisk() {
 	fwrite(ch, BLOCK_SIZE * 4, 1, disk);
 
 	// Remaining Locations of Disk initialised to 0
-	for (int i = reserved; i < offset; i++) {
+	for (int i = BLOCK_SIZE * 4; i < offset; i++) {
 		fputc(0, disk);
 	}
 	fclose(disk);

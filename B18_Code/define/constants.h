@@ -14,6 +14,9 @@
 #define UNUSED 0
 #define ALLOTED 2
 
+// TODO : use enum here
+
+// TODO : add type for slot map blocks
 #define REC 0
 #define IND_INTERNAL 1
 #define IND_LEAF 2
