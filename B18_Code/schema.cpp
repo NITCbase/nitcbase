@@ -15,16 +15,19 @@ Attribute* make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], in
 int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtypes[]) {
 	Attribute attrval;
 	strcpy(attrval.sval, relname);
-
-	// prev_recid of starting
+	/*
+	 * prev_recid of starting
+	 * Search for the first time on the condition (with no previous hits for the same condition)
+	 */
 	recId prev_recid;
 	prev_recid.block = -1;
 	prev_recid.slot = -1;
-
+	Attribute existing_relcatrec[6];
 	int flag;
-	// TODO: flag = ba_search(0,relcatrec,"RelName", attrval, EQ, &prev_recid);
+	flag = ba_search(0, existing_relcatrec, "RelName", attrval, EQ, &prev_recid);
 	if (flag == SUCCESS) {
-		return E_RELEXIST; // Relation name already exists.
+		// Relation name already exists
+		return E_RELEXIST;
 	}
 
 	if (check_duplicate_attributes(nAttrs, attrs) == E_DUPLICATEATTR) {

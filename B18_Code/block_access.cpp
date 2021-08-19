@@ -31,6 +31,12 @@ int getRelCatEntry(int rel_id, Attribute *relcat_entry);
 
 int setRelCatEntry(int rel_id, Attribute *relcat_entry);
 
+int getAttrCatEntry(int rel_id, char attrname[16], union Attribute *attrcat_entry);
+
+recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
+
+int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType);
+
 /*
  *  Inserts the Record into the given Relation
  */
@@ -90,6 +96,145 @@ int ba_insert(int relid, Attribute *rec) {
 
 	return SUCCESS;
 }
+
+/*
+ *  Searches the relation specified to find the 'next' record from the given 'prev'
+ *  that satisfies the op condition on attribute attrval
+ *  Uses the b+ tree if target attribute is indexed, otherwise, it does linear search
+ */
+int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op,
+              recId *prev_recid) {
+	// TODO: Cleanup Code
+	recId recid;
+	if (op == PRJCT) {
+		recid = linear_search(relid, attrName, attrval, op, prev_recid);
+
+	} else {
+		union Attribute attrcat_entry[6];
+		getAttrCatEntry(relid, attrName, attrcat_entry);
+		// Get the root_block from attribute catalog entry for the given attribute
+		int root_block = attrcat_entry[4].nval;
+		// TODO: Until indexing is allowed this if-condition can be commented
+		if (root_block == -1) {
+			/*
+			 * Index does not exist for the attribute
+			 * Do Linear Search corresponding to the attribute with attribute name attrName and with value attrval
+			 *
+			 */
+			recid = linear_search(relid, attrName, attrval, op, prev_recid);
+		} else {
+			/*
+			 * Index exists for the attribute
+			 * Do B+ Tree Search corresponding to the attribute with attribute name attrName and with value attrval
+			 */
+			// TODO: recid = bplus_search(relid, attrName, attrval, op,&prev_recid);
+		}
+	}
+
+	if ((recid.block == -1) && (recid.slot == -1)) {
+		//  Fails to find a record satisfying the given condition
+		return FAILURE;
+	}
+
+	//  Record Found, recid.block and recid.slot are the block and slot that contains matching record respectively
+	getRecord(record, recid.block, recid.slot);
+	return SUCCESS;
+}
+
+
+recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid) {
+	// Get the Relation Catalog Record corresponding to the given relation name
+	union Attribute relcat_entry[6];
+	getRelCatEntry(relid, relcat_entry);
+
+	int offset, attr_type;
+	//get the record itself in relcat_entry array of attributes
+	int curr_block, curr_slot, next_block = -1;
+	int no_of_attributes = relcat_entry[1].nval;
+	int no_of_slots = relcat_entry[5].nval;
+
+	if (op != PRJCT) {
+		union Attribute attrcat_entry[6];
+		getAttrCatEntry(relid, attrName, attrcat_entry);
+		offset = attrcat_entry[5].nval;
+		attr_type = attrcat_entry[2].nval;
+	}
+
+	recId ret_recid;
+	if ((prev_recid->block == -1) && prev_recid->slot == -1) {
+		// if linear search is done for first time on this attribute
+		curr_block = relcat_entry[3].nval;
+		curr_slot = 0;
+	} else {
+		// if the linear search knows the hit from previous search
+		curr_block = prev_recid->block;
+		curr_slot = prev_recid->slot + 1;
+	}
+
+	unsigned char slotmap[no_of_slots];
+	/*
+	 * Iterate through all blocks starting from curr_block
+	 */
+	while (curr_block != -1) {
+		struct HeadInfo header;
+		header = getHeader(curr_block);
+		next_block = header.rblock;
+		getSlotmap(slotmap, curr_block);
+		/*
+		 * Iterate through all the Slots(Records) in the curr_block
+		 */
+		for (int slotNum = curr_slot; slotNum < no_of_slots; slotNum++) {
+			union Attribute record[no_of_attributes];
+			if (slotmap[slotNum] == '0') {
+				continue;
+			}
+			// Get the record corresponding to {curr_block, slotNum=slotNum}
+			getRecord(record, curr_block, slotNum);
+			bool cond = false;
+			if (op != PRJCT) {
+				int flag = compareAttributes(record[offset], attrval, attr_type);
+				switch (op) {
+					case NE:
+						if (flag != 0)
+							cond = true;
+						break;
+					case LT:
+						if (flag < 0)
+							cond = true;
+						break;
+					case LE:
+						if (flag <= 0)
+							cond = true;
+						break;
+					case EQ:
+						if (flag == 0)
+							cond = true;
+						break;
+					case GT:
+						if (flag > 0)
+							cond = true;
+						break;
+					case GE:
+						if (flag >= 0)
+							cond = true;
+				}
+			}
+			if (cond == true || op == PRJCT) {
+				ret_recid = {curr_block, slotNum};
+				/*
+				 * prev_recid set to denote the previous hit record for the linear search
+				 */
+				*prev_recid = ret_recid;
+				return ret_recid;
+			}
+		}
+		curr_block = next_block;
+		curr_slot = 0;
+	}
+	// No records match the search condition over the relation
+	return {-1, -1};
+}
+
 
 /*
  * Retrieves whether the block is occupied or not
@@ -373,6 +518,33 @@ int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
 	}
 }
 
+/*
+ * Reads attribute catalogue entry from disk for the given attribute name of a given relation
+ */
+int getAttrCatEntry(int rel_id, char attrname[16], union Attribute *attrcat_entry) {
+	if (rel_id < 0 || rel_id >= MAXOPEN)
+		return E_OUTOFBOUND;
+	if (strcmp(OpenRelTable[rel_id], "NULL") == 0)
+		return E_NOTOPEN;
+	char rel_name[16];
+	strcpy(rel_name, OpenRelTable[rel_id]);
+	int curr_block = 5;
+	int next_block = -1;
+	while (curr_block != -1) {
+		struct HeadInfo header;
+		header = getHeader(curr_block);
+		next_block = header.rblock;
+		for (int i = 0; i < 20; i++) {
+			getRecord(attrcat_entry, curr_block, i);
+			if (strcmp(attrcat_entry[0].sval, rel_name) == 0) {
+				if (strcmp(attrcat_entry[1].sval, attrname) == 0)
+					return SUCCESS;
+			}
+		}
+		curr_block = next_block;
+	}
+	return E_ATTRNOTEXIST;
+}
 
 void add_disk_metainfo() {
 	union Attribute rec[6];
@@ -546,4 +718,22 @@ void add_disk_metainfo() {
 	rec[5].nval = 5;
 	setRecord(rec, 5, 11);
 
+}
+
+/*
+ * Compare two attributes based on their type
+ */
+int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType) {
+	if (attrType == STRING) {
+		return strcmp(attr1.sval, attr2.sval);
+	}
+
+	if (attrType == NUMBER) {
+		if (attr1.nval < attr2.nval)
+			return -1;
+		else if (attr1.nval == attr2.nval)
+			return 0;
+		else
+			return 1;
+	}
 }

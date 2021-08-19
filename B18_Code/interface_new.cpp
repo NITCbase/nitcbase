@@ -127,41 +127,41 @@ void display_help() {
 
 void print_errormsg(int ret) {
 	if (ret == FAILURE)
-		cout << "Error:Command Failed" << endl;
+		cout << "Error: Command Failed" << endl;
 	else if (ret == E_OUTOFBOUND)
-		cout << "Error: out of bound" << endl;
+		cout << "Error: Out of bound" << endl;
 	else if (ret == E_FREESLOT)
 		cout << "Error: Free slot" << endl;
 	else if (ret == E_NOINDEX)
 		cout << "Error: No index" << endl;
 	else if (ret == E_DISKFULL)
-		cout << "Error:Disk has insufficient space" << endl;
+		cout << "Error: Insufficient space in Disk" << endl;
 	else if (ret == E_INVALIDBLOCK)
 		cout << "Error: Invalid block" << endl;
 	else if (ret == E_RELNOTEXIST)
-		cout << "Error:Relation does not exist" << endl;
+		cout << "Error: Relation does not exist" << endl;
 	else if (ret == E_RELEXIST)
-		cout << "Error:Relation already exists" << endl;
+		cout << "Error: Relation already exists" << endl;
 	else if (ret == E_ATTRNOTEXIST)
-		cout << "Error:Attribute does not exist" << endl;
+		cout << "Error: Attribute does not exist" << endl;
 	else if (ret == E_ATTREXIST)
-		cout << "Error:Attribute already exists" << endl;
+		cout << "Error: Attribute already exists" << endl;
 	else if (ret == E_CACHEFULL)
-		cout << "Error:Cache is full" << endl;
+		cout << "Error: Cache is full" << endl;
 	else if (ret == E_RELNOTOPEN)
-		cout << "Error:Relation is not open" << endl;
+		cout << "Error: Relation is not open" << endl;
 	else if (ret == E_NOTOPEN)
-		cout << "Error:Relation is not open" << endl;
+		cout << "Error: Relation is not open" << endl;
 	else if (ret == E_NATTRMISMATCH)
-		cout << "Error:Mismatch in number of attributes" << endl;
+		cout << "Error: Mismatch in number of attributes" << endl;
 	else if (ret == E_DUPLICATEATTR)
-		cout << "Error:Duplicate attributes detected" << endl;
+		cout << "Error: Duplicate attributes found" << endl;
 	else if (ret == E_RELOPEN)
-		cout << "Error:Relation is open" << endl;
+		cout << "Error: Relation is open" << endl;
 	else if (ret == E_ATTRTYPEMISMATCH)
-		cout << "Error:Mismatch in attribute type" << endl;
+		cout << "Error: Mismatch in attribute type" << endl;
 	else if (ret == E_INVALID)
-		cout << "Error:Invaid index or argument" << endl;
+		cout << "Error: Invalid index or argument" << endl;
 }
 
 vector<string> extract_tokens(string input_command) {
