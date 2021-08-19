@@ -76,11 +76,12 @@ void Disk::formatDisk() {
 			ch[i] = (unsigned char) REC;
 	}
 
-	// Remaining entries are marked Unused
+	// Remaining Entries in Block Allocation Map are marked Unused
 	for (int i = reserved; i < BLOCK_SIZE * 4; i++)
 		ch[i] = (unsigned char) UNUSED_BLK;
 	fwrite(ch, BLOCK_SIZE * 4, 1, disk);
 
+	// Remaining Locations of Disk initialised to 0
 	for (int i = reserved; i < offset; i++) {
 		fputc(0, disk);
 	}
