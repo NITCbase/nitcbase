@@ -10,7 +10,7 @@
 #include <iostream>
 #include "define/constants.h"
 #include "define/errors.h"
-#include "interface_new.h"
+#include "interface.h"
 #include "schema.h"
 #include "Disk.h"
 #include "OpenRelTable.h"
@@ -51,6 +51,7 @@ int regexMatchAndExecute(const string input_command) {
 		return 0;
 	} else if (regex_match(input_command, dump_bmap)) {
 		// TODO : db();
+		dumpBlockAllocationMap();
 		cout << "Dumped block allocation map to $HOME/NITCBase/xfs-interface/block_allocation_map" << endl;
 		return 0;
 	} else if (regex_match(input_command, list_all)) {

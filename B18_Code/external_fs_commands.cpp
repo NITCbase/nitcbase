@@ -102,6 +102,43 @@ void dump_attrcat() {
 	fclose(fp_export);
 }
 
+void dumpBlockAllocationMap() {
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, 0, SEEK_SET);
+	unsigned char blockAllocationMap[4 * BLOCK_SIZE];
+	fread(blockAllocationMap, 4 * BLOCK_SIZE, 1, disk);
+	fclose(disk);
+
+	int iter;
+	char s[16];
+	FILE *fp_export = fopen("block_allocation_map", "w");
+	for (iter = 0; iter < 4; iter++) {
+		fputs("Block ", fp_export);
+		sprintf(s, "%d", iter);
+		fputs(s, fp_export);
+		fputs(": Block Allocation Map\n", fp_export);
+	}
+	for (iter = 4; iter < 8192; iter++) {
+		fputs("Block ", fp_export);
+		sprintf(s, "%d", iter);
+		fputs(s, fp_export);
+		if ((int32_t) (blockAllocationMap[iter]) == UNUSED_BLK) {
+			fputs(": Unused Block\n", fp_export);
+		}
+		if ((int32_t) (blockAllocationMap[iter]) == REC) {
+			fputs(": Record Block\n", fp_export);
+		}
+		if ((int32_t) (blockAllocationMap[iter]) == IND_INTERNAL) {
+			fputs(": Internal Index Block\n", fp_export);
+		}
+		if ((int32_t) (blockAllocationMap[iter]) == IND_LEAF) {
+			fputs(": Leaf Index Block\n", fp_export);
+		}
+	}
+
+	fclose(fp_export);
+}
+
 void ls() {
 	union Attribute attr[6];
 	int attr_blk = 4;
@@ -137,7 +174,7 @@ void writeHeaderFieldToFile(FILE *fp, int32_t headerField) {
 void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineFlag) {
 	char tmp[16];
 	if (type == NUMBER) {
-		sprintf(tmp, "%d", (int)attribute.nval);
+		sprintf(tmp, "%d", (int) attribute.nval);
 		fputs(tmp, fp);
 	} else if (type == STRING) {
 		fputs(attribute.sval, fp);

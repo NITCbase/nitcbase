@@ -2,8 +2,8 @@
 // Created by Gokul Sreekumar on 16/08/21.
 //
 
-#ifndef B18_CODE_INTERFACE_NEW_H
-#define B18_CODE_INTERFACE_NEW_H
+#ifndef B18_CODE_INTERFACE_H
+#define B18_CODE_INTERFACE_H
 
 #include<regex>
 
@@ -44,4 +44,4 @@ std::regex filename("[A-Za-z0-9_-]+\\.csv");
 std::regex filepath("(/.*\\.csv)");
 std::regex temp("\\((.*)\\)");
 
-#endif //B18_CODE_INTERFACE_NEW_H
+#endif //B18_CODE_INTERFACE_H

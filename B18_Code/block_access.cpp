@@ -736,6 +736,7 @@ int deleteAttrCatEntry(recId attrcat_recid) {
 	return SUCCESS;
 }
 
+// TODO : review in which file this function should be
 void add_disk_metainfo() {
 	union Attribute rec[6];
 	struct HeadInfo *H = (struct HeadInfo *) malloc(sizeof(struct HeadInfo));

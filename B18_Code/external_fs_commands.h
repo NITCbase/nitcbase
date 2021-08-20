@@ -7,6 +7,7 @@
 
 void dump_relcat();
 void dump_attrcat();
+void dumpBlockAllocationMap();
 void ls();
 
 #endif //B18_CODE_EXTERNAL_FS_COMMANDS_H
