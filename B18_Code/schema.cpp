@@ -3,11 +3,14 @@
 #include "disk_structures.h"
 #include "schema.h"
 #include "block_access.h"
+#include "OpenRelTable.h"
 #include <string>
 
 int check_duplicate_attributes(int nAttrs, char attrs[][ATTR_SIZE]);
-Attribute* make_relcatrec(char relname[16], int nAttrs, int nRecords, int firstBlock, int lastBlock);
-Attribute* make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], int attrtype, int rootBlock, int offset);
+
+Attribute *make_relcatrec(char relname[16], int nAttrs, int nRecords, int firstBlock, int lastBlock);
+
+Attribute *make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], int attrtype, int rootBlock, int offset);
 
 /*gokul
  * Schema Layer function for Creating a Relation/Table from the given name and attributes
@@ -43,7 +46,8 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 	}
 
 	for (int offset = 0; offset < nAttrs; offset++) {
-		Attribute *attrcatrec = make_attrcatrec(relname, attrs[offset], attrtypes[offset], -1, offset); // Attrcat Entry : relname, attr_name, attr_type, primaryflag, root_blk, offset
+		Attribute *attrcatrec = make_attrcatrec(relname, attrs[offset], attrtypes[offset], -1,
+		                                        offset); // Attrcat Entry : relname, attr_name, attr_type, primaryflag, root_blk, offset
 		flag = ba_insert(ATTRCAT_RELID, attrcatrec);
 
 		if (flag != SUCCESS) {
@@ -53,6 +57,58 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 	}
 	return SUCCESS;
 }
+
+int openRel(char RelName[16]) {
+	Attribute rec[6];
+
+	/* check if relation exists
+	 *      for this check each entry in relation catalog
+	 */
+	int i;
+	for (i = 0; i < 20; i++) {
+		getRecord(rec, 4, i);
+		if (strcmp(rec[0].sval, RelName) == 0) {
+			break;
+		}
+	}
+	// if relation does not exist
+	if (i == 20) {
+		return E_RELNOTEXIST;
+	}
+
+	/* check if relation is already open
+	 *      if yes, return open relation id
+	 *  otherwise search for a free slot in open relation table
+	 */
+	for (i = 0; i < 12; i++) {
+		if (strcmp(RelName, OpenRelTable[i]) == 0) {
+			return i;
+		}
+	}
+	for (i = 0; i < 12; i++) {
+		if (strcmp(OpenRelTable[i], "NULL") == 0) {
+			strcpy(OpenRelTable[i], RelName);
+			return i;
+		}
+	}
+	// if open relation table is already full
+	if (i == 12) {
+		return E_CACHEFULL;
+	}
+}
+
+int closeRel(int relid)
+{
+	if (relid < 0 || relid >= MAXOPEN) {
+		return E_OUTOFBOUND;
+	}
+	if (strcmp(OpenRelTable[relid], "NULL") == 0) {
+		return E_RELNOTOPEN;
+	}
+	strcpy(OpenRelTable[relid], "NULL");
+	return 0;
+}
+
 /*gokul
  * Creates and returns a Relation Catalog Record Entry with the parameters provided as argument
  */
@@ -99,4 +155,12 @@ int check_duplicate_attributes(int nAttrs, char attrs[][ATTR_SIZE]) {
 		}
 	}
 	return 0;
+}
+
+int getRelId(char relname[16])
+{
+	for(int i=0;i<12;i++)
+		if(strcmp(OpenRelTable[i],relname)==0)
+			return i;
+	return E_RELNOTOPEN;
 }
