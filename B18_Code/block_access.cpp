@@ -33,6 +33,12 @@ int setRelCatEntry(int rel_id, Attribute *relcat_entry);
 
 int getAttrCatEntry(int rel_id, char attrname[16], union Attribute *attrcat_entry);
 
+int deleteBlock(int blockNum);
+
+int deleteRelCatEntry(recId relcat_recid, Attribute relcat_rec[6]);
+
+int deleteAttrCatEntry(recId attrcat_recid);
+
 recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
 
 int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType);
@@ -235,6 +241,74 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 }
 
 
+// Todo: [AN EXISTING TODO] updating last block of attribute catalog
+/*
+ * Deletes the relation of the given name
+ *      - Clears the Data stored in ALL record blocks corresponding to the relation
+ *      - Clears the Attribute Catalog entries for the attributes of the relation
+ *      - Clears the Relation Catalog entry for this relation
+ */
+// I have changes the order in which Relation Catalog and Open Relation table is searched respectively for the given relation
+// REMOVE ONCE JEZZY SEES - ITS A NOTE TO CHECK
+int ba_delete(char relName[ATTR_SIZE]) {
+	// TODO: There was some issue with deletion earlier, we can check it later, I have added and cleaned the code now (A LOOOT of cleaning)
+	Attribute relName_Attr;
+	strcpy(relName_Attr.sval, relName);
+
+	/* Check if a relation with the given name exists in Relation Catalog and retrieve the relcat_recid */
+	recId prev_recid, relcat_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+
+	relcat_recid = linear_search(RELCAT_RELID, "RelName", relName_Attr, EQ, &prev_recid);
+	if ((relcat_recid.block == -1) && (relcat_recid.slot == -1)) {
+		return E_RELNOTEXIST;
+	}
+
+	/* Check if a relation with the given name exists in Open Relation Table */
+	// TODO: Extract this function: findInOpenRelTable() and use it across everywhere
+	for (auto relName_iter: OpenRelTable) {
+		if (strcmp(relName_iter, relName) == 0) {
+			return FAILURE;
+		}
+	}
+	/* Get the First Record Block corresponding to the given relation by using the Relation Catalog Entry */
+	Attribute relcat_rec[6];
+	getRecord(relcat_rec, relcat_recid.block, relcat_recid.slot);
+
+	int curr_block = relcat_rec[3].nval;
+	int no_of_attrs = relcat_rec[1].nval;
+	int next_block = -1;
+
+	/*
+	 * Delete the Relation Block-by-Block starting from the first block
+	 * Get the Next Block by using headerInfo of the Current Block
+	 */
+	while (curr_block != -1) {
+		struct HeadInfo header = getHeader(curr_block);
+		next_block = header.rblock;
+		deleteBlock(curr_block);
+		curr_block = next_block;
+	}
+
+	recId attrcat_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	for (int i = 0; i < no_of_attrs; i++) {
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relName_Attr, EQ, &prev_recid);
+		/* Updating the Attribute Catalog for the current Attribute Deletion */
+		deleteAttrCatEntry(attrcat_recid);
+	}
+
+	/*
+	 * Updating the Relation Catalog for the Relation Deletion
+	 */
+	deleteRelCatEntry(relcat_recid, relcat_rec);
+
+	return SUCCESS;
+
+}
+
 /*
  * Retrieves whether the block is occupied or not
  * If occupied returns the type of occupied block (REC: 0, IND_NUMBERERNAL: 1, IND_LEAF: 2)
@@ -298,13 +372,14 @@ void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
  *
  */
 int getFreeRecBlock() {
+	// TODO: Title for this
 	FILE *disk = fopen("disk", "rb+");
 	fseek(disk, 0, SEEK_SET);
+
 	unsigned char blockAllocationMap[4 * BLOCK_SIZE];
 	fread(blockAllocationMap, 4 * BLOCK_SIZE, 1, disk);
 
-	int iter;
-	for (iter = 0; iter < 4 * BLOCK_SIZE; iter++) {
+	for (int iter = 0; iter < 4 * BLOCK_SIZE; iter++) {
 		if ((int32_t) (blockAllocationMap[iter]) == UNUSED_BLK) {
 			blockAllocationMap[iter] = (unsigned char) REC;
 			fseek(disk, 0, SEEK_SET);
@@ -322,6 +397,7 @@ int getFreeRecBlock() {
  *      - next blocks in the linked list of blocks for the relation or
  *      - a newly allotted block for the relation
  */
+// TODO: is the relation checked for being relcat or attrcat and if so, is it being allocated a second block
 recId getFreeSlot(int block_num) {
 	recId recid = {-1, -1};
 	int prev_block_num, next_block_num;
@@ -336,11 +412,11 @@ recId getFreeSlot(int block_num) {
 		next_block_num = header.rblock;
 		num_attrs = header.numAttrs;
 
-		//getting slotmap for the current block
+		// getting slotmap for the current block
 		unsigned char slotmap[num_slots];
 		getSlotmap(slotmap, block_num);
 
-		//searching for free slot in block (block_num)
+		// searching for free slot in block (block_num)
 		int iter;
 		for (iter = 0; iter < num_slots; iter++) {
 			if (slotmap[iter] == '0') {
@@ -361,16 +437,22 @@ recId getFreeSlot(int block_num) {
 		block_num = next_block_num;
 	}
 
-	// no free slots in current record blocks
-	// get new record block
+	/*
+	 * no free slots in current record blocks
+	 * get new record block
+	 */
 	block_num = getFreeRecBlock();
 
-	// no blocks are available in disk
+	// no free blocks available in disk
 	if (block_num == -1) {
 		// no free slot can be found, return {-1, -1}
 		return recid;
 	}
 
+	// TODO: make_headerInfo() function extract
+	// TODO: make_slotMap() which returns an empty slotMap extract
+	// TODO: getFreeRecBlock() function may be expanded to also set the header information
+	//          OR make a function that gets a free block and sets both its header and slotMap
 	//setting header for new record block
 	header = getHeader(block_num);
 	header.numSlots = num_slots;
@@ -457,7 +539,7 @@ int setRecord(Attribute *rec, int blockNum, int slotNum) {
 		/* offset :
 		 *          size of blocks coming before current block ( = blockNum * BLOCK_SIZE ) +
 		 *          header size ( = 32 ) +
-		 *          slotmap size ( = numSlots ) +
+		 *          slot_map size ( = numSlots ) +
 		 *          size of records coming before current record ( = slotNum * numAttrs * ATTR_SIZE )
 		 */
 		fseek(disk, blockNum * BLOCK_SIZE + 32 + numOfSlots + slotNum * numAttrs * ATTR_SIZE, SEEK_SET);
@@ -520,7 +602,7 @@ int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
 /*
  * Reads attribute catalogue entry from disk for the given attribute name of a given relation
  */
-int getAttrCatEntry(int rel_id, char attrname[16], union Attribute *attrcat_entry) {
+int getAttrCatEntry(int rel_id, char attrname[16], Attribute *attrcat_entry) {
 	if (rel_id < 0 || rel_id >= MAXOPEN)
 		return E_OUTOFBOUND;
 	if (strcmp(OpenRelTable[rel_id], "NULL") == 0)
@@ -543,6 +625,115 @@ int getAttrCatEntry(int rel_id, char attrname[16], union Attribute *attrcat_entr
 		curr_block = next_block;
 	}
 	return E_ATTRNOTEXIST;
+}
+
+/*
+ * Deletes the given block from the disk
+ *      - Clears the Block Data
+ *      - Marks the Block UNUSED_BLK in Block Allocation Map
+ */
+int deleteBlock(int blockNum) {
+	FILE *disk;
+	disk = fopen("disk", "rb+");
+
+	/* Clear the data present in the block */
+	fseek(disk, BLOCK_SIZE * blockNum, SEEK_SET);
+	for (int i = 0; i < BLOCK_SIZE; i++)
+		fputc(0, disk);
+
+	/* Mark this block as UNUSED in the Block Allocation Map */
+	fseek(disk, blockNum, SEEK_SET);
+	fputc((unsigned char) UNUSED_BLK, disk);
+	fclose(disk);
+
+	return SUCCESS;
+}
+
+
+/*
+ * Delete a Relation from the Relation Catalog
+ *      - update the header & slot map of Relation Catalog
+ *      - update the relation catalog record present in the Relation Catalog Block
+ *          - decrease the number of records of RELCAT by one
+ *      - update the attribute catalog record also present in the Relation Catalog Block
+ *          - decrease the number of records of ATTRCAT by number of attributes in the deleted relation
+ *      - delete entry of relation being deleted in the relation catalog from the disk
+ */
+int deleteRelCatEntry(recId relcat_recid, Attribute relcat_rec[6]) {
+	struct HeadInfo relcat_header = getHeader(4);
+	relcat_header.numEntries = relcat_header.numEntries - 1;
+	setHeader(&relcat_header, 4);
+	unsigned char relcat_slotmap[20];
+	getSlotmap(relcat_slotmap, 4);
+	relcat_slotmap[relcat_recid.slot] = '0';
+	setSlotmap(relcat_slotmap, 20, relcat_recid.block);
+
+	getRecord(relcat_rec, 4, 0);
+	relcat_rec[2].nval = relcat_rec[2].nval - 1;
+	setRecord(relcat_rec, 4, 0);
+
+	int no_of_attrs = relcat_rec[1].nval;
+	getRecord(relcat_rec, 4, 1);
+	relcat_rec[2].nval = relcat_rec[2].nval - no_of_attrs;
+	setRecord(relcat_rec, 4, 1);
+
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, (relcat_recid.block) * BLOCK_SIZE + HEADER_SIZE + SLOTMAP_SIZE_RELCAT_ATTRCAT +
+	            relcat_recid.slot * NO_OF_ATTRS_RELCAT_ATTRCAT * ATTR_SIZE, SEEK_SET);
+	for (int i = 0; i < 16 * 6; i++)
+		fputc(0, disk);
+	fclose(disk);
+
+	return SUCCESS;
+}
+
+/*
+ * Delete a Single Attribute Catalog Entry for a given Attribute of a Relation from the Disk
+ *      - Clears the Disk Entry
+ *      - Updates Header and SlotMap fo Attribute Catalog
+ *      - Removes Indexing on the Attribute (TODO: TBD)
+ *      - Deletes Attrbute Catalog's Record Block if multiple blocks had been allocated and current block becomes empty
+ */
+int deleteAttrCatEntry(recId attrcat_recid) {
+	/* Clear the data present in the Disk Block containing the Attribute */
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, (attrcat_recid.block) * BLOCK_SIZE + HEADER_SIZE + SLOTMAP_SIZE_RELCAT_ATTRCAT +
+	            (attrcat_recid.slot) * NO_OF_ATTRS_RELCAT_ATTRCAT * ATTR_SIZE, SEEK_SET);
+	for (int i = 0; i < ATTR_SIZE * NO_OF_ATTRS_RELCAT_ATTRCAT; i++)
+		fputc(0, disk);
+	fclose(disk);
+
+	/* Update the Header and SlotMap for Attribute Catalog */
+	struct HeadInfo header = getHeader(attrcat_recid.block);
+	header.numEntries = header.numEntries - 1;
+	setHeader(&header, attrcat_recid.block);
+	unsigned char slotmap[20];
+	getSlotmap(slotmap, attrcat_recid.block);
+	slotmap[attrcat_recid.slot] = '0';
+	setSlotmap(slotmap, 20, attrcat_recid.block);
+
+	/* Removing Indexing on the Attribute */
+	// TODO: When indexing use this root_block enty to determine if its present and if yes, remove the indexing on the Attribute
+	Attribute attrcat_rec[6];
+	getRecord(attrcat_rec, attrcat_recid.block, attrcat_recid.slot);
+	int root_block = attrcat_rec[4].nval;
+
+	/* NOTE: Multiple blocks have been allocated to Attribute Catalog Relation */
+	if (header.numEntries == 0) {
+		/* Standard Linked List Delete for a Block */
+		HeadInfo prev_header = getHeader(header.lblock);
+		prev_header.rblock = header.rblock;
+		setHeader(&prev_header, header.lblock);
+
+		if (header.rblock != -1) {
+			HeadInfo next_header = getHeader(header.rblock);
+			next_header.lblock = header.lblock;
+			setHeader(&next_header, header.rblock);
+		}
+
+		deleteBlock(attrcat_recid.block);
+	}
+	return SUCCESS;
 }
 
 void add_disk_metainfo() {

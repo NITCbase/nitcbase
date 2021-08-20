@@ -16,8 +16,8 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 	Attribute attrval;
 	strcpy(attrval.sval, relname);
 	/*
-	 * prev_recid of starting
-	 * Search for the first time on the condition (with no previous hits for the same condition)
+	 * Check if Relation name already exists
+	 *      prev_recid {-1, -1} => search from starting block, starting slot for the record
 	 */
 	recId prev_recid;
 	prev_recid.block = -1;
@@ -26,7 +26,6 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 	int flag;
 	flag = ba_search(0, existing_relcatrec, "RelName", attrval, EQ, &prev_recid);
 	if (flag == SUCCESS) {
-		// Relation name already exists
 		return E_RELEXIST;
 	}
 
@@ -36,21 +35,19 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 
 	Attribute *relcatrec = make_relcatrec(relname, nAttrs, 0, -1,
 	                                      -1);   // Relcat Entry: relname, #attrs, #records, first_blk, #slots_per_blk
-
 	flag = ba_insert(RELCAT_RELID, relcatrec);
 
 	if (flag != SUCCESS) {
-		// TODO: ba_delete(relname);
+		ba_delete(relname);
 		return flag;
 	}
 
 	for (int offset = 0; offset < nAttrs; offset++) {
 		Attribute *attrcatrec = make_attrcatrec(relname, attrs[offset], attrtypes[offset], -1, offset); // Attrcat Entry : relname, attr_name, attr_type, primaryflag, root_blk, offset
-
 		flag = ba_insert(ATTRCAT_RELID, attrcatrec);
 
 		if (flag != SUCCESS) {
-			// TODO: ba_delete(relname);
+			ba_delete(relname);
 			return flag;
 		}
 	}

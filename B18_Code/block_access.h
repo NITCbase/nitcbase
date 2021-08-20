@@ -7,6 +7,8 @@
 
 int ba_insert(int relid, Attribute *rec);
 int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
+int ba_delete(char relName[ATTR_SIZE]);
+
 void add_disk_metainfo();
 HeadInfo getHeader(int blockNum);
 void getSlotmap(unsigned char *SlotMap, int blockNum);

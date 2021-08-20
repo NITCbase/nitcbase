@@ -36,26 +36,6 @@ int Disk::writeBlock(unsigned char *block, int blockNum) {
 	fclose(disk);
 }
 
-//void Disk::formatDisk() {
-//	// Formats the disk
-//	// Set the reserved entries in block allocation map
-//
-//	FILE *disk = fopen("disk","wb+");
-//	const int reserved = 6;
-//	const int offset = DISK_SIZE;
-//	fseek(disk, 0, SEEK_SET);
-//
-//	// First Five Entries set to 1
-//	for(int i=0; i<reserved; i++){
-//		fputc(1, disk);
-//	}
-//	// All other entries to zero
-//	for(int i=reserved; i<offset; i++){
-//		fputc(0, disk);
-//	}
-//	fclose(disk);
-//}
-
 /*
  * Formats the disk
  * Set the reserved entries in block allocation map
