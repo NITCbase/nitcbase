@@ -42,11 +42,11 @@ int regexMatchAndExecute(const string input_command) {
 		cout << "Disk formatted" << endl;
 
 	} else if (regex_match(input_command, dump_rel)) {
-		// TODO :  dump_relcat();
+		dump_relcat();
 		cout << "Dumped relation catalog to $HOME/NITCBase/xfs-interface/relation_catalog" << endl;
 		return 0;
 	} else if (regex_match(input_command, dump_attr)) {
-		// TODO : dump_attrcat();
+		dump_attrcat();
 		cout << "Dumped attribute catalog to $HOME/NITCBase/xfs-interface/attribute_catalog" << endl;
 		return 0;
 	} else if (regex_match(input_command, dump_bmap)) {

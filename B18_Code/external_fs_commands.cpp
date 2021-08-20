@@ -117,6 +117,16 @@ void ls() {
 	std::cout << "\n";
 }
 
+void writeHeaderToFile(FILE *fp_export, HeadInfo h) {
+	writeHeaderFieldToFile(fp_export, h.blockType);
+	writeHeaderFieldToFile(fp_export, h.pblock);
+	writeHeaderFieldToFile(fp_export, h.lblock);
+	writeHeaderFieldToFile(fp_export, h.rblock);
+	writeHeaderFieldToFile(fp_export, h.numEntries);
+	writeHeaderFieldToFile(fp_export, h.numAttrs);
+	writeHeaderFieldToFile(fp_export, h.numSlots);
+}
+
 void writeHeaderFieldToFile(FILE *fp, int32_t headerField) {
 	char tmp[16];
 	sprintf(tmp, "%d", headerField);
@@ -127,7 +137,7 @@ void writeHeaderFieldToFile(FILE *fp, int32_t headerField) {
 void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineFlag) {
 	char tmp[16];
 	if (type == NUMBER) {
-		sprintf(tmp, "%d", attribute.nval);
+		sprintf(tmp, "%d", (int)attribute.nval);
 		fputs(tmp, fp);
 	} else if (type == STRING) {
 		fputs(attribute.sval, fp);
@@ -138,14 +148,4 @@ void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineF
 	} else {
 		fputs("\n", fp);
 	}
-}
-
-void writeHeaderToFile(FILE *fp_export, HeadInfo h) {
-	writeHeaderFieldToFile(fp_export, h.blockType);
-	writeHeaderFieldToFile(fp_export, h.pblock);
-	writeHeaderFieldToFile(fp_export, h.lblock);
-	writeHeaderFieldToFile(fp_export, h.rblock);
-	writeHeaderFieldToFile(fp_export, h.numEntries);
-	writeHeaderFieldToFile(fp_export, h.numAttrs);
-	writeHeaderFieldToFile(fp_export, h.numSlots);
 }
