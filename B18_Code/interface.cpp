@@ -8,6 +8,7 @@
  */
 // TODO : review if we need to keep ';' at the end of commands
 #include <iostream>
+#include <fstream>
 #include "define/constants.h"
 #include "define/errors.h"
 #include "interface.h"
@@ -27,71 +28,75 @@ vector<string> extract_tokens(string input_command);
 
 void string_to_char_array(string x, char *a, int size);
 
+int executeCommandsFromFile(string fileName);
 
-int regexMatchAndExecute(const string input_command) {
+/* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
+ * I have done wherever i saw, check all Jezzy
+ */
+ int regexMatchAndExecute(const string input_command) {
 	smatch m;
 	if (regex_match(input_command, help)) {
 		display_help();
 	} else if (regex_match(input_command, ex)) {
-		return -1;
+		return EXIT;
+	} else if (regex_match(input_command, run)) {
+		smatch m;
+		regex_search(input_command, m, run);
+		string file_name = m[2];
+		if(executeCommandsFromFile(file_name) == EXIT) {
+			return EXIT;
+		};
 	} else if (regex_match(input_command, fdisk)) {
 		Disk disk; // For Calling the constructor and making a new disk file
 		Disk::formatDisk();
-
 		add_disk_metainfo();
 		cout << "Disk formatted" << endl;
-
 	} else if (regex_match(input_command, dump_rel)) {
 		dump_relcat();
 		cout << "Dumped relation catalog to $HOME/NITCBase/xfs-interface/relation_catalog" << endl;
-		return 0;
 	} else if (regex_match(input_command, dump_attr)) {
 		dump_attrcat();
 		cout << "Dumped attribute catalog to $HOME/NITCBase/xfs-interface/attribute_catalog" << endl;
-		return 0;
 	} else if (regex_match(input_command, dump_bmap)) {
 		// TODO : db();
 		dumpBlockAllocationMap();
 		cout << "Dumped block allocation map to $HOME/NITCBase/xfs-interface/block_allocation_map" << endl;
-		return 0;
 	} else if (regex_match(input_command, list_all)) {
 		ls();
-		return 0;
 	} else if (regex_match(input_command, open_table)) {
-
 		regex_search(input_command, m, open_table);
 		string tablename = m[3];
 		char relname[16];
 		string_to_char_array(tablename, relname, 15);
 		int ret = openRel(relname);
-		if (ret >= 0 && ret <= 11)
+		if (ret >= 0 && ret <= 11) {
 			cout << "Relation opened successfully\n";
-		else
+		}
+		else {
 			print_errormsg(ret);
-		return 0;
+			return FAILURE;
+		}
 	} else if (regex_match(input_command, close_table)) {
-
 		regex_search(input_command, m, close_table);
 		string tablename = m[3];
 		char relname[16];
 		string_to_char_array(tablename, relname, 15);
-
 		int id = getRelId(relname);
 		if (id == E_RELNOTOPEN) {
 			cout << "Relation not open" << endl;
-			return 0;
+			return FAILURE;
 		}
 		if (id == 0 || id == 1) {
 			cout << "Cannot close Relation/Attribute Catalog" << endl;
-			return 0;
+			return FAILURE;
 		}
-
 		int ret = closeRel(id);
-		if (ret == SUCCESS)
-			cout << "Relation closed successfully" << endl;
-		else
+		if (ret == SUCCESS) {
+			cout << "Relation Closed Successfully\n";
+		} else {
 			print_errormsg(ret);
-		return 0;
+			return FAILURE;
+		}
 	} else if (regex_match(input_command, create_table)) {
 		regex_search(input_command, m, create_table);
 
@@ -114,17 +119,19 @@ int regexMatchAndExecute(const string input_command) {
 			else if (words[k + 1] == "NUM")
 				type_attr[i] = NUMBER;
 		}
+
 		int ret = createRel(relname, no_attrs, attribute, type_attr);
 		if (ret == SUCCESS) {
 			cout << "Relation created successfully" << endl;
 		} else {
 			print_errormsg(ret);
+			return FAILURE;
 		}
-
 	} else {
 		cout << "Syntax Error" << endl;
+		return FAILURE;
 	}
-	return 0;
+	return SUCCESS;
 }
 
 char OpenRelTable[MAXOPEN][16];
@@ -149,11 +156,39 @@ int main() {
 		smatch m;
 		getline(cin, input_command);
 
-		int res = regexMatchAndExecute(input_command);
-		if (res == -1) {
+		int ret = regexMatchAndExecute(input_command);
+		if (ret == EXIT) {
 			return 0;
 		}
 	}
+}
+
+// TODO: What to do when one line Fails - EXIT?
+int executeCommandsFromFile(const string fileName) {
+	const string filePath = "./Files/";
+	fstream commandsFile;
+	commandsFile.open(filePath + fileName, ios::in);
+	string command;
+	vector<string> commands;
+	if (commandsFile.is_open()){
+		while(getline(commandsFile, command)){
+			commands.push_back(command);
+		}
+	} else {
+		cout << "The file " << fileName << " does not exist\n";
+	}
+	int lineNumber = 1;
+	for(auto command: commands) {
+		int ret = regexMatchAndExecute(command);
+		if(ret == EXIT) {
+			return EXIT;
+		} else if (ret == FAILURE) {
+			cout << "At line number " << lineNumber << endl;
+			break;
+		}
+		lineNumber++;
+	}
+	return SUCCESS;
 }
 
 void display_help() {

@@ -13,6 +13,7 @@
 
 #define SUCCESS 0
 #define FAILURE -1
+#define EXIT -2
 
 #define USED 1
 #define UNUSED 0

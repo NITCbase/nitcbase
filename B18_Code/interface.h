@@ -8,16 +8,19 @@
 #include<regex>
 
 /* External File System Commands */
-std::regex help("\\s*(help)\\s*");
-std::regex fdisk("\\s*(fdisk)\\s*");
-std::regex dump_rel("\\s*(dump)\\s+(relcat)\\s*");
-std::regex dump_attr("\\s*(dump)\\s+(attrcat)\\s*");
-std::regex dump_bmap("\\s*(dump)\\s+(bmap)\\s*");
-std::regex imp("\\s*(import)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*");
-std::regex expo("\\s*(export)\\s+([A-Za-z0-9_-]+)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*");
-std::regex list_all("\\s*(ls|LS)\\s*");
+std::regex help("\\s*(HELP|help)\\s*");
+std::regex fdisk("\\s*(FDISK|fdisk)\\s*");
+std::regex dump_rel("\\s*(DUMP|dump)\\s+(RELCAT|relcat)\\s*");
+std::regex dump_attr("\\s*(DUMP|dump)\\s+(ATTRCAT|attrcat)\\s*");
+std::regex dump_bmap("\\s*(DUMP|dump)\\s+(BMAP|bmap)\\s*");
+std::regex imp("\\s*(IMPORT|import)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*");
+std::regex expo("\\s*(EXPORT|export)\\s+([A-Za-z0-9_-]+)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*");
+std::regex list_all("\\s*(LS|ls)\\s*");
 std::regex ex("\\s*(EXIT|exit)\\s*\\s*");
+std::regex run("\\s*(RUN|run)\\s+([a-zA-Z0-9_.-]+)\\s*");
+// std::regex run("\\s*(RUN|run)\\s+([a-zA-Z0-9_-]+\\.txt)\\s*"); // IF WE NEED .txt in run file name
 
+// TODO: Remove Semicolons, Make ALL Commands accept all Lower or all upper case as well
 /* DDL Commands*/
 std::regex create_table("\\s*(CREATE|create)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*\\(\\s*([A-Za-z0-9_-]+\\s+(STR|NUM),\\s*)*([A-Za-z0-9_-]+\\s+(STR|NUM))\\s*\\)\\s*;");
 std::regex drop_table("\\s*(DROP|drop)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*;\\s*");
