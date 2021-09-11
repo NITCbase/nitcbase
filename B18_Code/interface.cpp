@@ -2,10 +2,6 @@
 // Created by Gokul Sreekumar on 16/08/21.
 //
 // TODO : rename interface_new.cpp to interface.cpp
-/*
- * TODO : add batchfile command
- * regex,
- */
 // TODO : review if we need to keep ';' at the end of commands
 #include <iostream>
 #include <fstream>
@@ -33,7 +29,7 @@ int executeCommandsFromFile(string fileName);
 /* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
  * I have done wherever i saw, check all Jezzy
  */
- int regexMatchAndExecute(const string input_command) {
+int regexMatchAndExecute(const string input_command) {
 	smatch m;
 	if (regex_match(input_command, help)) {
 		display_help();
@@ -43,7 +39,7 @@ int executeCommandsFromFile(string fileName);
 		smatch m;
 		regex_search(input_command, m, run);
 		string file_name = m[2];
-		if(executeCommandsFromFile(file_name) == EXIT) {
+		if (executeCommandsFromFile(file_name) == EXIT) {
 			return EXIT;
 		};
 	} else if (regex_match(input_command, fdisk)) {
@@ -71,8 +67,7 @@ int executeCommandsFromFile(string fileName);
 		int ret = openRel(relname);
 		if (ret >= 0 && ret <= 11) {
 			cout << "Relation opened successfully\n";
-		}
-		else {
+		} else {
 			print_errormsg(ret);
 			return FAILURE;
 		}
@@ -134,14 +129,14 @@ int executeCommandsFromFile(string fileName);
 	return SUCCESS;
 }
 
-char OpenRelTable[MAXOPEN][16];
+char OpenRelTable[MAX_OPEN][16];
 
 int main() {
 	// TODO : change to MAX_OPEN
 	/*
 	 * Initializing Open Relation Table
 	 */
-	for (int i = 0; i < MAXOPEN; ++i) {
+	for (int i = 0; i < MAX_OPEN; i++) {
 		if (i == RELCAT_RELID)
 			strcpy(OpenRelTable[i], "RELATIONCAT");
 		else if (i == ATTRCAT_RELID)
@@ -170,17 +165,17 @@ int executeCommandsFromFile(const string fileName) {
 	commandsFile.open(filePath + fileName, ios::in);
 	string command;
 	vector<string> commands;
-	if (commandsFile.is_open()){
-		while(getline(commandsFile, command)){
+	if (commandsFile.is_open()) {
+		while (getline(commandsFile, command)) {
 			commands.push_back(command);
 		}
 	} else {
 		cout << "The file " << fileName << " does not exist\n";
 	}
 	int lineNumber = 1;
-	for(auto command: commands) {
+	for (auto command: commands) {
 		int ret = regexMatchAndExecute(command);
-		if(ret == EXIT) {
+		if (ret == EXIT) {
 			return EXIT;
 		} else if (ret == FAILURE) {
 			cout << "At line number " << lineNumber << endl;

@@ -1,6 +1,7 @@
 help
 fdisk
 dump bmap
+aaaa
 CREATE TABLE sample (Rollno NUM,Name STR,CGPA NUM);
 CREATE TABLE sample2 (Rollno NUM,HostelName STR,MessType NUM);
 dump bmap
@@ -8,7 +9,4 @@ dump relcat
 dump attrcat
 dump bmap
 dump relcat
-dmkm
-kcm
-dkcmk
 EXIT

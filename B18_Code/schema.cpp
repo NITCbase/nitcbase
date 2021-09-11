@@ -99,7 +99,7 @@ int openRel(char RelName[16]) {
 
 int closeRel(int relid)
 {
-	if (relid < 0 || relid >= MAXOPEN) {
+	if (relid < 0 || relid >= MAX_OPEN) {
 		return E_OUTOFBOUND;
 	}
 	if (strcmp(OpenRelTable[relid], "NULL") == 0) {

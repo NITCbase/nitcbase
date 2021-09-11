@@ -560,7 +560,7 @@ int setRecord(Attribute *rec, int blockNum, int slotNum) {
  * Reads relation catalogue entry from disk
  */
 int getRelCatEntry(int rel_id, Attribute *relcat_entry) {
-	if (rel_id < 0 || rel_id >= MAXOPEN)
+	if (rel_id < 0 || rel_id >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
 	if (strcmp(OpenRelTable[rel_id], "NULL") == 0)
@@ -581,7 +581,7 @@ int getRelCatEntry(int rel_id, Attribute *relcat_entry) {
  * Writes relation catalogue entry into disk
  */
 int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
-	if (rel_id < 0 || rel_id >= MAXOPEN)
+	if (rel_id < 0 || rel_id >= MAX_OPEN)
 		return E_OUTOFBOUND;
 	if (strcmp(OpenRelTable[rel_id], "NULL") == 0)
 		return E_NOTOPEN;
@@ -603,7 +603,7 @@ int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
  * Reads attribute catalogue entry from disk for the given attribute name of a given relation
  */
 int getAttrCatEntry(int rel_id, char attrname[16], Attribute *attrcat_entry) {
-	if (rel_id < 0 || rel_id >= MAXOPEN)
+	if (rel_id < 0 || rel_id >= MAX_OPEN)
 		return E_OUTOFBOUND;
 	if (strcmp(OpenRelTable[rel_id], "NULL") == 0)
 		return E_NOTOPEN;
