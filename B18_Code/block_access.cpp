@@ -248,7 +248,7 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
  *      - Clears the Attribute Catalog entries for the attributes of the relation
  *      - Clears the Relation Catalog entry for this relation
  */
-// I have changes the order in which Relation Catalog and Open Relation table is searched respectively for the given relation
+// I have changed the order in which Relation Catalog and Open Relation table is searched respectively for the given relation
 // REMOVE ONCE JEZZY SEES - ITS A NOTE TO CHECK
 int ba_delete(char relName[ATTR_SIZE]) {
 	// TODO: There was some issue with deletion earlier, we can check it later, I have added and cleaned the code now (A LOOOT of cleaning)
@@ -266,20 +266,15 @@ int ba_delete(char relName[ATTR_SIZE]) {
 	}
 
 	/* Check if a relation with the given name exists in Open Relation Table */
-	if ( OpenRelations::checkIfRelationOpen(relName) == 1) {
+	if (OpenRelations::checkIfRelationOpen(relName) == 1) {
 		return FAILURE;
 	}
-	// TODO: Extract this function: findInOpenRelTable() and use it across everywhere -->DONE (review & remove)
-//	for (auto relName_iter: OpenRelTable) {
-//		if (strcmp(relName_iter, relName) == 0) {
-//			return FAILURE;
-//		}
-//	}
 
-	/* Get the First Record Block corresponding to the given relation by using the Relation Catalog Entry */
+	/* Get the Relation Catalog Entry */
 	Attribute relcat_rec[6];
 	getRecord(relcat_rec, relcat_recid.block, relcat_recid.slot);
 
+	/* Get first record block corresponding to the given relation */
 	int curr_block = relcat_rec[3].nval;
 	int no_of_attrs = relcat_rec[1].nval;
 	int next_block = -1;
@@ -287,6 +282,7 @@ int ba_delete(char relName[ATTR_SIZE]) {
 	/*
 	 * Delete the Relation Block-by-Block starting from the first block
 	 * Get the Next Block by using headerInfo of the Current Block
+	 * deleteBlock() will erase the block and mark UNUSED_BLK in the Block Allocation Map
 	 */
 	while (curr_block != -1) {
 		struct HeadInfo header = getHeader(curr_block);
@@ -696,14 +692,14 @@ int deleteRelCatEntry(recId relcat_recid, Attribute relcat_rec[6]) {
 }
 
 /*
- * Delete a Single Attribute Catalog Entry for a given Attribute of a Relation from the Disk
+ * Deletes a Single Attribute Catalog Entry for a given Attribute of a Relation
  *      - Clears the Disk Entry
- *      - Updates Header and SlotMap fo Attribute Catalog
+ *      - Updates Header and SlotMap of Attribute Catalog
  *      - Removes Indexing on the Attribute (TODO: TBD)
  *      - Deletes Attrbute Catalog's Record Block if multiple blocks had been allocated and current block becomes empty
  */
 int deleteAttrCatEntry(recId attrcat_recid) {
-	/* Clear the data present in the Disk Block containing the Attribute */
+	/* Clear the Attribute Catalog Record present in the given (Slot & Block) of the Disk */
 	FILE *disk = fopen("disk", "rb+");
 	fseek(disk, (attrcat_recid.block) * BLOCK_SIZE + HEADER_SIZE + SLOTMAP_SIZE_RELCAT_ATTRCAT +
 	            (attrcat_recid.slot) * NO_OF_ATTRS_RELCAT_ATTRCAT * ATTR_SIZE, SEEK_SET);
@@ -726,7 +722,10 @@ int deleteAttrCatEntry(recId attrcat_recid) {
 	getRecord(attrcat_rec, attrcat_recid.block, attrcat_recid.slot);
 	int root_block = attrcat_rec[4].nval;
 
-	/* NOTE: Multiple blocks have been allocated to Attribute Catalog Relation */
+	/*
+	 * NOTE: Multiple blocks have been allocated to Attribute Catalog Relation
+	 * Delete a Block allocated to an attribute in case it becomes empty
+	 */
 	if (header.numEntries == 0) {
 		/* Standard Linked List Delete for a Block */
 		HeadInfo prev_header = getHeader(header.lblock);
