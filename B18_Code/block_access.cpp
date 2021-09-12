@@ -27,11 +27,11 @@ int getRecord(Attribute *rec, int blockNum, int slotNum);
 
 int setRecord(Attribute *rec, int blockNum, int slotNum);
 
-int getRelCatEntry(int rel_id, Attribute *relcat_entry);
+int getRelCatEntry(int relationId, Attribute *relcat_entry);
 
-int setRelCatEntry(int rel_id, Attribute *relcat_entry);
+int setRelCatEntry(int relationId, Attribute *relcat_entry);
 
-int getAttrCatEntry(int rel_id, char attrname[16], union Attribute *attrcat_entry);
+int getAttrCatEntry(int relationId, char attrname[16], union Attribute *attrcat_entry);
 
 int deleteBlock(int blockNum);
 
@@ -266,12 +266,16 @@ int ba_delete(char relName[ATTR_SIZE]) {
 	}
 
 	/* Check if a relation with the given name exists in Open Relation Table */
-	// TODO: Extract this function: findInOpenRelTable() and use it across everywhere
-	for (auto relName_iter: OpenRelTable) {
-		if (strcmp(relName_iter, relName) == 0) {
-			return FAILURE;
-		}
+	if ( OpenRelations::checkIfRelationOpen(relName) == 1) {
+		return FAILURE;
 	}
+	// TODO: Extract this function: findInOpenRelTable() and use it across everywhere -->DONE (review & remove)
+//	for (auto relName_iter: OpenRelTable) {
+//		if (strcmp(relName_iter, relName) == 0) {
+//			return FAILURE;
+//		}
+//	}
+
 	/* Get the First Record Block corresponding to the given relation by using the Relation Catalog Entry */
 	Attribute relcat_rec[6];
 	getRecord(relcat_rec, relcat_recid.block, relcat_recid.slot);
@@ -559,19 +563,19 @@ int setRecord(Attribute *rec, int blockNum, int slotNum) {
 /*
  * Reads relation catalogue entry from disk
  */
-int getRelCatEntry(int rel_id, Attribute *relcat_entry) {
-	if (rel_id < 0 || rel_id >= MAX_OPEN)
+int getRelCatEntry(int relationId, Attribute *relcat_entry) {
+	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (strcmp(OpenRelTable[rel_id], "NULL") == 0)
+	if (OpenRelations::checkIfRelationOpen(relationId ) == 0)
 		return E_NOTOPEN;
 
-	char rel_name[16];
-	strcpy(rel_name, OpenRelTable[rel_id]);
+	char relName[16];
+	OpenRelations::getRelationName(relationId, relName);
 
 	for (int i = 0; i < 20; i++) {
 		getRecord(relcat_entry, 4, i);
-		if (strcmp(relcat_entry[0].sval, rel_name) == 0)
+		if (strcmp(relcat_entry[0].sval, relName) == 0)
 			return SUCCESS;
 	}
 	return FAILURE;
@@ -580,19 +584,20 @@ int getRelCatEntry(int rel_id, Attribute *relcat_entry) {
 /*
  * Writes relation catalogue entry into disk
  */
-int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
-	if (rel_id < 0 || rel_id >= MAX_OPEN)
+int setRelCatEntry(int relationId, Attribute *relcat_entry) {
+	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
-	if (strcmp(OpenRelTable[rel_id], "NULL") == 0)
+
+	if (OpenRelations::checkIfRelationOpen(relationId ) == 0)
 		return E_NOTOPEN;
 
-	char rel_name[16];
-	strcpy(rel_name, OpenRelTable[rel_id]);
+	char relName[16];
+	OpenRelations::getRelationName(relationId, relName);
 
 	Attribute relcat_entry1[6];
 	for (int i = 0; i < 20; i++) {
 		getRecord(relcat_entry1, 4, i);
-		if (strcmp(relcat_entry1[0].sval, rel_name) == 0) {
+		if (strcmp(relcat_entry1[0].sval, relName) == 0) {
 			setRecord(relcat_entry, 4, i);
 			return SUCCESS;
 		}
@@ -602,13 +607,16 @@ int setRelCatEntry(int rel_id, Attribute *relcat_entry) {
 /*
  * Reads attribute catalogue entry from disk for the given attribute name of a given relation
  */
-int getAttrCatEntry(int rel_id, char attrname[16], Attribute *attrcat_entry) {
-	if (rel_id < 0 || rel_id >= MAX_OPEN)
+int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry) {
+	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
-	if (strcmp(OpenRelTable[rel_id], "NULL") == 0)
+
+	if (OpenRelations::checkIfRelationOpen(relationId ) == 0)
 		return E_NOTOPEN;
-	char rel_name[16];
-	strcpy(rel_name, OpenRelTable[rel_id]);
+
+	char relName[16];
+	OpenRelations::getRelationName(relationId, relName);
+
 	int curr_block = 5;
 	int next_block = -1;
 	while (curr_block != -1) {
@@ -617,7 +625,7 @@ int getAttrCatEntry(int rel_id, char attrname[16], Attribute *attrcat_entry) {
 		next_block = header.rblock;
 		for (int i = 0; i < 20; i++) {
 			getRecord(attrcat_entry, curr_block, i);
-			if (strcmp(attrcat_entry[0].sval, rel_name) == 0) {
+			if (strcmp(attrcat_entry[0].sval, relName) == 0) {
 				if (strcmp(attrcat_entry[1].sval, attrname) == 0)
 					return SUCCESS;
 			}

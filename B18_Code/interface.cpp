@@ -129,21 +129,9 @@ int regexMatchAndExecute(const string input_command) {
 	return SUCCESS;
 }
 
-char OpenRelTable[MAX_OPEN][16];
-
 int main() {
-	// TODO : change to MAX_OPEN
-	/*
-	 * Initializing Open Relation Table
-	 */
-	for (int i = 0; i < MAX_OPEN; i++) {
-		if (i == RELCAT_RELID)
-			strcpy(OpenRelTable[i], "RELATIONCAT");
-		else if (i == ATTRCAT_RELID)
-			strcpy(OpenRelTable[i], "ATTRIBUTECAT");
-		else
-			strcpy(OpenRelTable[i], "NULL");
-	}
+	// Initializing Open Relation Table
+	OpenRelations::initializeOpenRelationTable();
 
 	while (true) {
 		cout << "# ";
