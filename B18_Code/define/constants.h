@@ -18,6 +18,9 @@
 #define FAILURE -1
 #define EXIT -2
 
+#define SLOT_OCCUPIED '1'
+#define SLOT_UNOCCUPIED '0'
+
 #define USED 1
 #define UNUSED 0
 #define ALLOTED 2

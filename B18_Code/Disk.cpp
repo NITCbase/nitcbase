@@ -5,15 +5,19 @@
 #include "define/constants.h"
 #include "Disk.h"
 
-Disk::Disk() {
-	const int offset = DISK_SIZE; //16MB
+int Disk::createDisk() {
 	FILE *disk = fopen("disk","wb+");
+	if(disk == NULL)
+		return FAILURE;
 	fseek(disk, 0, SEEK_SET);
-	// TODO: Use memset here
-	for(int i=0; i < offset; i++){
+
+	// 16 MB
+	for(int i=0; i < DISK_SIZE; i++){
 		fputc(0,disk);
 	}
+
 	fclose(disk);
+	return SUCCESS;
 }
 
 Disk::~Disk() {

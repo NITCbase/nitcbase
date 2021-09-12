@@ -14,7 +14,7 @@ std::regex dump_rel("\\s*(DUMP|dump)\\s+(RELCAT|relcat)\\s*");
 std::regex dump_attr("\\s*(DUMP|dump)\\s+(ATTRCAT|attrcat)\\s*");
 std::regex dump_bmap("\\s*(DUMP|dump)\\s+(BMAP|bmap)\\s*");
 std::regex imp("\\s*(IMPORT|import)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*");
-std::regex expo("\\s*(EXPORT|export)\\s+([A-Za-z0-9_-]+)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*");
+std::regex exp("\\s*(EXPORT|export)\\s+([A-Za-z0-9_-]+)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*");
 std::regex list_all("\\s*(LS|ls)\\s*");
 std::regex ex("\\s*(EXIT|exit)\\s*\\s*");
 std::regex run("\\s*(RUN|run)\\s+([a-zA-Z0-9_.-]+)\\s*");

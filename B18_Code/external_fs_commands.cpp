@@ -40,7 +40,7 @@ void dump_relcat() {
 	for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
 		getRecord(relcat_rec, RELCAT_BLOCK, slotNum);
 
-		if ((char) slotmap[slotNum] == '0')
+		if ((char) slotmap[slotNum] == SLOT_UNOCCUPIED)
 			strcpy(relcat_rec[0].sval, "NULL");
 
 		// RelationName
@@ -82,7 +82,7 @@ void dump_attrcat() {
 		for (int i = 0; i < 20; i++) {
 
 			getRecord(attr, attr_blk, i);
-			if ((char) slotmap[i] == '0') {
+			if ((char) slotmap[i] == SLOT_UNOCCUPIED) {
 				strcpy(attr[0].sval, "NULL");
 				strcpy(attr[1].sval, "NULL");
 			}
@@ -151,13 +151,13 @@ void ls() {
 	getSlotmap(slotmap, attr_blk);
 	for (int i = 0; i < 20; i++) {
 		getRecord(attr, attr_blk, i);
-		if ((char) slotmap[i] == '1')
+		if ((char) slotmap[i] == SLOT_OCCUPIED)
 			std::cout << attr[0].sval << "\n";
 	}
 	std::cout << "\n";
 }
 
-int exportRelation(char *rel_name, char *filename) {
+int exportRelation(char *relname, char *filename) {
 	FILE *fp_export = fopen(filename, "w");
 
 	if (!fp_export) {
@@ -165,90 +165,106 @@ int exportRelation(char *rel_name, char *filename) {
 		return FAILURE;
 	}
 
-	struct HeadInfo header;
-	int slotNum;
-	int first_block;
-	union Attribute relationCatalogRecord[6];
-	int num_slots, next_block_num, num_attrs, no_attrs;
+	HeadInfo headInfo;
+	Attribute relcat_rec[6];
 
+	int firstBlock, numOfAttrs;
+	int slotNum;
 	for (slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
-		getRecord(relationCatalogRecord, 4, slotNum);
-		if (strcmp(relationCatalogRecord[0].sval, rel_name) == 0) {
-			first_block = relationCatalogRecord[3].nval;
-			no_attrs = relationCatalogRecord[1].nval;
+		getRecord(relcat_rec, RELCAT_BLOCK, slotNum);
+		if (strcmp(relcat_rec[0].sval, relname) == 0) {
+			firstBlock = (int) relcat_rec[3].nval;
+			numOfAttrs = (int) relcat_rec[1].nval;
 			break;
 		}
 	}
 
-	if (slotNum == 20) {
+	if (slotNum == SLOTMAP_SIZE_RELCAT_ATTRCAT) {
 		cout << "The relation does not exist\n";
 		return FAILURE;
 	}
-	if (first_block == -1) {
-		cout << "No records exist\n";
+	if (firstBlock == -1) {
+		cout << "No records exist for the relation\n";
 		return FAILURE;
 	}
 
-	union Attribute attr[6];
-	int attr_blk = 5;
-	char Attr_name[no_attrs][16];
-	int Attr_type[no_attrs];
-	int j = 0;
-	while (attr_blk != -1) {
-		header = getheader(attr_blk);
-		next_block_num = header.rblock;
-		for (slotNum = 0; slotNum < 20; slotNum++) {
-			getRecord(attr, attr_blk, slotNum);
-			if (strcmp(attr[0].sval, rel_name) == 0) {
-				strcpy(Attr_name[j], attr[1].sval);
-				Attr_type[j++] = attr[2].ival;
+	Attribute rec[6];
+
+	int recBlock = ATTRCAT_BLOCK;
+	int nextRecBlock;
+
+	// Array for attribute names and types
+	int attrNo = 0;
+	char attrName[numOfAttrs][ATTR_SIZE];
+	int attrType[numOfAttrs];
+
+	while (recBlock != -1) {
+		headInfo = getHeader(recBlock);
+		nextRecBlock = headInfo.rblock;
+		for (slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
+			getRecord(rec, recBlock, slotNum);
+			if (strcmp(rec[0].sval, relname) == 0) {
+				// Attribute belongs to this Relation - add info to array
+				strcpy(attrName[attrNo], rec[1].sval);
+				attrType[attrNo] = (int) rec[2].nval;
+				attrNo++;
 			}
 		}
-		attr_blk = next_block_num;
+		recBlock = nextRecBlock;
 	}
-	for (j = 0; j < no_attrs; j++) {
-		fputs(Attr_name[j], fp_export);
-		if (j != no_attrs - 1)
-			fputs(",", fp_export);
+
+	// Write the Attribute names to o/p file
+	for (attrNo = 0; attrNo < numOfAttrs; attrNo++) {
+		fputs(attrName[attrNo], fp_export);
+		if (attrNo != numOfAttrs - 1)
+			fputs(", ", fp_export);
 	}
+
 	fputs("\n", fp_export);
-	int block_num = first_block;
+
+	int block_num = firstBlock;
+	int num_slots;
+	int num_attrs;
+
+	/*
+	 * Iterate over the record blocks of this relation
+	 * Linked list traversal
+	 */
 	while (block_num != -1) {
-		header = getheader(block_num);
-		num_slots = header.numSlots;
-		next_block_num = header.rblock;
-		num_attrs = header.numAttrs;
+		headInfo = getHeader(block_num);
+
+		num_slots = headInfo.numSlots;
+		num_attrs = headInfo.numAttrs;
+		nextRecBlock = headInfo.rblock;
+
 		unsigned char slotmap[num_slots];
 		getSlotmap(slotmap, block_num);
 
-		union Attribute A[num_attrs];
-		int iter;
-		for (iter = 0; iter < num_slots; iter++) {
-			if (slotmap[iter] == '1') {
-				getRecord(A, block_num, iter);
+		Attribute A[num_attrs];
+		slotNum = 0;
+		// Go through all slots and write the record entry to file
+		for (slotNum = 0; slotNum < num_slots; slotNum++) {
+			if (slotmap[slotNum] == SLOT_OCCUPIED) {
+				getRecord(A, block_num, slotNum);
 				char s[16];
-				for (int l = 0; l < no_attrs; l++) {
-					if (Attr_type[l] == FLOAT) {
-						sprintf(s, "%f", A[l].fval);
-						//cout<<s<<" "<<strlen(s)<<"\n";
+				for (int l = 0; l < numOfAttrs; l++) {
+					if (attrType[l] == NUMBER) {
+						sprintf(s, "%f ", A[l].nval);
 						fputs(s, fp_export);
 					}
-					if (Attr_type[l] == INT) {
-						sprintf(s, "%lld", A[l].ival);
-						//cout<<s<<" "<<strlen(s)<<"\n";
-						fputs(s, fp_export);
-					}
-					if (Attr_type[l] == STRING) {
+					if (attrType[l] == STRING) {
 						fputs(A[l].sval, fp_export);
 					}
-					if (l != no_attrs - 1)
-						fputs(",", fp_export);
+					if (l != numOfAttrs - 1)
+						fputs(", ", fp_export);
 				}
 				fputs("\n", fp_export);
 			}
 		}
-		block_num = next_block_num;
+
+		block_num = nextRecBlock;
 	}
+
 	fclose(fp_export);
 	return SUCCESS;
 }

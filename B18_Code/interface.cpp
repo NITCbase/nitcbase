@@ -27,7 +27,7 @@ void string_to_char_array(string x, char *a, int size);
 int executeCommandsFromFile(string fileName);
 
 /* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
- * I have done wherever i saw, check all Jezzy
+ * I have done wherever i saw, check all that you added once again Jezzy
  */
 int regexMatchAndExecute(const string input_command) {
 	smatch m;
@@ -43,7 +43,7 @@ int regexMatchAndExecute(const string input_command) {
 			return EXIT;
 		};
 	} else if (regex_match(input_command, fdisk)) {
-		Disk disk; // For Calling the constructor and making a new disk file
+		Disk::createDisk();
 		Disk::formatDisk();
 		add_disk_metainfo();
 		cout << "Disk formatted" << endl;
@@ -59,6 +59,27 @@ int regexMatchAndExecute(const string input_command) {
 		cout << "Dumped block allocation map to $HOME/NITCBase/xfs-interface/block_allocation_map" << endl;
 	} else if (regex_match(input_command, list_all)) {
 		ls();
+	} else if (regex_match(input_command, exp)) {
+		regex_search(input_command, m, exp);
+		string tableName = m[2];
+
+		string filePath = m[3];
+		filePath = "../Files/" + filePath;
+
+		char relname[16];
+		string_to_char_array(tableName, relname, 15);
+		char fileName[filePath.length() + 1];
+		string_to_char_array(filePath, fileName, filePath.length() + 1);
+
+		int ret = exportRelation(relname, fileName);
+
+		if (ret == SUCCESS)
+			cout << "Exported successfully" << endl;
+		else {
+			cout << "Export Command Failed" << endl;
+			return FAILURE;
+		}
+
 	} else if (regex_match(input_command, open_table)) {
 		regex_search(input_command, m, open_table);
 		string tablename = m[3];

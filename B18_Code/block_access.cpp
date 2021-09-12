@@ -76,7 +76,7 @@ int ba_insert(int relid, Attribute *rec) {
 		getSlotmap(slotmap, blockNum);
 
 		// set all slots as free
-		memset(slotmap, '0', sizeof(slotmap));
+		memset(slotmap, SLOT_UNOCCUPIED, sizeof(slotmap));
 		setSlotmap(slotmap, num_slots, blockNum);
 	}
 
@@ -190,7 +190,7 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 		 */
 		for (int slotNum = curr_slot; slotNum < no_of_slots; slotNum++) {
 			union Attribute record[no_of_attributes];
-			if (slotmap[slotNum] == '0') {
+			if (slotmap[slotNum] == SLOT_UNOCCUPIED) {
 				continue;
 			}
 			// Get the record corresponding to {curr_block, slotNum=slotNum}
@@ -423,14 +423,14 @@ recId getFreeSlot(int block_num) {
 		// searching for free slot in block (block_num)
 		int iter;
 		for (iter = 0; iter < num_slots; iter++) {
-			if (slotmap[iter] == '0') {
+			if (slotmap[iter] == SLOT_UNOCCUPIED) {
 				break;
 			}
 		}
 
 		// if free slot found, return it
 		if (iter < num_slots) {
-			slotmap[iter] = '1';
+			slotmap[iter] = SLOT_OCCUPIED;
 			setSlotmap(slotmap, num_slots, block_num);
 			recid = {block_num, iter};
 			return recid;
@@ -468,8 +468,8 @@ recId getFreeSlot(int block_num) {
 	//setting slotmap
 	unsigned char slotmap[num_slots];
 	getSlotmap(slotmap, block_num);
-	memset(slotmap, '0', sizeof(slotmap)); //all slots are free
-	slotmap[0] = '1';
+	memset(slotmap, SLOT_UNOCCUPIED, sizeof(slotmap)); //all slots are free
+	slotmap[0] = SLOT_OCCUPIED;
 	setSlotmap(slotmap, num_slots, block_num);
 
 	// recid of free slot
@@ -673,7 +673,7 @@ int deleteRelCatEntry(recId relcat_recid, Attribute relcat_rec[6]) {
 	setHeader(&relcat_header, 4);
 	unsigned char relcat_slotmap[20];
 	getSlotmap(relcat_slotmap, 4);
-	relcat_slotmap[relcat_recid.slot] = '0';
+	relcat_slotmap[relcat_recid.slot] = SLOT_UNOCCUPIED;
 	setSlotmap(relcat_slotmap, 20, relcat_recid.block);
 
 	getRecord(relcat_rec, 4, 0);
@@ -717,7 +717,7 @@ int deleteAttrCatEntry(recId attrcat_recid) {
 	setHeader(&header, attrcat_recid.block);
 	unsigned char slotmap[20];
 	getSlotmap(slotmap, attrcat_recid.block);
-	slotmap[attrcat_recid.slot] = '0';
+	slotmap[attrcat_recid.slot] = SLOT_UNOCCUPIED;
 	setSlotmap(slotmap, 20, attrcat_recid.block);
 
 	/* Removing Indexing on the Attribute */
@@ -768,9 +768,9 @@ void add_disk_metainfo() {
 	unsigned char slot_map[20];
 	for (int i = 0; i < 20; i++) {
 		if (i == 0 || i == 1)
-			slot_map[i] = '1';
+			slot_map[i] = SLOT_OCCUPIED;
 		else
-			slot_map[i] = '0';
+			slot_map[i] = SLOT_UNOCCUPIED;
 	}
 	setSlotmap(slot_map, 20, 4);
 
@@ -812,9 +812,9 @@ void add_disk_metainfo() {
 	 */
 	for (int i = 0; i < 20; i++) {
 		if (i >= 0 && i <= 11)
-			slot_map[i] = '1';
+			slot_map[i] = SLOT_OCCUPIED;
 		else
-			slot_map[i] = '0';
+			slot_map[i] = SLOT_UNOCCUPIED;
 	}
 	setSlotmap(slot_map, 20, 5);
 
