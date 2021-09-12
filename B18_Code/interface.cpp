@@ -150,13 +150,13 @@ int regexMatchAndExecute(const string input_command) {
 		string_to_char_array(tablename, relname, 15);
 		if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0)
 			cout << "Cannot delete Relation Catalog or Attribute Catalog" << endl;
-		// TODO: int ret = deleteRel(relname);
-//		if (ret == SUCCESS)
-//			cout << "Relation deleted successfully" << endl;
-//		else {
-//			printErrorMsg(ret);
-//			return FAILURE;
-//		}
+		int ret = deleteRel(relname);
+		if (ret == SUCCESS)
+			cout << "Relation deleted successfully" << endl;
+		else {
+			printErrorMsg(ret);
+			return FAILURE;
+		}
 
 	} else if (regex_match(input_command, insert_single)) {
 
