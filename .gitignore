@@ -16,3 +16,9 @@
 /B18_Code/XFS-Interface/cmake-build-debug
 
 /B18_Code/XFS-Interface/.idea
+
+/B18_Code/attribute_catalog
+/B18_Code/relation_catalog
+/B18_Code/block_allocation_map
+/B18_Code/disk
+

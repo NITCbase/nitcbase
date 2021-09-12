@@ -7,6 +7,8 @@
 #include "disk_structures.h"
 #include "OpenRelTable.h"
 
+char OpenRelations::OpenRelTable[MAX_OPEN][ATTR_SIZE];
+
 void OpenRelations::initializeOpenRelationTable() {
 	for (int i = 0; i < MAX_OPEN; i++) {
 		if (i == RELCAT_RELID)
