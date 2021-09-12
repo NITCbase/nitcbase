@@ -115,9 +115,9 @@ int regexMatchAndExecute(const string input_command) {
 	} else if (regex_match(input_command, create_table)) {
 		regex_search(input_command, m, create_table);
 
-		string table_name = m[3];
-		char rel_name[ATTR_SIZE];
-		string_to_char_array(table_name, rel_name, 15);
+		string tablename = m[3];
+		char relname[ATTR_SIZE];
+		string_to_char_array(tablename, relname, 15);
 
 		regex_search(input_command, m, temp);
 		string attrs = m[0];
@@ -135,7 +135,7 @@ int regexMatchAndExecute(const string input_command) {
 				type_attr[i] = NUMBER;
 		}
 
-		int ret = createRel(rel_name, no_attrs, attribute, type_attr);
+		int ret = createRel(relname, no_attrs, attribute, type_attr);
 		if (ret == SUCCESS) {
 			cout << "Relation created successfully" << endl;
 		} else {
@@ -143,23 +143,39 @@ int regexMatchAndExecute(const string input_command) {
 			return FAILURE;
 		}
 
+	} else if (regex_match(input_command, drop_table)) {
+		regex_search(input_command, m, drop_table);
+		string tablename = m[3];
+		char relname[16];
+		string_to_char_array(tablename, relname, 15);
+		if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0)
+			cout << "Cannot delete Relation Catalog or Attribute Catalog" << endl;
+		// TODO: int ret = deleteRel(relname);
+//		if (ret == SUCCESS)
+//			cout << "Relation deleted successfully" << endl;
+//		else {
+//			printErrorMsg(ret);
+//			return FAILURE;
+//		}
+
 	} else if (regex_match(input_command, insert_single)) {
 
 		regex_search(input_command, m, insert_single);
-		string table_name = m[3];
-		char rel_name[ATTR_SIZE];
-		string_to_char_array(table_name, rel_name, 15);
-		regex_search(input_command, m, temp);
-		string attrs = m[0];
-		vector<string> words = extract_tokens(attrs);
+			string table_name = m[3];
+			char rel_name[ATTR_SIZE];
+			string_to_char_array(table_name, rel_name, 15);
+			regex_search(input_command, m, temp);
+			string attrs = m[0];
+			vector<string> words = extract_tokens(attrs);
 
-//		int ret = insert_val(words, rel_name);
+			//		int ret = insert_val(words, rel_name);
 
-//		if (ret == SUCCESS) {
-//			cout << "Inserted successfully" << endl;
-//		} else
-//			printErrorMsg(ret);
+			//		if (ret == SUCCESS) {
+			//			cout << "Inserted successfully" << endl;
+			//		} else
+			//			printErrorMsg(ret);
 
+		}
 	} else {
 		cout << "Syntax Error" << endl;
 		return FAILURE;
