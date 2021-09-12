@@ -39,7 +39,7 @@ void dump_relcat() {
 
 	for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
 		getRecord(relCatRecord, RELCAT_BLOCK, slotNum);
-		
+
 		if ((char) slotmap[slotNum] == SLOT_UNOCCUPIED)
 			strcpy(relCatRecord[0].sval, "NULL");
 
@@ -150,15 +150,9 @@ void ls() {
 	unsigned char slotmap[headInfo.numSlots];
 	getSlotmap(slotmap, attr_blk);
 	for (int i = 0; i < 20; i++) {
-<<<<<<< HEAD
-		getRecord(attr, attr_blk, i);
-		if ((char) slotmap[i] == SLOT_OCCUPIED)
-			std::cout << attr[0].sval << "\n";
-=======
 		getRecord(relCatRecord, attr_blk, i);
-		if ((char) slotmap[i] == '1')
+		if ((char) slotmap[i] == SLOT_OCCUPIED)
 			std::cout << relCatRecord[0].sval << "\n";
->>>>>>> giving more meaningful variables names
 	}
 	std::cout << "\n";
 }
