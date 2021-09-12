@@ -18,7 +18,7 @@ using namespace std;
 
 void display_help();
 
-void print_errormsg(int ret);
+void printErrorMsg(int ret);
 
 vector<string> extract_tokens(string input_command);
 
@@ -54,7 +54,6 @@ int regexMatchAndExecute(const string input_command) {
 		dump_attrcat();
 		cout << "Dumped attribute catalog to $HOME/NITCBase/xfs-interface/attribute_catalog" << endl;
 	} else if (regex_match(input_command, dump_bmap)) {
-		// TODO : db();
 		dumpBlockAllocationMap();
 		cout << "Dumped block allocation map to $HOME/NITCBase/xfs-interface/block_allocation_map" << endl;
 	} else if (regex_match(input_command, list_all)) {
@@ -89,7 +88,7 @@ int regexMatchAndExecute(const string input_command) {
 		if (ret >= 0 && ret <= 11) {
 			cout << "Relation opened successfully\n";
 		} else {
-			print_errormsg(ret);
+			printErrorMsg(ret);
 			return FAILURE;
 		}
 	} else if (regex_match(input_command, close_table)) {
@@ -110,22 +109,22 @@ int regexMatchAndExecute(const string input_command) {
 		if (ret == SUCCESS) {
 			cout << "Relation Closed Successfully\n";
 		} else {
-			print_errormsg(ret);
+			printErrorMsg(ret);
 			return FAILURE;
 		}
 	} else if (regex_match(input_command, create_table)) {
 		regex_search(input_command, m, create_table);
 
 		string table_name = m[3];
-		char relname[16];
-		string_to_char_array(table_name, relname, 15);
+		char rel_name[ATTR_SIZE];
+		string_to_char_array(table_name, rel_name, 15);
 
 		regex_search(input_command, m, temp);
 		string attrs = m[0];
 		vector<string> words = extract_tokens(attrs);
 
 		int no_attrs = words.size() / 2;
-		char attribute[no_attrs][16];
+		char attribute[no_attrs][ATTR_SIZE];
 		int type_attr[no_attrs];
 
 		for (int i = 0, k = 0; i < no_attrs; i++, k += 2) {
@@ -136,13 +135,31 @@ int regexMatchAndExecute(const string input_command) {
 				type_attr[i] = NUMBER;
 		}
 
-		int ret = createRel(relname, no_attrs, attribute, type_attr);
+		int ret = createRel(rel_name, no_attrs, attribute, type_attr);
 		if (ret == SUCCESS) {
 			cout << "Relation created successfully" << endl;
 		} else {
-			print_errormsg(ret);
+			printErrorMsg(ret);
 			return FAILURE;
 		}
+
+	} else if (regex_match(input_command, insert_single)) {
+
+		regex_search(input_command, m, insert_single);
+		string table_name = m[3];
+		char rel_name[ATTR_SIZE];
+		string_to_char_array(table_name, rel_name, 15);
+		regex_search(input_command, m, temp);
+		string attrs = m[0];
+		vector<string> words = extract_tokens(attrs);
+
+		int ret = insert_val(words, rel_name);
+
+		if (ret == SUCCESS) {
+			cout << "Inserted successfully" << endl;
+		} else
+			printErrorMsg(ret);
+
 	} else {
 		cout << "Syntax Error" << endl;
 		return FAILURE;
@@ -223,7 +240,7 @@ void display_help() {
 	return;
 }
 
-void print_errormsg(int ret) {
+void printErrorMsg(int ret) {
 	if (ret == FAILURE)
 		cout << "Error: Command Failed" << endl;
 	else if (ret == E_OUTOFBOUND)
