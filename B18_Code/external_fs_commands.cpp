@@ -20,7 +20,7 @@ void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineF
 
 void dump_relcat() {
 	FILE *fp_export = fopen("relation_catalog", "w");
-	Attribute relcat_rec[6];
+	Attribute relCatRecord[ATTR_SIZE];
 
 	HeadInfo headInfo;
 
@@ -31,30 +31,30 @@ void dump_relcat() {
 	unsigned char slotmap[headInfo.numSlots];
 	getSlotmap(slotmap,  RELCAT_BLOCK);
 
-	for (int slotNum = 0; slotNum < 20; slotNum++) {
+	for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
 		unsigned char ch = slotmap[slotNum];
 		fputc(ch, fp_export);
 	}
 	fputs("\n", fp_export);
 
 	for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
-		getRecord(relcat_rec, RELCAT_BLOCK, slotNum);
-
+		getRecord(relCatRecord, RELCAT_BLOCK, slotNum);
+		
 		if ((char) slotmap[slotNum] == SLOT_UNOCCUPIED)
-			strcpy(relcat_rec[0].sval, "NULL");
+			strcpy(relCatRecord[0].sval, "NULL");
 
 		// RelationName
-		writeAttributeToFile(fp_export, relcat_rec[0], STRING, 0);
+		writeAttributeToFile(fp_export, relCatRecord[0], STRING, 0);
 		// #Attributes
-		writeAttributeToFile(fp_export, relcat_rec[1], NUMBER, 0);
+		writeAttributeToFile(fp_export, relCatRecord[1], NUMBER, 0);
 		// #Records
-		writeAttributeToFile(fp_export, relcat_rec[2], NUMBER, 0);
+		writeAttributeToFile(fp_export, relCatRecord[2], NUMBER, 0);
 		// FirstBlock
-		writeAttributeToFile(fp_export, relcat_rec[3], NUMBER, 0);
+		writeAttributeToFile(fp_export, relCatRecord[3], NUMBER, 0);
 		// LastBlock
-		writeAttributeToFile(fp_export, relcat_rec[4], NUMBER, 0);
+		writeAttributeToFile(fp_export, relCatRecord[4], NUMBER, 0);
 		// #SlotsPerBlock
-		writeAttributeToFile(fp_export, relcat_rec[5], NUMBER, 1);
+		writeAttributeToFile(fp_export, relCatRecord[5], NUMBER, 1);
 	}
 
 	fclose(fp_export);
@@ -62,45 +62,45 @@ void dump_relcat() {
 
 void dump_attrcat() {
 	FILE *fp_export = fopen("attribute_catalog", "w");
-	Attribute attr[6];
-	int attr_blk = 5;
+	Attribute attrCatRecord[ATTR_SIZE];
+	int attrCatBlock = ATTRCAT_BLOCK;
 
-	HeadInfo h;
+	HeadInfo headInfo;
 
-	while (attr_blk != -1) {
-		h = getHeader(attr_blk);
-		writeHeaderToFile(fp_export, h);
+	while (attrCatBlock != -1) {
+		headInfo = getHeader(attrCatBlock);
+		writeHeaderToFile(fp_export, headInfo);
 
-		unsigned char slotmap[h.numSlots];
-		getSlotmap(slotmap, attr_blk);
-		for (int k = 0; k < 20; k++) {
-			unsigned char ch = slotmap[k];
+		unsigned char slotmap[headInfo.numSlots];
+		getSlotmap(slotmap, attrCatBlock);
+		for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
+			unsigned char ch = slotmap[slotNum];
 			fputc(ch, fp_export);
 		}
 		fputs("\n", fp_export);
 
-		for (int i = 0; i < 20; i++) {
+		for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
 
-			getRecord(attr, attr_blk, i);
-			if ((char) slotmap[i] == SLOT_UNOCCUPIED) {
-				strcpy(attr[0].sval, "NULL");
-				strcpy(attr[1].sval, "NULL");
+			getRecord(attrCatRecord, attrCatBlock, slotNum);
+			if ((char) slotmap[slotNum] == SLOT_UNOCCUPIED) {
+				strcpy(attrCatRecord[0].sval, "NULL");
+				strcpy(attrCatRecord[1].sval, "NULL");
 			}
 
 			// RelationName
-			writeAttributeToFile(fp_export, attr[0], STRING, 0);
+			writeAttributeToFile(fp_export, attrCatRecord[0], STRING, 0);
 			// AttributeName
-			writeAttributeToFile(fp_export, attr[1], STRING, 0);
+			writeAttributeToFile(fp_export, attrCatRecord[1], STRING, 0);
 			// AttributeType
-			writeAttributeToFile(fp_export, attr[2], NUMBER, 0);
+			writeAttributeToFile(fp_export, attrCatRecord[2], NUMBER, 0);
 			// PrimaryFlag
-			writeAttributeToFile(fp_export, attr[3], NUMBER, 0);
+			writeAttributeToFile(fp_export, attrCatRecord[3], NUMBER, 0);
 			// RootBlock
-			writeAttributeToFile(fp_export, attr[4], NUMBER, 0);
+			writeAttributeToFile(fp_export, attrCatRecord[4], NUMBER, 0);
 			// Offset
-			writeAttributeToFile(fp_export, attr[5], NUMBER, 1);
+			writeAttributeToFile(fp_export, attrCatRecord[5], NUMBER, 1);
 		}
-		attr_blk = h.rblock;
+		attrCatBlock = headInfo.rblock;
 	}
 	fclose(fp_export);
 }
@@ -112,29 +112,29 @@ void dumpBlockAllocationMap() {
 	fread(blockAllocationMap, 4 * BLOCK_SIZE, 1, disk);
 	fclose(disk);
 
-	int iter;
+	int blockNum;
 	char s[16];
 	FILE *fp_export = fopen("block_allocation_map", "w");
-	for (iter = 0; iter < 4; iter++) {
+	for (blockNum = 0; blockNum < 4; blockNum++) {
 		fputs("Block ", fp_export);
-		sprintf(s, "%d", iter);
+		sprintf(s, "%d", blockNum);
 		fputs(s, fp_export);
 		fputs(": Block Allocation Map\n", fp_export);
 	}
-	for (iter = 4; iter < 8192; iter++) {
+	for (blockNum = 4; blockNum < 8192; blockNum++) {
 		fputs("Block ", fp_export);
-		sprintf(s, "%d", iter);
+		sprintf(s, "%d", blockNum);
 		fputs(s, fp_export);
-		if ((int32_t) (blockAllocationMap[iter]) == UNUSED_BLK) {
+		if ((int32_t) (blockAllocationMap[blockNum]) == UNUSED_BLK) {
 			fputs(": Unused Block\n", fp_export);
 		}
-		if ((int32_t) (blockAllocationMap[iter]) == REC) {
+		if ((int32_t) (blockAllocationMap[blockNum]) == REC) {
 			fputs(": Record Block\n", fp_export);
 		}
-		if ((int32_t) (blockAllocationMap[iter]) == IND_INTERNAL) {
+		if ((int32_t) (blockAllocationMap[blockNum]) == IND_INTERNAL) {
 			fputs(": Internal Index Block\n", fp_export);
 		}
-		if ((int32_t) (blockAllocationMap[iter]) == IND_LEAF) {
+		if ((int32_t) (blockAllocationMap[blockNum]) == IND_LEAF) {
 			fputs(": Leaf Index Block\n", fp_export);
 		}
 	}
@@ -143,16 +143,22 @@ void dumpBlockAllocationMap() {
 }
 
 void ls() {
-	union Attribute attr[6];
+	Attribute relCatRecord[6];
 	int attr_blk = 4;
-	struct HeadInfo h;
-	h = getHeader(attr_blk);
-	unsigned char slotmap[h.numSlots];
+	struct HeadInfo headInfo;
+	headInfo = getHeader(attr_blk);
+	unsigned char slotmap[headInfo.numSlots];
 	getSlotmap(slotmap, attr_blk);
 	for (int i = 0; i < 20; i++) {
+<<<<<<< HEAD
 		getRecord(attr, attr_blk, i);
 		if ((char) slotmap[i] == SLOT_OCCUPIED)
 			std::cout << attr[0].sval << "\n";
+=======
+		getRecord(relCatRecord, attr_blk, i);
+		if ((char) slotmap[i] == '1')
+			std::cout << relCatRecord[0].sval << "\n";
+>>>>>>> giving more meaningful variables names
 	}
 	std::cout << "\n";
 }
