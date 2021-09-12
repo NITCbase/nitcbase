@@ -109,6 +109,19 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 //	return 0;
 //}
 
+
+//int deleteRel(char relname[ATTR_SIZE])
+//{
+//	// get the relation's open relation id(let it be srelid), using getRelId() method of Openreltable
+//	// if relation is opened in open relation table, return E_RELOPEN
+//	int relid = getRelId(relname);
+//	if(relid!=E_RELNOTOPEN)
+//		return E_RELOPEN;
+//
+//	int retval  = ba_delete(relname);
+//	return retval;
+//}
+
 /*gokul
  * Creates and returns a Relation Catalog Record Entry with the parameters provided as argument
  */
