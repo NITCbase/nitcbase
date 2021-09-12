@@ -14,12 +14,30 @@ class OpenRelations {
 	static char OpenRelTable[MAX_OPEN][ATTR_SIZE];
 
 public:
+	static void initializeOpenRelationTable() {
+		for (int i = 0; i < MAX_OPEN; i++) {
+			if (i == RELCAT_RELID)
+				strcpy(OpenRelTable[i], "RELATIONCAT");
+			else if (i == ATTRCAT_RELID)
+				strcpy(OpenRelTable[i], "ATTRIBUTECAT");
+			else
+				strcpy(OpenRelTable[i], "NULL");
+		}
+	}
 
 	static int getRelationId(char relationName[ATTR_SIZE]) {
 		for (int i = 0; i < MAX_OPEN; i++)
 			if (strcmp(OpenRelTable[i], relationName) == 0)
 				return i;
 		return E_RELNOTOPEN;
+	}
+
+	static int getRelationName(int relationId, char relationName[ATTR_SIZE]) {
+		if (relationId < 0 || relationId >= MAX_OPEN) {
+			return E_OUTOFBOUND;
+		}
+		strcpy(relationName, OpenRelTable[relationId]);
+		return 0;
 	}
 
 	static int openRelation(char relationName[ATTR_SIZE]) {
@@ -73,6 +91,31 @@ public:
 		}
 		strcpy(OpenRelTable[relationId], "NULL");
 		return 0;
+	}
+
+	/*
+	 * If yes, return 1
+	 * else, 0
+	 */
+	static int checkIfRelationOpen(char relationName[ATTR_SIZE]) {
+		for (auto relationIterator: OpenRelTable) {
+			if (strcmp(relationIterator, relationName) == 0) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+
+	static int checkIfRelationOpen(int relationId) {
+		if (relationId < 0 || relationId >= MAX_OPEN) {
+			return E_OUTOFBOUND;
+		}
+		if (strcmp(OpenRelTable[relationId], "NULL") == 0) {
+			return 0;
+		}
+		else {
+			return 1;
+		}
 	}
 };
 
