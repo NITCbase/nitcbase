@@ -175,7 +175,6 @@ int regexMatchAndExecute(const string input_command) {
 			//		} else
 			//			printErrorMsg(ret);
 
-		}
 	} else {
 		cout << "Syntax Error" << endl;
 		return FAILURE;
