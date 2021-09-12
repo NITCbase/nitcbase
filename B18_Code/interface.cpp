@@ -84,7 +84,7 @@ int regexMatchAndExecute(const string input_command) {
 		string tablename = m[3];
 		char relname[16];
 		string_to_char_array(tablename, relname, 15);
-		int ret = openRel(relname);
+		int ret = OpenRelations::openRelation(relname);
 		if (ret >= 0 && ret <= 11) {
 			cout << "Relation opened successfully\n";
 		} else {
@@ -96,7 +96,7 @@ int regexMatchAndExecute(const string input_command) {
 		string tablename = m[3];
 		char relname[16];
 		string_to_char_array(tablename, relname, 15);
-		int id = getRelId(relname);
+		int id = OpenRelations::getRelationId(relname);
 		if (id == E_RELNOTOPEN) {
 			cout << "Relation not open" << endl;
 			return FAILURE;
@@ -105,7 +105,7 @@ int regexMatchAndExecute(const string input_command) {
 			cout << "Cannot close Relation/Attribute Catalog" << endl;
 			return FAILURE;
 		}
-		int ret = closeRel(id);
+		int ret = OpenRelations::closeRelation(id);
 		if (ret == SUCCESS) {
 			cout << "Relation Closed Successfully\n";
 		} else {
@@ -153,12 +153,12 @@ int regexMatchAndExecute(const string input_command) {
 		string attrs = m[0];
 		vector<string> words = extract_tokens(attrs);
 
-		int ret = insert_val(words, rel_name);
+//		int ret = insert_val(words, rel_name);
 
-		if (ret == SUCCESS) {
-			cout << "Inserted successfully" << endl;
-		} else
-			printErrorMsg(ret);
+//		if (ret == SUCCESS) {
+//			cout << "Inserted successfully" << endl;
+//		} else
+//			printErrorMsg(ret);
 
 	} else {
 		cout << "Syntax Error" << endl;

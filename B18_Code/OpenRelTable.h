@@ -15,17 +15,11 @@ class OpenRelations {
 
 public:
 	static void initializeOpenRelationTable();
-
 	static int getRelationId(char relationName[ATTR_SIZE]);
-
 	static int getRelationName(int relationId, char relationName[ATTR_SIZE]);
-
 	static int openRelation(char relationName[ATTR_SIZE]);
-
 	static int closeRelation(int relationId);
-
 	static int checkIfRelationOpen(char relationName[ATTR_SIZE]);
-
 	static int checkIfRelationOpen(int relationId);
 };
 
