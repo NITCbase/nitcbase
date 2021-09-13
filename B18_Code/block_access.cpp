@@ -632,6 +632,38 @@ int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry)
 }
 
 /*
+ * Reads attribute catalogue entry from disk for the given attribute name of a given relation
+ */
+int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry) {
+	if (relationId < 0 || relationId >= MAX_OPEN)
+		return E_OUTOFBOUND;
+
+	if (OpenRelations::checkIfRelationOpen(relationId ) == 0)
+		return E_NOTOPEN;
+
+	char relName[16];
+	OpenRelations::getRelationName(relationId, relName);
+
+	int curr_block = 5;
+	int next_block = -1;
+	while (curr_block != -1) {
+		struct HeadInfo header;
+		header = getHeader(curr_block);
+		next_block = header.rblock;
+		for (int i = 0; i < 20; i++) {
+			getRecord(attrcat_entry, curr_block, i);
+			if (strcmp(attrcat_entry[0].sval, relName) == 0) {
+				if (static_cast<int>(attrcat_entry[5].nval) == offset)
+					return SUCCESS;
+			}
+		}
+		curr_block = next_block;
+	}
+	return E_ATTRNOTEXIST;
+}
+
+
+/*
  * Deletes the given block from the disk
  *      - Clears the Block Data
  *      - Marks the Block UNUSED_BLK in Block Allocation Map
