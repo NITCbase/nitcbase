@@ -63,7 +63,7 @@ int regexMatchAndExecute(const string input_command) {
 		string tableName = m[2];
 
 		string filePath = m[3];
-		filePath = "../Files/" + filePath;
+		filePath = "./Files/" + filePath;
 
 		char relname[16];
 		string_to_char_array(tableName, relname, 15);
