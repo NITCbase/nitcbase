@@ -173,8 +173,10 @@ int regexMatchAndExecute(const string input_command) {
 
 			if (retValue == SUCCESS) {
 				cout << "Inserted successfully" << endl;
-			} else
+			} else {
 				printErrorMsg(retValue);
+				return FAILURE;
+			}
 
 	} else {
 		cout << "Syntax Error" << endl;

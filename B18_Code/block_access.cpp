@@ -266,7 +266,7 @@ int ba_delete(char relName[ATTR_SIZE]) {
 	}
 
 	/* Check if a relation with the given name exists in Open Relation Table */
-	if (OpenRelations::checkIfRelationOpen(relName) == 1) {
+	if (OpenRelations::checkIfRelationOpen(relName) == SUCCESS) {
 		return FAILURE;
 	}
 
@@ -563,7 +563,7 @@ int getRelCatEntry(int relationId, Attribute *relcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId ) == 0)
+	if (OpenRelations::checkIfRelationOpen(relationId ) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
@@ -584,7 +584,7 @@ int setRelCatEntry(int relationId, Attribute *relcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId ) == 0)
+	if (OpenRelations::checkIfRelationOpen(relationId ) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
@@ -607,7 +607,7 @@ int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry)
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId ) == 0)
+	if (OpenRelations::checkIfRelationOpen(relationId ) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
@@ -638,7 +638,7 @@ int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId ) == 0)
+	if (OpenRelations::checkIfRelationOpen(relationId ) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
