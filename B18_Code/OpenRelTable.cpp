@@ -32,7 +32,7 @@ int OpenRelations::getRelationName(int relationId, char relationName[ATTR_SIZE])
 		return E_OUTOFBOUND;
 	}
 	strcpy(relationName, OpenRelTable[relationId]);
-	return 0;
+	return SUCCESS;
 }
 
 int OpenRelations::openRelation(char relationName[ATTR_SIZE]) {
@@ -85,20 +85,16 @@ int OpenRelations::closeRelation(int relationId) {
 		return E_RELNOTOPEN;
 	}
 	strcpy(OpenRelTable[relationId], "NULL");
-	return 0;
+	return SUCCESS;
 }
 
-/*
- * If yes, return 1
- * else, 0
- */
 int OpenRelations::checkIfRelationOpen(char relationName[ATTR_SIZE]) {
 	for (auto relationIterator: OpenRelTable) {
 		if (strcmp(relationIterator, relationName) == 0) {
-			return 1;
+			return SUCCESS;
 		}
 	}
-	return 0;
+	return FAILURE;
 }
 
 int OpenRelations::checkIfRelationOpen(int relationId) {
@@ -106,9 +102,9 @@ int OpenRelations::checkIfRelationOpen(int relationId) {
 		return E_OUTOFBOUND;
 	}
 	if (strcmp(OpenRelTable[relationId], "NULL") == 0) {
-		return 0;
+		return FAILURE;
 	}
 	else {
-		return 1;
+		return SUCCESS;
 	}
 }
