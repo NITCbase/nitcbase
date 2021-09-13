@@ -12,6 +12,7 @@
 #include "Disk.h"
 #include "OpenRelTable.h"
 #include "block_access.h"
+#include "algebra.h"
 #include "external_fs_commands.h"
 
 using namespace std;
@@ -168,12 +169,12 @@ int regexMatchAndExecute(const string input_command) {
 			string attrs = m[0];
 			vector<string> words = extract_tokens(attrs);
 
-			//		int ret = insert_val(words, rel_name);
+			int retValue = insert(words, rel_name);
 
-			//		if (ret == SUCCESS) {
-			//			cout << "Inserted successfully" << endl;
-			//		} else
-			//			printErrorMsg(ret);
+			if (retValue == SUCCESS) {
+				cout << "Inserted successfully" << endl;
+			} else
+				printErrorMsg(retValue);
 
 	} else {
 		cout << "Syntax Error" << endl;

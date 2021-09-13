@@ -1,162 +1,125 @@
-////
-//// Created by Jessiya Joy on 12/09/21.
-////
-//#include <string>
-//#include <vector>
-//#include "define/constants.h"
-//#include "define/errors.h"
-//#include "disk_structures.h"
-//#include "algebra.h"
-//#include "OpenRelTable.h"
 //
-//using namespace std;
+// Created by Jessiya Joy on 12/09/21.
 //
-//int insert_val(vector<string> attributeTokens, char table_name[16]) {
-//	char ch;
-//	int relationId = OpenRelations::getRelationId(table_name);
-//	if (relationId == E_CACHEFULL || relationId == E_RELNOTEXIST || relationId == E_RELNOTOPEN) {
-//		//cout<<"Relation not open\n";
-//		return relationId;
-//	}
-//	Attribute relCatEntry[6];
-//	int y;
-//	y = getRelCatEntry(relationId, relCatEntry);
-//	if (y != SUCCESS) {
-//		//cout<<"Insert Failed\n";
-//		return y;
-//	}
-//	int count;
-//	count = relCatEntry[1].ival;
-//	int type[count];
-//	//getting the types of all attributes
-//	Attribute attr[6];
-//	int attr_blk = 5;
-//	char Attr_name[6][16];
-//	int j = 0;
-//	struct HeadInfo h;
-//	while (attr_blk != -1) {
-//		h = getheader(attr_blk);
-//		unsigned char slotmap[h.numSlots];
-//		getSlotmap(slotmap, attr_blk);
-//		for (int i = 0; i < 20; i++) {
-//			getRecord(attr, attr_blk, i);
-//			if ((char) slotmap[i] == '0') {
-//				continue;
-//			}
-//			if (strcmp(attr[0].sval, table_name) == 0) {
-//				type[attr[5].ival] = attr[2].ival;
-//			}
-//		}
-//		attr_blk = h.rblock;
-//	}
-//	//-----------------------------------------------------
-//
-//	char record_array[count][16];
-//	if (attributeTokens.size() != count) {
-//		//cout<<"Mismatch in no of arguments\n";
-//		return E_NATTRMISMATCH;
-//	}
-//	//cout<<"hi\n";
-//	//cout<<count<<"\n";
-//	for (int i = 0; i < count; i++) {
-//		string x = attributeTokens[i];
-//		char p[16];
-//		int j;
-//		for (j = 0; j < 15 && j < x.size(); j++) {
-//			p[j] = x[j];
-//		}
-//		p[j] = '\0';
-//		strcpy(record_array[i], p);
-//	}
-//
-//	union Attribute rec[count];
-//	for (int l = 0; l < count; l++) {
-//		if (type[l] == FLOAT) {
-//			// cout<<record_array[l]<<"\n";
-//			if (check_type(record_array[l]) == FLOAT || check_type(record_array[l]) == INT)
-//				rec[l].fval = atof(record_array[l]);
-//			else
-//				return E_ATTRTYPEMISMATCH;
-//
-//
-//			//cout<<rec[l].fval<<"\n";
-//		}
-//		if (type[l] == INT) {
-//			//cout<<record_array[l]<<"\n";
-//			if (check_type(record_array[l]) != INT)
-//				return E_ATTRTYPEMISMATCH;
-//			rec[l].ival = strtoull(record_array[l], NULL, 10);
-//			//cout<<rec[l].ival<<"\n";
-//		}
-//		if (type[l] == STRING) {
-//			//cout<<record_array[l]<<"\n";
-//
-//			strcpy(rec[l].sval, record_array[l]);
-//			//cout<<rec[l].sval<<"\n";
-//		}
-//	}
-//	int r;
-//	//cout<<"Calling insert"<<endl;
-//	r = ba_insert(relationId, rec);
-//	if (r == SUCCESS) {
-//		return SUCCESS;
-//	} else {
-//		//cout<<"FAILURE\n";
-//		return FAILURE;
-//	}
-//
-//
-//}
-//
-//int insert(char relname[ATTR_SIZE], int nAttrs, char record[][ATTR_SIZE]) {
-//
-//	// get the relation's open relation id(let it be rel_id), using getRelId() method of Openreltable
-//	// if relation is not opened in Openreltable, return E_RELNOTOPEN
-//	int relid = getRelId(relname);
-//	if (relid == E_RELNOTOPEN)
-//		return relid;
-//
-//
-//	//get the no. of attributes present in relation, from RelcatEntry present in Openreltable(using getRelCatEntry() method).
-//	//if nAttrs!=no_of_attrs in relation, return E_NATTRMISMATCH
-//	union Attribute relcat_entry[6];
-//	getRelCatEntry(relid, relcat_entry);
-//	int noAttrs = relcat_entry[1].ival;
-//	if (noAttrs != nAttrs)
-//		return E_NATTRMISMATCH;
-//
-//	union Attribute recval[nAttrs];
-//
-//	/*iterate through 0 to nAttrs-1 :
-//		get the i'th attribute's AttrCatEntry (using getAttrcatEntry() of Openreltable )
-//	*/
-//	// let type=attrcatentry.attr_type;
-//	union Attribute attrcat_entry[6];
-//	recId prev_recid;
-//	prev_recid.block = -1;
-//	prev_recid.slot = -1;
-//	recId recid;
-//	char attrName[ATTR_SIZE];
-//	strcpy(attrName, "RelName");
-//	union Attribute a;
-//	strcpy(a.sval, OpenRelTable[relid]);
-//	for (int i = 0; i < nAttrs; i++) {
-//
-//		recid = linear_search(ATTRCAT_RELID, attrName, a, EQ, &prev_recid);
-//		getRecord(attrcat_entry, recid.block, recid.slot);
-//		int type = attrcat_entry[2].ival;
-//		if (type == INT)
-//			recval[i].ival = stoi(record[i]);
-//		else if (type == FLOAT)
-//			recval[i].fval = stof(record[i]);
-//		else if (type == STRING)
-//			strcpy(recval[i].sval, record[i]);
-//
-//
-//	}
-//
-//	int retval = ba_insert(relid, recval);
-//	return retval;
-//
-//	//return retval
-//}
+#include <string>
+#include <vector>
+#include "define/constants.h"
+#include "define/errors.h"
+#include "disk_structures.h"
+#include "algebra.h"
+#include "block_access.h"
+#include "OpenRelTable.h"
+
+using namespace std;
+
+int check_type(char *data);
+
+int insert(vector<string> attributeTokens, char *table_name) {
+
+	// check if relation is open
+	int relationId = OpenRelations::getRelationId(table_name);
+	if (relationId == E_RELNOTOPEN) {
+		return relationId;
+	}
+
+	// get #attributes from relation catalog entry
+	Attribute relCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+	int retValue;
+	retValue = getRelCatEntry(relationId, relCatEntry);
+	if (retValue != SUCCESS) {
+		return retValue;
+	}
+	int numAttrs = static_cast<int>(relCatEntry[1].nval);
+	if (numAttrs != attributeTokens.size())
+		return E_NATTRMISMATCH;
+
+	// get attribute types from attribute catalog entry
+	int attrTypes[numAttrs];
+	Attribute attrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+
+	int relId = OpenRelations::getRelationId(table_name);
+	for (int offsetIter = 0; offsetIter < numAttrs; ++offsetIter) {
+		getAttrCatEntry(relId, offsetIter, attrCatEntry);
+		attrTypes[static_cast<int>(attrCatEntry[5].nval)] = static_cast<int>(attrCatEntry[2].nval);
+	}
+
+	int attrCatBlock = ATTRCAT_BLOCK;
+	struct HeadInfo headInfo;
+	while (attrCatBlock != -1) {
+		headInfo = getHeader(attrCatBlock);
+		unsigned char slotmap[headInfo.numSlots];
+		getSlotmap(slotmap, attrCatBlock);
+		for (int i = 0; i < SLOTMAP_SIZE_RELCAT_ATTRCAT; i++) {
+			getRecord(attrCatEntry, attrCatBlock, i);
+			if ((char) slotmap[i] == '0') {
+				continue;
+			}
+			if (strcmp(attrCatEntry[0].sval, table_name) == 0) {
+				attrTypes[static_cast<int>(attrCatEntry[5].nval)] = static_cast<int>(attrCatEntry[2].nval);
+			}
+		}
+		attrCatBlock = headInfo.rblock;
+	}
+
+	// for each attribute, convert string vector to char array
+	char recordArray[numAttrs][16];
+	for (int i = 0; i < numAttrs; i++) {
+		string attrValue = attributeTokens[i];
+		char tempAttribute[ATTR_SIZE];
+		int j;
+		for (j = 0; j < 15 && j < attrValue.size(); j++) {
+			tempAttribute[j] = attrValue[j];
+		}
+		tempAttribute[j] = '\0';
+		strcpy(recordArray[i], tempAttribute);
+	}
+
+	// Construct a record ( array of type Attribute ) from previous character array
+	// Perform type checking for integer types
+	Attribute record[numAttrs];
+	for (int l = 0; l < numAttrs; l++) {
+
+		if (attrTypes[l] == NUMBER) {
+			if (check_type(recordArray[l]) == NUMBER)
+				record[l].nval = atof(recordArray[l]);
+			else
+				return E_ATTRTYPEMISMATCH;
+		}
+
+		if (attrTypes[l] == STRING) {
+			strcpy(record[l].sval, recordArray[l]);
+		}
+	}
+
+	retValue = ba_insert(relationId, record);
+	if (retValue == SUCCESS) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
+// TODO : Find library functions for this?
+int check_type(char *data)
+{
+	int count_int=0,count_dot=0,count_string=0,i;
+	for(i=0;data[i]!='\0';i++)
+	{
+
+		if(data[i]>='0'&&data[i]<='9')
+			count_int++;
+		if(data[i]=='.')
+			count_dot++;
+		else
+			count_string++;
+	}
+
+	if(count_dot==1&&count_int==(strlen(data)-1))
+		return NUMBER;
+	if(count_int==strlen(data))
+	{
+		return NUMBER;
+	}
+	else
+		return STRING;
+}
