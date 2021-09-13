@@ -296,6 +296,8 @@ int ba_delete(char relName[ATTR_SIZE]) {
 	prev_recid.slot = -1;
 	for (int i = 0; i < no_of_attrs; i++) {
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relName_Attr, EQ, &prev_recid);
+		prev_recid.block = -1;
+		prev_recid.slot = -1;
 		/* Updating the Attribute Catalog for the current Attribute Deletion */
 		deleteAttrCatEntry(attrcat_recid);
 	}
@@ -769,7 +771,6 @@ int deleteAttrCatEntry(recId attrcat_recid) {
 			next_header.lblock = header.lblock;
 			setHeader(&next_header, header.rblock);
 		}
-
 		deleteBlock(attrcat_recid.block);
 	}
 	return SUCCESS;

@@ -32,6 +32,10 @@ CREATE TABLE new14(Age NUM, Name STR, Salary NUM)
 ls
 CREATE TABLE new15(Age NUM, Name STR, Salary NUM)
 ls
+CREATE TABLE new16(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new17(Age NUM, Name STR, Salary NUM)
+ls
 export RELATIONCAT all_relcat.csv
 export ATTRIBUTECAT all_attrcat.csv
 DROP TABLE new
@@ -65,6 +69,10 @@ ls
 DROP TABLE new14
 ls
 DROP TABLE new15
+ls
+DROP TABLE new16
+ls
+DROP TABLE new17
 ls
 export RELATIONCAT fin_relcat.csv
 export ATTRIBUTECAT fin_attrcat.csv
