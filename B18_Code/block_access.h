@@ -13,5 +13,7 @@ void add_disk_metainfo();
 HeadInfo getHeader(int blockNum);
 void getSlotmap(unsigned char *SlotMap, int blockNum);
 int getRecord(Attribute *rec, int blockNum, int slotNum);
+int getRelCatEntry(int relationId, Attribute *relcat_entry);
+int setRelCatEntry(int relationId, Attribute *relcat_entry);
 
 #endif //B18_CODE_BLOCK_ACCESS_H
