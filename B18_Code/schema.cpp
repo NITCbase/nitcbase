@@ -58,58 +58,6 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 	return SUCCESS;
 }
 
-//int openRel(char RelName[16]) {
-//	Attribute rec[6];
-//
-//	/* check if relation exists
-//	 *      for this check each entry in relation catalog
-//	 */
-//	int i;
-//	for (i = 0; i < 20; i++) {
-//		getRecord(rec, 4, i);
-//		if (strcmp(rec[0].sval, RelName) == 0) {
-//			break;
-//		}
-//	}
-//	// if relation does not exist
-//	if (i == 20) {
-//		return E_RELNOTEXIST;
-//	}
-//
-//	/* check if relation is already open
-//	 *      if yes, return open relation id
-//	 *  otherwise search for a free slot in open relation table
-//	 */
-//	for (i = 0; i < 12; i++) {
-//		if (strcmp(RelName, OpenRelTable[i]) == 0) {
-//			return i;
-//		}
-//	}
-//	for (i = 0; i < 12; i++) {
-//		if (strcmp(OpenRelTable[i], "NULL") == 0) {
-//			strcpy(OpenRelTable[i], RelName);
-//			return i;
-//		}
-//	}
-//	// if open relation table is already full
-//	if (i == 12) {
-//		return E_CACHEFULL;
-//	}
-//}
-
-//int closeRel(int relid)
-//{
-//	if (relid < 0 || relid >= MAX_OPEN) {
-//		return E_OUTOFBOUND;
-//	}
-//	if (strcmp(OpenRelTable[relid], "NULL") == 0) {
-//		return E_RELNOTOPEN;
-//	}
-//	strcpy(OpenRelTable[relid], "NULL");
-//	return 0;
-//}
-
-
 int deleteRel(char relname[ATTR_SIZE]) {
 	// get the relation's open relation id
 	int relid = OpenRelations::getRelationId(relname);
@@ -169,11 +117,3 @@ int check_duplicate_attributes(int nAttrs, char attrs[][ATTR_SIZE]) {
 	}
 	return 0;
 }
-
-//int getRelId(char relname[16])
-//{
-//	for(int i=0;i<12;i++)
-//		if(strcmp(OpenRelTable[i],relname)==0)
-//			return i;
-//	return E_RELNOTOPEN;
-//}
