@@ -163,21 +163,21 @@ int regexMatchAndExecute(const string input_command) {
 	} else if (regex_match(input_command, insert_single)) {
 
 		regex_search(input_command, m, insert_single);
-			string table_name = m[3];
-			char rel_name[ATTR_SIZE];
-			string_to_char_array(table_name, rel_name, 15);
-			regex_search(input_command, m, temp);
-			string attrs = m[0];
-			vector<string> words = extract_tokens(attrs);
+		string table_name = m[3];
+		char rel_name[ATTR_SIZE];
+		string_to_char_array(table_name, rel_name, 15);
+		regex_search(input_command, m, temp);
+		string attrs = m[0];
+		vector<string> words = extract_tokens(attrs);
 
-			int retValue = insert(words, rel_name);
+		int retValue = insert(words, rel_name);
 
-			if (retValue == SUCCESS) {
-				cout << "Inserted successfully" << endl;
-			} else {
-				printErrorMsg(retValue);
-				return FAILURE;
-			}
+		if (retValue == SUCCESS) {
+			cout << "Inserted successfully" << endl;
+		} else {
+			printErrorMsg(retValue);
+			return FAILURE;
+		}
 
 	} else if(regex_match(input_command, select_from)) {
 

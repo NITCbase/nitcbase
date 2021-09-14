@@ -43,24 +43,6 @@ int insert(vector<string> attributeTokens, char *table_name) {
 		attrTypes[static_cast<int>(attrCatEntry[5].nval)] = static_cast<int>(attrCatEntry[2].nval);
 	}
 
-	int attrCatBlock = ATTRCAT_BLOCK;
-	struct HeadInfo headInfo;
-	while (attrCatBlock != -1) {
-		headInfo = getHeader(attrCatBlock);
-		unsigned char slotmap[headInfo.numSlots];
-		getSlotmap(slotmap, attrCatBlock);
-		for (int i = 0; i < SLOTMAP_SIZE_RELCAT_ATTRCAT; i++) {
-			getRecord(attrCatEntry, attrCatBlock, i);
-			if ((char) slotmap[i] == '0') {
-				continue;
-			}
-			if (strcmp(attrCatEntry[0].sval, table_name) == 0) {
-				attrTypes[static_cast<int>(attrCatEntry[5].nval)] = static_cast<int>(attrCatEntry[2].nval);
-			}
-		}
-		attrCatBlock = headInfo.rblock;
-	}
-
 	// for each attribute, convert string vector to char array
 	char recordArray[numAttrs][16];
 	for (int i = 0; i < numAttrs; i++) {
@@ -100,26 +82,22 @@ int insert(vector<string> attributeTokens, char *table_name) {
 }
 
 // TODO : Find library functions for this?
-int check_type(char *data)
-{
-	int count_int=0,count_dot=0,count_string=0,i;
-	for(i=0;data[i]!='\0';i++)
-	{
+int check_type(char *data) {
+	int count_int = 0, count_dot = 0, count_string = 0, i;
+	for (i = 0; data[i] != '\0'; i++) {
 
-		if(data[i]>='0'&&data[i]<='9')
+		if (data[i] >= '0' && data[i] <= '9')
 			count_int++;
-		if(data[i]=='.')
+		if (data[i] == '.')
 			count_dot++;
 		else
 			count_string++;
 	}
 
-	if(count_dot==1&&count_int==(strlen(data)-1))
+	if (count_dot == 1 && count_int == (strlen(data) - 1))
 		return NUMBER;
-	if(count_int==strlen(data))
-	{
+	if (count_int == strlen(data)) {
 		return NUMBER;
-	}
-	else
+	} else
 		return STRING;
 }
