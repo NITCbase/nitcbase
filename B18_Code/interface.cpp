@@ -178,6 +178,30 @@ int regexMatchAndExecute(const string input_command) {
 			printErrorMsg(retValue);
 			return FAILURE;
 		}
+	} else if (regex_match(input_command, insert_multiple)) {
+		regex_search(input_command, m, insert_multiple);
+		string tablename = m[3];
+		char relname[16];
+		string p = "./Files/";
+		string_to_char_array(tablename, relname, 15);
+		string t = m[6];
+		p = p + t;
+		char Filepath[p.length() + 1];
+		string_to_char_array(p, Filepath, p.length() + 1);
+		FILE *file = fopen(Filepath, "r");
+		cout << Filepath << endl;
+		if (!file) {
+			cout << "Invalid file path or file does not exist" << endl;
+			return FAILURE;
+		}
+		fclose(file);
+		int retValue = insert(relname, Filepath);
+		if (retValue == SUCCESS) {
+			cout << "Inserted successfully" << endl;
+		} else {
+			printErrorMsg(retValue);
+			return FAILURE;
+		}
 
 	} else if(regex_match(input_command, select_from)) {
 
@@ -238,7 +262,6 @@ int regexMatchAndExecute(const string input_command) {
 		// TODO: int ret = project(sourceRelName, targetRelName, nAttrs, targetAttrs);
 		// if ret == SUCCESS cout<<"Select successful"<<endl;
 		// else printErrorMsg(ret); return FAILURE;
-
 	} else {
 			cout << "Syntax Error" << endl;
 			return FAILURE;

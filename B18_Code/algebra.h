@@ -6,5 +6,6 @@
 #define B18_CODE_ALGEBRA_H
 
 int insert(std::vector<std::string> attributeTokens, char *table_name);
+int insert(char relName[16], char *filename);
 
 #endif //B18_CODE_ALGEBRA_H
