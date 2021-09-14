@@ -13,38 +13,29 @@
 using namespace std;
 
 int check_type(char *data);
+int getNumberOfAttrsForRelation(int relationId);
+void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]);
+int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE], int attrTypes[numAttrs]);
 
 int insert(vector<string> attributeTokens, char *table_name) {
 
 	// check if relation is open
-	int relationId = OpenRelations::getRelationId(table_name);
-	if (relationId == E_RELNOTOPEN) {
-		return relationId;
+	int relId = OpenRelations::getRelationId(table_name);
+	if (relId == E_RELNOTOPEN) {
+		return relId;
 	}
 
 	// get #attributes from relation catalog entry
-	Attribute relCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
-	int retValue;
-	retValue = getRelCatEntry(relationId, relCatEntry);
-	if (retValue != SUCCESS) {
-		return retValue;
-	}
-	int numAttrs = static_cast<int>(relCatEntry[1].nval);
+	int numAttrs = getNumberOfAttrsForRelation(relId);
 	if (numAttrs != attributeTokens.size())
 		return E_NATTRMISMATCH;
 
 	// get attribute types from attribute catalog entry
 	int attrTypes[numAttrs];
-	Attribute attrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
-
-	int relId = OpenRelations::getRelationId(table_name);
-	for (int offsetIter = 0; offsetIter < numAttrs; ++offsetIter) {
-		getAttrCatEntry(relId, offsetIter, attrCatEntry);
-		attrTypes[static_cast<int>(attrCatEntry[5].nval)] = static_cast<int>(attrCatEntry[2].nval);
-	}
+	getAttrTypesForRelation(relId, numAttrs, attrTypes);
 
 	// for each attribute, convert string vector to char array
-	char recordArray[numAttrs][16];
+	char recordArray[numAttrs][ATTR_SIZE];
 	for (int i = 0; i < numAttrs; i++) {
 		string attrValue = attributeTokens[i];
 		char tempAttribute[ATTR_SIZE];
@@ -59,21 +50,11 @@ int insert(vector<string> attributeTokens, char *table_name) {
 	// Construct a record ( array of type Attribute ) from previous character array
 	// Perform type checking for integer types
 	Attribute record[numAttrs];
-	for (int l = 0; l < numAttrs; l++) {
+	int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
+	if (retValue == E_ATTRTYPEMISMATCH)
+		return E_ATTRTYPEMISMATCH;
 
-		if (attrTypes[l] == NUMBER) {
-			if (check_type(recordArray[l]) == NUMBER)
-				record[l].nval = atof(recordArray[l]);
-			else
-				return E_ATTRTYPEMISMATCH;
-		}
-
-		if (attrTypes[l] == STRING) {
-			strcpy(record[l].sval, recordArray[l]);
-		}
-	}
-
-	retValue = ba_insert(relationId, record);
+	retValue = ba_insert(relId, record);
 	if (retValue == SUCCESS) {
 		return SUCCESS;
 	} else {
@@ -100,4 +81,42 @@ int check_type(char *data) {
 		return NUMBER;
 	} else
 		return STRING;
+}
+
+int getNumberOfAttrsForRelation(int relationId) {
+	Attribute relCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+	int retValue;
+	retValue = getRelCatEntry(relationId, relCatEntry);
+	if (retValue != SUCCESS) {
+		return retValue;
+	}
+	int numAttrs = static_cast<int>(relCatEntry[1].nval);
+	return numAttrs;
+}
+
+void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]) {
+
+	Attribute attrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+
+	for (int offsetIter = 0; offsetIter < numAttrs; ++offsetIter) {
+		getAttrCatEntry(relId, offsetIter, attrCatEntry);
+		attrTypes[static_cast<int>(attrCatEntry[5].nval)] = static_cast<int>(attrCatEntry[2].nval);
+	}
+}
+
+int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE], int attrTypes[numAttrs]) {
+	for (int l = 0; l < numAttrs; l++) {
+
+		if (attrTypes[l] == NUMBER) {
+			if (check_type(recordArray[l]) == NUMBER)
+				record[l].nval = atof(recordArray[l]);
+			else
+				return E_ATTRTYPEMISMATCH;
+		}
+
+		if (attrTypes[l] == STRING) {
+			strcpy(record[l].sval, recordArray[l]);
+		}
+	}
+	return SUCCESS;
 }
