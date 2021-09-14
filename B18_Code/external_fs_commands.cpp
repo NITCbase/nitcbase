@@ -190,19 +190,23 @@ int exportRelation(char *relname, char *filename) {
 
 	Attribute rec[6];
 
-	int recBlock = ATTRCAT_BLOCK;
-	int nextRecBlock;
+	int recBlock_Attrcat = ATTRCAT_BLOCK;
+	int nextRecBlock_Attrcat;
 
 	// Array for attribute names and types
 	int attrNo = 0;
 	char attrName[numOfAttrs][ATTR_SIZE];
 	int attrType[numOfAttrs];
 
-	while (recBlock != -1) {
-		headInfo = getHeader(recBlock);
-		nextRecBlock = headInfo.rblock;
+	/*
+	 * Searching the Attribute Catalog Disk Blocks
+	 * for finding and storing all the attributes of the given relation
+	 */
+	 while (recBlock_Attrcat != -1) {
+		headInfo = getHeader(recBlock_Attrcat);
+		 nextRecBlock_Attrcat = headInfo.rblock;
 		for (slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
-			getRecord(rec, recBlock, slotNum);
+			getRecord(rec, recBlock_Attrcat, slotNum);
 			if (strcmp(rec[0].sval, relname) == 0) {
 				// Attribute belongs to this Relation - add info to array
 				strcpy(attrName[attrNo], rec[1].sval);
@@ -210,7 +214,7 @@ int exportRelation(char *relname, char *filename) {
 				attrNo++;
 			}
 		}
-		recBlock = nextRecBlock;
+		 recBlock_Attrcat = nextRecBlock_Attrcat;
 	}
 
 	// Write the Attribute names to o/p file
@@ -235,7 +239,7 @@ int exportRelation(char *relname, char *filename) {
 
 		num_slots = headInfo.numSlots;
 		num_attrs = headInfo.numAttrs;
-		nextRecBlock = headInfo.rblock;
+		nextRecBlock_Attrcat = headInfo.rblock;
 
 		unsigned char slotmap[num_slots];
 		getSlotmap(slotmap, block_num);
@@ -262,7 +266,7 @@ int exportRelation(char *relname, char *filename) {
 			}
 		}
 
-		block_num = nextRecBlock;
+		block_num = nextRecBlock_Attrcat;
 	}
 
 	fclose(fp_export);

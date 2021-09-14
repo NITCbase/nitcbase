@@ -5,6 +5,7 @@
 // TODO : review if we need to keep ';' at the end of commands
 #include <iostream>
 #include <fstream>
+#include <string>
 #include "define/constants.h"
 #include "define/errors.h"
 #include "interface.h"
@@ -178,9 +179,69 @@ int regexMatchAndExecute(const string input_command) {
 				return FAILURE;
 			}
 
+	} else if(regex_match(input_command, select_from)) {
+
+		regex_search(input_command, m, select_from);
+		string source=m[4];
+		string target=m[6];
+
+		char sourceRelName[16];
+		char targetRelName[16];
+
+		string_to_char_array(source, sourceRelName, 15);
+		string_to_char_array(target, targetRelName, 15);
+
+		/* Check if the relation is Open */
+		int src_relid = OpenRelations::getRelationId(sourceRelName);
+		if (src_relid==E_RELNOTOPEN) {
+			cout<<"Source relation not open"<<endl;
+			return FAILURE;
+		}
+
+		/* Get the relation catalog entry for the source relation */
+		Attribute relcatEntry[6];
+		if(getRelCatEntry(src_relid, relcatEntry) != SUCCESS) {
+			cout<<"Command Failed: Could not get the relation catalogue entry"<<endl;
+			return FAILURE;
+		}
+
+		int nAttrs = (int) relcatEntry[1].nval;
+		/*
+		 * Array for the Attributes of the Target Relation
+		 *  - target relation has same number of attributes as source relation
+		 * Search the Attribute Catalog to find all the attributes belonging to Source Relation
+		 *  - and store them in this array (for projecting)
+		 */
+		char targetAttrs[nAttrs][ATTR_SIZE];
+		Attribute rec_Attrcat[6];
+		int recBlock_Attrcat = ATTRCAT_BLOCK; // Block Number
+		HeadInfo headInfo;
+
+		while (recBlock_Attrcat != -1) {
+			headInfo = getHeader(recBlock_Attrcat);
+
+			unsigned char slotmap[headInfo.numSlots];
+			getSlotmap(slotmap,recBlock_Attrcat);
+
+			for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
+				if(slotmap[slotNum] != SLOT_UNOCCUPIED) {
+					getRecord(rec_Attrcat, recBlock_Attrcat, slotNum);
+					if(strcmp(rec_Attrcat[0].sval, sourceRelName) == 0) {
+						// Copy the attribute name to the attribute offset index
+						strcpy(targetAttrs[(int)rec_Attrcat[5].nval], rec_Attrcat[1].sval);
+					}
+				}
+			}
+			recBlock_Attrcat = headInfo.rblock;
+		}
+
+		// TODO: int ret = project(sourceRelName, targetRelName, nAttrs, targetAttrs);
+		// if ret == SUCCESS cout<<"Select successful"<<endl;
+		// else printErrorMsg(ret); return FAILURE;
+
 	} else {
-		cout << "Syntax Error" << endl;
-		return FAILURE;
+			cout << "Syntax Error" << endl;
+			return FAILURE;
 	}
 	return SUCCESS;
 }
