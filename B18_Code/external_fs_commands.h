@@ -9,6 +9,7 @@ void dump_relcat();
 void dump_attrcat();
 void dumpBlockAllocationMap();
 void ls();
+int importRelation(char *filename);
 int exportRelation(char *relname, char *filename);
 
 #endif //B18_CODE_EXTERNAL_FS_COMMANDS_H

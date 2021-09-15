@@ -28,6 +28,8 @@ void string_to_char_array(string x, char *a, int size);
 
 int executeCommandsFromFile(string fileName);
 
+bool checkValidCsvFile(string filename);
+
 /* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
  * I have done wherever i saw, check all that you added once again Jezzy
  */
@@ -60,6 +62,33 @@ int regexMatchAndExecute(const string input_command) {
 		cout << "Dumped block allocation map to $HOME/NITCBase/xfs-interface/block_allocation_map" << endl;
 	} else if (regex_match(input_command, list_all)) {
 		ls();
+	} else if (regex_match(input_command, imp)) {
+		string Filepath;
+		string p = "./Files/";
+		regex_search(input_command, m, imp);
+		Filepath = m[2];
+		p = p + Filepath;
+		char f[p.length() + 1];
+		string_to_char_array(p, f, p.length() + 1);
+		FILE *file = fopen(f, "r");
+		if (!file) {
+			cout << "Invalid file path or file does not exist" << endl;
+			return FAILURE;
+		}
+		fclose(file);
+		string Filename = m[2];
+		bool r = checkValidCsvFile(Filename);
+		if (!r) {
+			cout << "Command Failed" << endl;
+			return FAILURE;
+		}
+		int ret = importRelation(f);
+		if (ret == SUCCESS)
+			cout << " Imported successfully" << endl;
+		else {
+			cout << "Command Failed" << endl;
+			return FAILURE;
+		}
 	} else if (regex_match(input_command, exp)) {
 		regex_search(input_command, m, exp);
 		string tableName = m[2];
@@ -424,4 +453,17 @@ void string_to_char_array(string x, char *a, int size) {
 		}
 		a[i] = '\0';
 	}
+}
+
+bool checkValidCsvFile(string filename) {
+	int pos1 = filename.rfind('.');
+	if (filename.substr(pos1 + 1, filename.length()) == "csv") {
+		string file_name = filename.substr(0, pos1);
+		if (file_name.length() > 15) {
+			cout << " File name should have at most 15 characters\n";
+			return false;
+		} else
+			return true;
+	} else
+		return false;
 }

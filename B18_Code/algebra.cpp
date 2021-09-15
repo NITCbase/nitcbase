@@ -13,7 +13,7 @@
 
 using namespace std;
 
-int check_type(char *data);
+int checkAttrTypeOfValue(char *data);
 
 int getNumberOfAttrsForRelation(int relationId);
 
@@ -53,7 +53,7 @@ int insert(vector<string> attributeTokens, char *table_name) {
 	}
 
 	// Construct a record ( array of type Attribute ) from previous character array
-	// Perform type checking for integer types
+	// Perform type checking for number types
 	Attribute record[numAttrs];
 	int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
 	if (retValue == E_ATTRTYPEMISMATCH)
@@ -147,7 +147,7 @@ int insert(char relName[16], char *filename) {
 		}
 
 		// Construct a record ( array of type Attribute ) from previous character array
-		// Perform type checking for integer types
+		// Perform type checking for number types
 		Attribute record[numAttrs];
 		int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
 		if (retValue == E_ATTRTYPEMISMATCH)
@@ -167,7 +167,7 @@ int insert(char relName[16], char *filename) {
 }
 
 // TODO : Find library functions for this?
-int check_type(char *data) {
+int checkAttrTypeOfValue(char *data) {
 	int count_int = 0, count_dot = 0, count_string = 0, i;
 	for (i = 0; data[i] != '\0'; i++) {
 
@@ -213,7 +213,7 @@ int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char
 	for (int l = 0; l < numAttrs; l++) {
 
 		if (attrTypes[l] == NUMBER) {
-			if (check_type(recordArray[l]) == NUMBER)
+			if (checkAttrTypeOfValue(recordArray[l]) == NUMBER)
 				record[l].nval = atof(recordArray[l]);
 			else
 				return E_ATTRTYPEMISMATCH;

@@ -8,6 +8,9 @@
 #include "external_fs_commands.h"
 #include "disk_structures.h"
 #include "block_access.h"
+#include "OpenRelTable.h"
+#include "algebra.h"
+#include "schema.h"
 
 using namespace std;
 
@@ -29,7 +32,7 @@ void dump_relcat() {
 	writeHeaderToFile(fp_export, headInfo);
 
 	unsigned char slotmap[headInfo.numSlots];
-	getSlotmap(slotmap,  RELCAT_BLOCK);
+	getSlotmap(slotmap, RELCAT_BLOCK);
 
 	for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
 		unsigned char ch = slotmap[slotNum];
@@ -155,6 +158,216 @@ void ls() {
 			std::cout << relCatRecord[0].sval << "\n";
 	}
 	std::cout << "\n";
+}
+
+int importRelation(char *filename) {
+	FILE *file = fopen(filename, "r");
+	//attr : first line in the file
+	//numAttrs : no of attributes in the file
+	char *attr = (char *) malloc(sizeof(char));
+	int len = 1;
+	char ch, oldch;
+	int numAttrs = 1;
+	oldch = ',';
+	while ((ch = fgetc(file)) != '\n') {
+
+		if (ch == EOF)
+			break;
+		while (ch == ' ' || ch == '\t' || ch == '\n') {
+			ch = fgetc(file);
+		}
+		if (ch == EOF)
+			break;
+		if (ch == ',') {
+			numAttrs++;
+			if (oldch == ch) {
+				cout << "Null values are not allowed in attribute names\n";
+				return FAILURE;
+			}
+		}
+		attr[len - 1] = ch;
+		len++;
+		attr = (char *) realloc(attr, (len) * sizeof(char));
+		oldch = ch;
+	}
+
+	if (oldch == ',') {
+		cout << "Null values are not allowed in attribute names\n";
+		return FAILURE;
+	}
+
+	attr[len - 1] = '\0';
+	int i = 0, j, k;
+	char attribute[numAttrs][ATTR_SIZE];
+	j = 0;
+	while (j < numAttrs) {
+		k = 0;
+		while (((attr[i] != ',') && (attr[i] != '\0')) && (k < 15)) {
+			attribute[j][k++] = attr[i++];
+		}
+		if (k == 15) {
+			while (attr[i] != ',')
+				i++;
+		}
+		attribute[j][k] = '\0';
+		j++;
+		i++;
+	}
+	i = 0;
+	//attribute array contains the names of all attributes
+
+
+	char *attr_type = (char *) malloc(sizeof(char));
+	len = 1;
+	while ((ch = fgetc(file)) != '\n') {
+		attr_type[len - 1] = ch;
+		len++;
+		attr_type = (char *) realloc(attr_type, (len) * sizeof(char));
+	}
+	attr_type[len - 1] = '\0';
+	i = 0;
+	//attr_type contains second line in the file (to know the attrTypes)
+	char attribute_type[numAttrs][ATTR_SIZE];
+	int attrTypes[numAttrs];
+	j = 0;
+	while (j < numAttrs) {
+		k = 0;
+		while (((attr_type[i] != ',') && (attr_type[i] != '\0')) && (k < 15)) {
+			attribute_type[j][k++] = attr_type[i++];
+		}
+		attribute_type[j][k] = '\0';
+		attrTypes[j] = checkAttrTypeOfValue(attribute_type[j]);
+
+		j++;
+		i++;
+	}
+
+	i = 0;
+	//attrTypes array contains the types of all attributes
+	char newfilename[16];
+	int loopv = strlen(filename) - 1;
+	while (filename[loopv] != '.') {loopv--;
+	}
+	loopv--;
+	int end = loopv;
+	while (filename[loopv] != '/') {
+		loopv--;
+	}
+	int start = loopv + 1;
+	int f = 0;
+	for (; start <= end; start++) {
+		newfilename[f] = filename[start];
+		f++;
+	}
+	newfilename[f] = '\0';
+	int ret;
+	ret = createRel(newfilename, numAttrs, attribute, attrTypes);
+	if (ret != SUCCESS) {
+		cout << "Import not possible as createRel failed\n";
+		return FAILURE;
+	}
+	int relId = OpenRelations::openRelation(newfilename);
+	if (relId == E_CACHEFULL || relId == E_RELNOTEXIST) {
+		cout << "Import not possible as openRel failed\n";
+		return FAILURE;
+	}
+	file = fopen(filename, "r");
+
+	while ((ch = fgetc(file)) != '\n')
+		continue;
+
+	char *record = (char *) malloc(sizeof(char));
+	len = 1;
+
+	while (1) {
+		ch = fgetc(file);
+		if (ch == EOF)
+			break;
+		while (ch == ' ' || ch == '\t' || ch == '\n') {
+			ch = fgetc(file);
+		}
+		if (ch == EOF)
+			break;
+		len = 1;
+		int c_c = 0;
+		oldch = ',';
+		while ((ch != '\n') && (ch != EOF)) {
+			if (ch == ',')
+				c_c++;
+			if (ch == oldch && ch == ',') {
+
+				OpenRelations::closeRelation(relId);
+				ba_delete(newfilename);
+				//cout<<ch;
+				cout << "Null values are not allowed in attribute names\n";
+				return FAILURE;
+			}
+			record[len - 1] = ch;
+			len++;
+			record = (char *) realloc(record, (len) * sizeof(char));
+			oldch = ch;
+
+			ch = fgetc(file);
+
+		}
+
+		if (oldch == ',' && ch != '\n') {
+			OpenRelations::closeRelation(relId);
+			ba_delete(newfilename);
+
+			cout << "Null values are not allowed in attribute names\n";
+			return FAILURE;
+		}
+		if (numAttrs != c_c + 1 && ch != '\n') {
+			OpenRelations::closeRelation(relId);
+			ba_delete(newfilename);
+			cout << "Mismatch in number of attributes\n";
+			return FAILURE;
+		}
+		record[len - 1] = '\0';
+		i = 0;
+
+		char recordArray[numAttrs][ATTR_SIZE];
+		j = 0;
+		while (j < numAttrs) {
+			k = 0;
+
+			while (((record[i] != ',') && (record[i] != '\0')) && (k < 15)) {
+				recordArray[j][k++] = record[i++];
+			}
+			if (k == 15) {
+				while (record[i] != ',')
+					i++;
+			}
+			i++;
+			recordArray[j][k] = '\0';
+
+			j++;
+		}
+
+		// Construct a record ( array of attrTypes Attribute ) from previous character array
+		// Perform attrTypes checking for number types
+		Attribute record[numAttrs];
+		int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
+		if (retValue == E_ATTRTYPEMISMATCH)
+			return E_ATTRTYPEMISMATCH;
+
+
+		int retVal = ba_insert(relId, record);
+
+		if (retVal != SUCCESS) {
+			OpenRelations::closeRelation(relId);
+			ba_delete(newfilename);
+			cout << "Insert failed" << endl;
+			return FAILURE;
+		}
+		if (ch == EOF)
+			break;
+
+	}
+	OpenRelations::closeRelation(relId);
+	fclose(file);
+	return SUCCESS;
 }
 
 int exportRelation(char *relname, char *filename) {
