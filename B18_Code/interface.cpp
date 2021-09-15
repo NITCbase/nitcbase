@@ -232,7 +232,7 @@ int regexMatchAndExecute(const string input_command) {
 			return FAILURE;
 		}
 
-	} else if(regex_match(input_command, select_from)) {
+	} else if (regex_match(input_command, select_from)) {
 
 		regex_search(input_command, m, select_from);
 		string source = m[4];
@@ -292,37 +292,37 @@ int regexMatchAndExecute(const string input_command) {
 		// if ret == SUCCESS cout<<"Select successful"<<endl;
 		// else printErrorMsg(ret); return FAILURE;
 	} else if (regex_match(input_command, select_from_where)) {
-        regex_search(input_command, m, select_from_where);
+		regex_search(input_command, m, select_from_where);
 
-        string sourceRel_str = m[4];
-        string targetRel_str = m[6];
-        string attribute_str = m[8];
-        string op_str = m[9];
-        string value_str = m[10];
+		string sourceRel_str = m[4];
+		string targetRel_str = m[6];
+		string attribute_str = m[8];
+		string op_str = m[9];
+		string value_str = m[10];
 
-        char sourceRelName[16];
-        char targetRelName[16];
-        char attribute[16];
-        char value[16];
+		char sourceRelName[16];
+		char targetRelName[16];
+		char attribute[16];
+		char value[16];
 
-        string_to_char_array(sourceRel_str, sourceRelName, 15);
-        string_to_char_array(targetRel_str, targetRelName, 15);
-        string_to_char_array(attribute_str, attribute, 15);
-        string_to_char_array(value_str, value, 15);
+		string_to_char_array(sourceRel_str, sourceRelName, 15);
+		string_to_char_array(targetRel_str, targetRelName, 15);
+		string_to_char_array(attribute_str, attribute, 15);
+		string_to_char_array(value_str, value, 15);
 
-        int op = 0;
-        if (op_str == "=")
-            op = EQ;
-        else if (op_str == "<")
-            op = LT;
-        else if (op_str == "<=")
-            op = LE;
-        else if (op_str == ">")
-            op = GT;
-        else if (op_str == ">=")
-            op = GE;
-        else if (op_str == "!=")
-            op = NE;
+		int op = 0;
+		if (op_str == "=")
+			op = EQ;
+		else if (op_str == "<")
+			op = LT;
+		else if (op_str == "<=")
+			op = LE;
+		else if (op_str == ">")
+			op = GT;
+		else if (op_str == ">=")
+			op = GE;
+		else if (op_str == "!=")
+			op = NE;
 
 //        int ret=select(sourceRelName, targetRelName, attribute, op, value);
 //        if(ret==SUCCESS)
@@ -334,38 +334,38 @@ int regexMatchAndExecute(const string input_command) {
 //            print_errormsg(ret);
 //        }
 
-    } else if (regex_match(input_command, select_attr_from)) {
-        regex_search(input_command, m, select_attr_from);
-        vector<string> command_tokens;
-        for (auto token: m)
-            command_tokens.push_back(token);
-        int index_of_from;
-        for (index_of_from = 0; index_of_from < command_tokens.size(); index_of_from++) {
-            if (command_tokens[index_of_from] == "from" || command_tokens[index_of_from] == "FROM")
-                break;
-        }
-        char src_rel[16];
-        char tar_rel[16];
-        string_to_char_array(command_tokens[index_of_from + 1], src_rel, 15);
-        string_to_char_array(command_tokens[index_of_from + 3], tar_rel, 15);
+	} else if (regex_match(input_command, select_attr_from)) {
+		regex_search(input_command, m, select_attr_from);
+		vector<string> command_tokens;
+		for (auto token: m)
+			command_tokens.push_back(token);
+		int index_of_from;
+		for (index_of_from = 0; index_of_from < command_tokens.size(); index_of_from++) {
+			if (command_tokens[index_of_from] == "from" || command_tokens[index_of_from] == "FROM")
+				break;
+		}
+		char src_rel[16];
+		char tar_rel[16];
+		string_to_char_array(command_tokens[index_of_from + 1], src_rel, 15);
+		string_to_char_array(command_tokens[index_of_from + 3], tar_rel, 15);
 
-        int attrListPos = 1;
-        string attribute_list;
-        string inputCommand = input_command;
-        while (regex_search(inputCommand, m, attrlist)) {
-            if (attrListPos == 2)
-                attribute_list = m.str(0);
-            attrListPos++;
-            // suffix to find the rest of the string.
-            inputCommand = m.suffix().str();
-        }
-        vector<string> attr_tokens = extract_tokens(attribute_list);
+		int attrListPos = 1;
+		string attribute_list;
+		string inputCommand = input_command;
+		while (regex_search(inputCommand, m, attrlist)) {
+			if (attrListPos == 2)
+				attribute_list = m.str(0);
+			attrListPos++;
+			// suffix to find the rest of the string.
+			inputCommand = m.suffix().str();
+		}
+		vector<string> attr_tokens = extract_tokens(attribute_list);
 
-        int count = attr_tokens.size();
-        char attrs[count][16];
-        for (int i = 0; i < count; i++) {
-            string_to_char_array(attr_tokens[i], attrs[i], 15);
-        }
+		int count = attr_tokens.size();
+		char attrs[count][16];
+		for (int i = 0; i < count; i++) {
+			string_to_char_array(attr_tokens[i], attrs[i], 15);
+		}
 //        int ret=project(src_rel,tar_rel,count,attrs);
 //        if(ret==SUCCESS)
 //        {
@@ -386,11 +386,11 @@ int regexMatchAndExecute(const string input_command) {
 			cout << "Syntax Error" << endl;
 			return FAILURE;
 		}
-		char src_rel1[16];
-		char src_rel2[16];
-		char tar_rel[16];
-		char attr1[16];
-		char attr2[16];
+		char src_rel1[ATTR_SIZE];
+		char src_rel2[ATTR_SIZE];
+		char tar_rel[ATTR_SIZE];
+		char attr1[ATTR_SIZE];
+		char attr2[ATTR_SIZE];
 
 		string_to_char_array(m[4], src_rel1, 15);
 		string_to_char_array(m[6], src_rel2, 15);
@@ -401,6 +401,76 @@ int regexMatchAndExecute(const string input_command) {
 		int ret = join(src_rel1, src_rel2, tar_rel, attr1, attr2);
 		if (ret == SUCCESS) {
 			cout << "Join successful" << endl;
+		} else {
+			printErrorMsg(ret);
+			return FAILURE;
+		}
+
+	} else if (regex_match(input_command, select_attr_from_join)) {
+
+		regex_search(input_command, m, select_attr_from_join);
+
+		vector<string> tokens;
+		for (auto token : m)
+			tokens.push_back(token);
+
+		int refIndex;
+		for (refIndex = 0; refIndex < tokens.size(); refIndex++) {
+			if (tokens[refIndex] == "from" || tokens[refIndex] == "FROM")
+				break;
+		}
+
+		char src_rel1[ATTR_SIZE];
+		char src_rel2[ATTR_SIZE];
+		char tar_rel[ATTR_SIZE];
+		char attr1[ATTR_SIZE];
+		char attr2[ATTR_SIZE];
+
+		string_to_char_array(tokens[refIndex + 1], src_rel1, 15);
+		string_to_char_array(tokens[refIndex + 3], src_rel2, 15);
+		string_to_char_array(tokens[refIndex + 5], tar_rel, 15);
+		string_to_char_array(tokens[refIndex + 8], attr1, 15);
+		string_to_char_array(tokens[refIndex + 10], attr2, 15);
+
+		int ret = join(src_rel1, src_rel2, "temp", attr1, attr2);
+
+		int relId;
+		if (ret == SUCCESS) {
+
+			relId = OpenRelations::openRelation("temp");
+			if (!(relId >= 0 && relId < MAXOPEN)) {
+				cout << "openRel Failed" << endl;
+			}
+
+			int attrListPos = 1;
+			string attribute_list;
+			string inputCommand = input_command;
+			while (regex_search(inputCommand, m, attrlist)) {
+				if (attrListPos == 2)
+					attribute_list = m.str(0);
+				attrListPos++;
+				// suffix to find the rest of the string.
+				inputCommand = m.suffix().str();
+			}
+
+			vector<string> words = extract_tokens(attribute_list);
+			int attrCount = words.size();
+			char attrs[attrCount][ATTR_SIZE];
+			for (int i = 0; i < attrCount; i++) {
+				string_to_char_array(words[i], attrs[i], 15);
+			}
+
+//			int ret_project = project("temp", tar_rel, attrCount, attrs);
+//
+//			if (ret_project == SUCCESS) {
+//				cout << "Join successful" << endl;
+//				OpenRelations::closeRelation(relId);
+//				deleteRel("temp");
+//			} else {
+//				printErrorMsg(ret_project);
+//				return FAILURE;
+//			}
+
 		} else {
 			printErrorMsg(ret);
 			return FAILURE;
