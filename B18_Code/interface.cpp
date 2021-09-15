@@ -233,7 +233,6 @@ int regexMatchAndExecute(const string input_command) {
 		}
 
 	} else if(regex_match(input_command, select_from)) {
-
 		regex_search(input_command, m, select_from);
 		string source=m[4];
 		string target=m[6];
@@ -291,7 +290,92 @@ int regexMatchAndExecute(const string input_command) {
 		// TODO: int ret = project(sourceRelName, targetRelName, nAttrs, targetAttrs);
 		// if ret == SUCCESS cout<<"Select successful"<<endl;
 		// else printErrorMsg(ret); return FAILURE;
-	} else {
+	} else if (regex_match(input_command, select_from_where)) {
+        regex_search(input_command, m, select_from_where);
+
+        string sourceRel_str = m[4];
+        string targetRel_str = m[6];
+        string attribute_str = m[8];
+        string op_str = m[9];
+        string value_str = m[10];
+
+        char sourceRelName[16];
+        char targetRelName[16];
+        char attribute[16];
+        char value[16];
+
+        string_to_char_array(sourceRel_str, sourceRelName, 15);
+        string_to_char_array(targetRel_str, targetRelName, 15);
+        string_to_char_array(attribute_str, attribute, 15);
+        string_to_char_array(value_str, value, 15);
+
+        int op = 0;
+        if (op_str == "=")
+            op = EQ;
+        else if (op_str == "<")
+            op = LT;
+        else if (op_str == "<=")
+            op = LE;
+        else if (op_str == ">")
+            op = GT;
+        else if (op_str == ">=")
+            op = GE;
+        else if (op_str == "!=")
+            op = NE;
+
+//        int ret=select(sourceRelName, targetRelName, attribute, op, value);
+//        if(ret==SUCCESS)
+//        {
+//            cout<<"Select executed successfully"<<endl;
+//        }
+//        else
+//        {
+//            print_errormsg(ret);
+//        }
+
+    } else if (regex_match(input_command, select_attr_from)) {
+        regex_search(input_command, m, select_attr_from);
+        vector<string> command_tokens;
+        for (auto token: m)
+            command_tokens.push_back(token);
+        int index_of_from;
+        for (index_of_from = 0; index_of_from < command_tokens.size(); index_of_from++) {
+            if (command_tokens[index_of_from] == "from" || command_tokens[index_of_from] == "FROM")
+                break;
+        }
+        char src_rel[16];
+        char tar_rel[16];
+        string_to_char_array(command_tokens[index_of_from + 1], src_rel, 15);
+        string_to_char_array(command_tokens[index_of_from + 3], tar_rel, 15);
+
+        int attrListPos = 1;
+        string attribute_list;
+        string inputCommand = input_command;
+        while (regex_search(inputCommand, m, attrlist)) {
+            if (attrListPos == 2)
+                attribute_list = m.str(0);
+            attrListPos++;
+            // suffix to find the rest of the string.
+            inputCommand = m.suffix().str();
+        }
+        vector<string> attr_tokens = extract_tokens(attribute_list);
+
+        int count = attr_tokens.size();
+        char attrs[count][16];
+        for (int i = 0; i < count; i++) {
+            string_to_char_array(attr_tokens[i], attrs[i], 15);
+        }
+//        int ret=project(src_rel,tar_rel,count,attrs);
+//        if(ret==SUCCESS)
+//        {
+//            cout<<"Command executed successfully"<<endl;
+//        }
+//        else
+//        {
+//            print_errormsg(ret);
+//        }
+
+    } else {
 			cout << "Syntax Error" << endl;
 			return FAILURE;
 	}
