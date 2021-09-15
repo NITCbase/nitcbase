@@ -273,7 +273,7 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
 				targetRecord[iter] = record1[iter];
 			int targetIndex = nAttrs1;
 			for (int iter = 0; iter < nAttrs2; iter++) {
-				if (iter != static_cast<int>(attrcat_entry2[2].nval))
+				if (iter != static_cast<int>(attrcat_entry2[5].nval))
 					targetRecord[targetIndex++] = record2[iter];
 			}
 
