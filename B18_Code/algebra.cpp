@@ -67,8 +67,8 @@ int insert(vector<string> attributeTokens, char *table_name) {
 	}
 }
 
-int insert(char relName[16], char *filename) {
-	FILE *file = fopen(filename, "r");
+int insert(char relName[16], char *fileName) {
+
 	char ch;
 
 	// check if relation is open
@@ -87,6 +87,8 @@ int insert(char relName[16], char *filename) {
 
 	char *record = (char *) malloc(sizeof(char));
 	int len = 1;
+
+	FILE *file = fopen(fileName, "r");
 	while (1) {
 		ch = fgetc(file);
 		if (ch == EOF)
@@ -187,6 +189,9 @@ int checkAttrTypeOfValue(char *data) {
 		return STRING;
 }
 
+/*
+ * Gets #ttribute of relation from Relation Catalog Entry
+ */
 int getNumberOfAttrsForRelation(int relationId) {
 	Attribute relCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
 	int retValue;
@@ -198,6 +203,9 @@ int getNumberOfAttrsForRelation(int relationId) {
 	return numAttrs;
 }
 
+/*
+ * Gets attribute types of relation from Attribute Catalog Entry
+ */
 void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]) {
 
 	Attribute attrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
@@ -208,8 +216,18 @@ void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]) {
 	}
 }
 
-int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE],
-                                  int attrTypes[numAttrs]) {
+
+/* Construct a record ( array of type Attribute ) from char array of attributes
+ * Also performs type checking
+ * @param numAttrs : #attributes in the relation
+ * @param record : 'Attribute' array, new record is stored here
+ * @param recordArray : 2D char array, a single row stores an attribute as a char array
+ * @param attrTypes : attribute types of the relation, used for type checking
+ * @return :
+ *      SUCCESS
+ *      E_ATTRTYPEMISMATCH : types dont match
+ */
+int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE], int attrTypes[numAttrs]) {
 	for (int l = 0; l < numAttrs; l++) {
 
 		if (attrTypes[l] == NUMBER) {

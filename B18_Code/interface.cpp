@@ -84,7 +84,7 @@ int regexMatchAndExecute(const string input_command) {
 		}
 		int ret = importRelation(f);
 		if (ret == SUCCESS)
-			cout << " Imported successfully" << endl;
+			cout << "Imported successfully" << endl;
 		else {
 			cout << "Command Failed" << endl;
 			return FAILURE;

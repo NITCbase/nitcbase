@@ -6,7 +6,7 @@
 #define B18_CODE_ALGEBRA_H
 
 int insert(std::vector<std::string> attributeTokens, char *table_name);
-int insert(char relName[16], char *filename);
+int insert(char relName[16], char *fileName);
 int checkAttrTypeOfValue(char *data);
 int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE], int attrTypes[numAttrs]);
 

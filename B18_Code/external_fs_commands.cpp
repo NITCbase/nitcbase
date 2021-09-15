@@ -159,209 +159,227 @@ void ls() {
 	}
 	std::cout << "\n";
 }
+/*
+ * attr -1st line
+ * attr_type - 2nd line
+ * attribute - attribute names
+ *
+ */
+int importRelation(char *fileName) {
 
-int importRelation(char *filename) {
-	FILE *file = fopen(filename, "r");
-	//attr : first line in the file
-	//numAttrs : no of attributes in the file
-	char *attr = (char *) malloc(sizeof(char));
-	int len = 1;
-	char ch, oldch;
-	int numAttrs = 1;
-	oldch = ',';
-	while ((ch = fgetc(file)) != '\n') {
+	FILE *file = fopen(fileName, "r");
 
-		if (ch == EOF)
+
+	/*
+	 *  GET ATTRIBUTE NAMES FROM FIRST LINE OF FILE
+	 */
+	char *firstLine = (char *) malloc(sizeof(char));
+	int numOfCharactersInLine = 1;
+	char currentCharacter, previousCharacter;
+	int numOfAttributes = 1;
+	previousCharacter = ',';
+	while ((currentCharacter = fgetc(file)) != '\n') {
+
+		if (currentCharacter == EOF)
 			break;
-		while (ch == ' ' || ch == '\t' || ch == '\n') {
-			ch = fgetc(file);
+		while (currentCharacter == ' ' || currentCharacter == '\t' || currentCharacter == '\n') {
+			currentCharacter = fgetc(file);
 		}
-		if (ch == EOF)
+		if (currentCharacter == EOF)
 			break;
-		if (ch == ',') {
-			numAttrs++;
-			if (oldch == ch) {
-				cout << "Null values are not allowed in attribute names\n";
+		if (currentCharacter == ',') {
+			numOfAttributes++;
+			if (previousCharacter == currentCharacter) {
+				cout << "Null values are not allowed in attributeNames names\n";
 				return FAILURE;
 			}
 		}
-		attr[len - 1] = ch;
-		len++;
-		attr = (char *) realloc(attr, (len) * sizeof(char));
-		oldch = ch;
+		firstLine[numOfCharactersInLine - 1] = currentCharacter;
+		numOfCharactersInLine++;
+		firstLine = (char *) realloc(firstLine, (numOfCharactersInLine) * sizeof(char));
+		previousCharacter = currentCharacter;
 	}
 
-	if (oldch == ',') {
-		cout << "Null values are not allowed in attribute names\n";
+	if (previousCharacter == ',') {
+		cout << "Null values are not allowed in attributeNames names\n";
 		return FAILURE;
 	}
 
-	attr[len - 1] = '\0';
-	int i = 0, j, k;
-	char attribute[numAttrs][ATTR_SIZE];
-	j = 0;
-	while (j < numAttrs) {
+	firstLine[numOfCharactersInLine - 1] = '\0';
+	int i = 0, attrOffset, k;
+	char attributeNames[numOfAttributes][ATTR_SIZE];
+	attrOffset = 0;
+	while (attrOffset < numOfAttributes) {
 		k = 0;
-		while (((attr[i] != ',') && (attr[i] != '\0')) && (k < 15)) {
-			attribute[j][k++] = attr[i++];
+		while (((firstLine[i] != ',') && (firstLine[i] != '\0')) && (k < 15)) {
+			attributeNames[attrOffset][k++] = firstLine[i++];
 		}
 		if (k == 15) {
-			while (attr[i] != ',')
+			while (firstLine[i] != ',')
 				i++;
 		}
-		attribute[j][k] = '\0';
-		j++;
+		attributeNames[attrOffset][k] = '\0';
+		attrOffset++;
 		i++;
 	}
 	i = 0;
-	//attribute array contains the names of all attributes
+	// ------------------------
 
-
-	char *attr_type = (char *) malloc(sizeof(char));
-	len = 1;
-	while ((ch = fgetc(file)) != '\n') {
-		attr_type[len - 1] = ch;
-		len++;
-		attr_type = (char *) realloc(attr_type, (len) * sizeof(char));
+	/*
+	 *  INFER ATTRIBUTE TYPES FROM SECOND LINE OF FILE
+	 */
+	char *secondLine = (char *) malloc(sizeof(char));
+	numOfCharactersInLine = 1;
+	while ((currentCharacter = fgetc(file)) != '\n') {
+		secondLine[numOfCharactersInLine - 1] = currentCharacter;
+		numOfCharactersInLine++;
+		secondLine = (char *) realloc(secondLine, (numOfCharactersInLine) * sizeof(char));
 	}
-	attr_type[len - 1] = '\0';
+	secondLine[numOfCharactersInLine - 1] = '\0';
 	i = 0;
-	//attr_type contains second line in the file (to know the attrTypes)
-	char attribute_type[numAttrs][ATTR_SIZE];
-	int attrTypes[numAttrs];
-	j = 0;
-	while (j < numAttrs) {
+	char secondLineFields[numOfAttributes][ATTR_SIZE];
+	int attrTypes[numOfAttributes];
+	attrOffset = 0;
+	while (attrOffset < numOfAttributes) {
 		k = 0;
-		while (((attr_type[i] != ',') && (attr_type[i] != '\0')) && (k < 15)) {
-			attribute_type[j][k++] = attr_type[i++];
+		while (((secondLine[i] != ',') && (secondLine[i] != '\0')) && (k < 15)) {
+			secondLineFields[attrOffset][k++] = secondLine[i++];
 		}
-		attribute_type[j][k] = '\0';
-		attrTypes[j] = checkAttrTypeOfValue(attribute_type[j]);
+		secondLineFields[attrOffset][k] = '\0';
+		attrTypes[attrOffset] = checkAttrTypeOfValue(secondLineFields[attrOffset]);
 
-		j++;
+		attrOffset++;
 		i++;
 	}
+	//-------------------------
 
+	// EXTRACT RELATION NAME FROM FILE PATH
 	i = 0;
-	//attrTypes array contains the types of all attributes
-	char newfilename[16];
-	int loopv = strlen(filename) - 1;
-	while (filename[loopv] != '.') {loopv--;
+	char relationName[ATTR_SIZE];
+	int fileNameIterator = strlen(fileName) - 1;
+	while (fileName[fileNameIterator] != '.') {fileNameIterator--;
 	}
-	loopv--;
-	int end = loopv;
-	while (filename[loopv] != '/') {
-		loopv--;
+	fileNameIterator--;
+	int end = fileNameIterator;
+	while (fileName[fileNameIterator] != '/') {
+		fileNameIterator--;
 	}
-	int start = loopv + 1;
+	int start = fileNameIterator + 1;
 	int f = 0;
 	for (; start <= end; start++) {
-		newfilename[f] = filename[start];
+		relationName[f] = fileName[start];
 		f++;
 	}
-	newfilename[f] = '\0';
+	relationName[f] = '\0';
+
+	// CREATE RELATION
 	int ret;
-	ret = createRel(newfilename, numAttrs, attribute, attrTypes);
+	ret = createRel(relationName, numOfAttributes, attributeNames, attrTypes);
 	if (ret != SUCCESS) {
 		cout << "Import not possible as createRel failed\n";
 		return FAILURE;
 	}
-	int relId = OpenRelations::openRelation(newfilename);
+
+	// OPEN RELATION
+	int relId = OpenRelations::openRelation(relationName);
 	if (relId == E_CACHEFULL || relId == E_RELNOTEXIST) {
 		cout << "Import not possible as openRel failed\n";
 		return FAILURE;
 	}
-	file = fopen(filename, "r");
 
-	while ((ch = fgetc(file)) != '\n')
+	// Skip first line containing attribute names
+	file = fopen(fileName, "r");
+	while ((currentCharacter = fgetc(file)) != '\n')
 		continue;
 
 	char *record = (char *) malloc(sizeof(char));
-	len = 1;
+	numOfCharactersInLine = 1;
 
 	while (1) {
-		ch = fgetc(file);
-		if (ch == EOF)
+		currentCharacter = fgetc(file);
+		if (currentCharacter == EOF)
 			break;
-		while (ch == ' ' || ch == '\t' || ch == '\n') {
-			ch = fgetc(file);
+		while (currentCharacter == ' ' || currentCharacter == '\t' || currentCharacter == '\n') {
+			currentCharacter = fgetc(file);
 		}
-		if (ch == EOF)
+		if (currentCharacter == EOF)
 			break;
-		len = 1;
-		int c_c = 0;
-		oldch = ',';
-		while ((ch != '\n') && (ch != EOF)) {
-			if (ch == ',')
-				c_c++;
-			if (ch == oldch && ch == ',') {
+		numOfCharactersInLine = 1;
+		int numOfFieldsInLine = 0;
+		previousCharacter = ',';
+
+
+		while ((currentCharacter != '\n') && (currentCharacter != EOF)) {
+
+			if (currentCharacter == ',')
+				numOfFieldsInLine++;
+			if (currentCharacter == previousCharacter && currentCharacter == ',') {
 
 				OpenRelations::closeRelation(relId);
-				ba_delete(newfilename);
-				//cout<<ch;
-				cout << "Null values are not allowed in attribute names\n";
+				ba_delete(relationName);
+				//cout<<currentCharacter;
+				cout << "Null values are not allowed in attribute fields\n";
 				return FAILURE;
 			}
-			record[len - 1] = ch;
-			len++;
-			record = (char *) realloc(record, (len) * sizeof(char));
-			oldch = ch;
+			record[numOfCharactersInLine - 1] = currentCharacter;
+			numOfCharactersInLine++;
+			record = (char *) realloc(record, (numOfCharactersInLine) * sizeof(char));
+			previousCharacter = currentCharacter;
 
-			ch = fgetc(file);
+			currentCharacter = fgetc(file);
 
 		}
 
-		if (oldch == ',' && ch != '\n') {
+		if (previousCharacter == ',' && currentCharacter != '\n') {
 			OpenRelations::closeRelation(relId);
-			ba_delete(newfilename);
+			ba_delete(relationName);
 
-			cout << "Null values are not allowed in attribute names\n";
+			cout << "Null values are not allowed in attribute fields\n";
 			return FAILURE;
 		}
-		if (numAttrs != c_c + 1 && ch != '\n') {
+		if (numOfAttributes != numOfFieldsInLine + 1 && currentCharacter != '\n') {
 			OpenRelations::closeRelation(relId);
-			ba_delete(newfilename);
+			ba_delete(relationName);
 			cout << "Mismatch in number of attributes\n";
 			return FAILURE;
 		}
-		record[len - 1] = '\0';
+		record[numOfCharactersInLine - 1] = '\0';
 		i = 0;
 
-		char recordArray[numAttrs][ATTR_SIZE];
-		j = 0;
-		while (j < numAttrs) {
+		char recordArray[numOfAttributes][ATTR_SIZE];
+		attrOffset = 0;
+		while (attrOffset < numOfAttributes) {
 			k = 0;
 
 			while (((record[i] != ',') && (record[i] != '\0')) && (k < 15)) {
-				recordArray[j][k++] = record[i++];
+				recordArray[attrOffset][k++] = record[i++];
 			}
 			if (k == 15) {
 				while (record[i] != ',')
 					i++;
 			}
 			i++;
-			recordArray[j][k] = '\0';
+			recordArray[attrOffset][k] = '\0';
 
-			j++;
+			attrOffset++;
 		}
 
 		// Construct a record ( array of attrTypes Attribute ) from previous character array
 		// Perform attrTypes checking for number types
-		Attribute record[numAttrs];
-		int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
+		Attribute record[numOfAttributes];
+		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, recordArray, attrTypes);
 		if (retValue == E_ATTRTYPEMISMATCH)
 			return E_ATTRTYPEMISMATCH;
-
 
 		int retVal = ba_insert(relId, record);
 
 		if (retVal != SUCCESS) {
 			OpenRelations::closeRelation(relId);
-			ba_delete(newfilename);
+			ba_delete(relationName);
 			cout << "Insert failed" << endl;
 			return FAILURE;
 		}
-		if (ch == EOF)
+		if (currentCharacter == EOF)
 			break;
 
 	}
@@ -519,3 +537,11 @@ void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineF
 		fputs("\n", fp);
 	}
 }
+
+//void getAttrNamesFromFirstLineOfFile(FILE* fp, ) {
+//
+//}
+//
+//void inferAttrTypesFromSecondLine() {
+//
+//}
