@@ -107,15 +107,14 @@ int ba_insert(int relid, Attribute *rec) {
  *  that satisfies the op condition on given attrval
  *  Uses the b+ tree if target attribute is indexed, otherwise, linear search
  */
-int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op,
-              recId *prev_recid) {
+int ba_search(relId relid, Attribute *record, char attrName[ATTR_SIZE], Attribute attrval, int op, recId *prev_recid) {
 	// TODO: Cleanup Code
 	recId recid;
 	if (op == PRJCT) {
 		recid = linear_search(relid, attrName, attrval, op, prev_recid);
 
 	} else {
-		union Attribute attrcat_entry[6];
+		Attribute attrcat_entry[6];
 		getAttrCatEntry(relid, attrName, attrcat_entry);
 		// Get the root_block from attribute catalog entry for the given attribute
 		int root_block = attrcat_entry[4].nval;

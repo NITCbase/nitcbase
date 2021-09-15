@@ -233,9 +233,10 @@ int regexMatchAndExecute(const string input_command) {
 		}
 
 	} else if(regex_match(input_command, select_from)) {
+
 		regex_search(input_command, m, select_from);
-		string source=m[4];
-		string target=m[6];
+		string source = m[4];
+		string target = m[6];
 
 		char sourceRelName[16];
 		char targetRelName[16];
@@ -245,15 +246,15 @@ int regexMatchAndExecute(const string input_command) {
 
 		/* Check if the relation is Open */
 		int src_relid = OpenRelations::getRelationId(sourceRelName);
-		if (src_relid==E_RELNOTOPEN) {
-			cout<<"Source relation not open"<<endl;
+		if (src_relid == E_RELNOTOPEN) {
+			cout << "Source relation not open" << endl;
 			return FAILURE;
 		}
 
 		/* Get the relation catalog entry for the source relation */
 		Attribute relcatEntry[6];
-		if(getRelCatEntry(src_relid, relcatEntry) != SUCCESS) {
-			cout<<"Command Failed: Could not get the relation catalogue entry"<<endl;
+		if (getRelCatEntry(src_relid, relcatEntry) != SUCCESS) {
+			cout << "Command Failed: Could not get the relation catalogue entry" << endl;
 			return FAILURE;
 		}
 
@@ -273,14 +274,14 @@ int regexMatchAndExecute(const string input_command) {
 			headInfo = getHeader(recBlock_Attrcat);
 
 			unsigned char slotmap[headInfo.numSlots];
-			getSlotmap(slotmap,recBlock_Attrcat);
+			getSlotmap(slotmap, recBlock_Attrcat);
 
 			for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
-				if(slotmap[slotNum] != SLOT_UNOCCUPIED) {
+				if (slotmap[slotNum] != SLOT_UNOCCUPIED) {
 					getRecord(rec_Attrcat, recBlock_Attrcat, slotNum);
-					if(strcmp(rec_Attrcat[0].sval, sourceRelName) == 0) {
+					if (strcmp(rec_Attrcat[0].sval, sourceRelName) == 0) {
 						// Copy the attribute name to the attribute offset index
-						strcpy(targetAttrs[(int)rec_Attrcat[5].nval], rec_Attrcat[1].sval);
+						strcpy(targetAttrs[(int) rec_Attrcat[5].nval], rec_Attrcat[1].sval);
 					}
 				}
 			}
@@ -375,9 +376,39 @@ int regexMatchAndExecute(const string input_command) {
 //            print_errormsg(ret);
 //        }
 
-    } else {
+	} else if (regex_match(input_command, select_from_join)) {
+
+		regex_search(input_command, m, select_from_join);
+
+		// m[4] and m[10] should be equal ( src_rel1)
+		// m[6] and m[102 should be equal ( src_rel2)
+		if (m[4] != m[10] || m[6] != m[12]) {
 			cout << "Syntax Error" << endl;
 			return FAILURE;
+		}
+		char src_rel1[16];
+		char src_rel2[16];
+		char tar_rel[16];
+		char attr1[16];
+		char attr2[16];
+
+		string_to_char_array(m[4], src_rel1, 15);
+		string_to_char_array(m[6], src_rel2, 15);
+		string_to_char_array(m[8], tar_rel, 15);
+		string_to_char_array(m[11], attr1, 15);
+		string_to_char_array(m[13], attr2, 15);
+
+		int ret = join(src_rel1, src_rel2, tar_rel, attr1, attr2);
+		if (ret == SUCCESS) {
+			cout << "Join successful" << endl;
+		} else {
+			printErrorMsg(ret);
+			return FAILURE;
+		}
+
+	} else {
+		cout << "Syntax Error" << endl;
+		return FAILURE;
 	}
 	return SUCCESS;
 }
