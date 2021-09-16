@@ -208,6 +208,28 @@ int regexMatchAndExecute(const string input_command) {
 			return FAILURE;
 		}
 
+	} else if (regex_match(input_command, rename_column)) {
+
+		regex_search(input_command, m, rename_column);
+		string tablename = m[4];
+		string oldcolumnname = m[6];
+		string newcolumnname = m[8];
+		char relname[ATTR_SIZE];
+		char old_col[ATTR_SIZE];
+		char new_col[ATTR_SIZE];
+		string_to_char_array(tablename, relname, 15);
+		string_to_char_array(oldcolumnname, old_col, 15);
+		string_to_char_array(newcolumnname, new_col, 15);
+
+		int ret = renameAtrribute(relname, old_col, new_col);
+
+		if (ret == SUCCESS) {
+			cout << "Renamed Attribute Successfully" << endl;
+		} else {
+			printErrorMsg(ret);
+			return FAILURE;
+		}
+
 	} else if (regex_match(input_command, insert_single)) {
 
 		regex_search(input_command, m, insert_single);

@@ -63,24 +63,38 @@ int deleteRel(char relname[ATTR_SIZE]) {
 	int relid = OpenRelations::getRelationId(relname);
 
 	// if relation is open return E_RELOPEN - cannot be deleted
-	if(relid!=E_RELNOTOPEN)
+	if (relid != E_RELNOTOPEN)
 		return E_RELOPEN;
-	int retval  = ba_delete(relname);
+	int retval = ba_delete(relname);
 
 	return retval;
 }
 
-int renameRel(char oldRelName[ATTR_SIZE],char newRelName[ATTR_SIZE]) {
-	if(strcmp(oldRelName, "RELATIONCAT") == 0 || strcmp(oldRelName, "ATTRIBUTECAT") == 0) {
+int renameRel(char oldRelName[ATTR_SIZE], char newRelName[ATTR_SIZE]) {
+	if (strcmp(oldRelName, "RELATIONCAT") == 0 || strcmp(oldRelName, "ATTRIBUTECAT") == 0) {
 		return E_INVALID;
 	}
 
 	int relId = OpenRelations::checkIfRelationOpen(oldRelName);
-	if(relId >= 0 && relId <12) {
+	if (relId >= 0 && relId < 12) {
 		return E_RELOPEN;
 	}
 
-	int retVal = ba_renamerel(oldRelName,newRelName);
+	int retVal = ba_renamerel(oldRelName, newRelName);
+	return retVal;
+}
+
+int renameAtrribute(char relName[ATTR_SIZE], char oldAttrName[ATTR_SIZE], char newAttrName[ATTR_SIZE]) {
+	if (strcmp(relName, "RELATIONCAT") == 0 || strcmp(relName, "ATTRIBUTECAT") == 0) {
+		return E_INVALID;
+	}
+
+	int relId = OpenRelations::checkIfRelationOpen(relName);
+	if (relId >= 0 && relId < 12) {
+		return E_RELOPEN;
+	}
+
+	int retVal = ba_renameattr(relName, oldAttrName, newAttrName);
 	return retVal;
 }
 

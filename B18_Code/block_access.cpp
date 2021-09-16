@@ -356,6 +356,54 @@ int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE]) {
 	return SUCCESS;
 }
 
+int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName[ATTR_SIZE]) {
+
+	// CHECK IF RELATION WITH THE GIVEN NAME EXISTS
+	recId prev_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	recId relcat_recid, attrcat_recid;
+	Attribute attrcat_record[6];
+	Attribute temp;
+	strcpy(temp.sval, relName);
+	relcat_recid = linear_search(RELCAT_RELID, "RelName", temp, EQ, &prev_recid);
+	if ((relcat_recid.block == -1) && (relcat_recid.slot == -1)) {
+		return E_RELNOTEXIST;
+	}
+
+
+	// CHECK IF ATTRIBUTE WITH THE NEW NAME ALREADY EXISTS
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	while (1) {
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
+		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
+			getRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
+			if (strcmp(attrcat_record[1].sval, newName) == 0)
+				return E_ATTREXIST;
+		} else
+			break;
+	}
+
+	/* RENAME ATTRIBUTE
+	 * If attribute with old name does not exist, E_ATTRNOTEXIST
+	 */
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	while (1) {
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
+		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
+			getRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
+			if (strcmp(attrcat_record[1].sval, oldName) == 0) {
+				strcpy(attrcat_record[1].sval, newName);
+				setRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
+				return SUCCESS;
+			}
+		} else
+			return E_ATTRNOTEXIST;
+	}
+}
+
 /*
  * Retrieves whether the block is occupied or not
  * If occupied returns the type of occupied block (REC: 0, IND_NUMBERERNAL: 1, IND_LEAF: 2)
