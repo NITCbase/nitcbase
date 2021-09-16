@@ -1,0 +1,3 @@
+run test_selectAttrFromInputParsing;
+run test_selectFromWhereInputParsing;
+run test_selectAttrFromWhereInputParsing;

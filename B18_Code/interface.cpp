@@ -322,7 +322,7 @@ int regexMatchAndExecute(const string input_command) {
 
         int op = getOperator(op_str);
 
-        // DEBUG //
+        // LOGGING DEBUG //
         print16(sourceRelName);
         print16(targetRelName);
         print16(attribute);
@@ -333,12 +333,10 @@ int regexMatchAndExecute(const string input_command) {
         return select_from_where_handler(sourceRelName, targetRelName, attribute, op, value);
 
     } else if (regex_match(input_command, select_attr_from)) {
-        cout << "DEBUG | Im here" << endl;
         regex_search(input_command, m, select_attr_from);
         vector<string> command_tokens;
         for (auto token: m)
             command_tokens.push_back(token);
-        cout << "DEBUG | before from" << endl;
         int index_of_from = getIndexOfFromToken(command_tokens);
 
         string sourceRel_str = command_tokens[index_of_from + 1];
@@ -348,8 +346,6 @@ int regexMatchAndExecute(const string input_command) {
         char targetRelName[ATTR_SIZE];
         string_to_char_array(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
         string_to_char_array(targetRel_str, targetRelName, ATTR_SIZE - 1);
-
-        cout << "DEBUG | before attrlist making" << endl;
 
         /* Get the attribute list string from the input command */
         string attribute_list = getAttrListStringFromCommand(input_command, m);
@@ -361,11 +357,10 @@ int regexMatchAndExecute(const string input_command) {
             string_to_char_array(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
         }
 
-        cout << "DEBUG | after attrlist making" << endl;
-
-        // DEBUG //
+        // LOGGING DEBUG //
         print16(sourceRelName);
         print16(targetRelName);
+        cout << attr_count << endl;
         cout << "DEBUG | attrlist:" << endl;
         for(auto i=0; i<attr_count; i++) {
             print16(attr_list[i]);
@@ -408,6 +403,19 @@ int regexMatchAndExecute(const string input_command) {
         for (int attr_no = 0; attr_no < attr_count; attr_no++) {
             string_to_char_array(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
         }
+
+        // LOGGING DEBUG //
+        print16(sourceRelName);
+        print16(targetRelName);
+        print16(attribute);
+        print16(value);
+        cout << op_str << endl;
+        cout << attr_count << endl;
+        cout << "DEBUG | attrlist:" << endl;
+        for(auto i=0; i<attr_count; i++) {
+            print16(attr_list[i]);
+        }
+        /**********/
 
         return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, op, value);
 
@@ -527,7 +535,6 @@ int main() {
 		string input_command;
 		smatch m;
 		getline(cin, input_command);
-
 		int ret = regexMatchAndExecute(input_command);
 		if (ret == EXIT) {
 			return 0;
@@ -586,14 +593,6 @@ string getAttrListStringFromCommand(const string input_command, smatch m) {
         attrListPos++;
         // suffix to find the rest of the string.
         inputCommand = m.suffix().str();
-    }
-
-    vector<string> attr_tokens = extract_tokens(attribute_list);
-
-    int attr_count = attr_tokens.size();
-    char** attrs = new char*[ATTR_SIZE];
-    for (int attr_no = 0; attr_no < attr_count; attr_no++) {
-        string_to_char_array(attr_tokens[attr_no], attrs[attr_no], ATTR_SIZE - 1);
     }
 
     return attribute_list;
