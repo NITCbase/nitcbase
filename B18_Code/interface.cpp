@@ -111,38 +111,35 @@ int regexMatchAndExecute(const string input_command) {
 		}
 
 	} else if (regex_match(input_command, open_table)) {
+
 		regex_search(input_command, m, open_table);
 		string tablename = m[3];
-		char relname[16];
+		char relname[ATTR_SIZE];
 		string_to_char_array(tablename, relname, 15);
-		int ret = OpenRelations::openRelation(relname);
+
+		int ret = openRel(relname);
 		if (ret >= 0 && ret <= 11) {
 			cout << "Relation opened successfully\n";
 		} else {
 			printErrorMsg(ret);
 			return FAILURE;
 		}
+
 	} else if (regex_match(input_command, close_table)) {
+
 		regex_search(input_command, m, close_table);
 		string tablename = m[3];
-		char relname[16];
+		char relname[ATTR_SIZE];
 		string_to_char_array(tablename, relname, 15);
-		int id = OpenRelations::getRelationId(relname);
-		if (id == E_RELNOTOPEN) {
-			cout << "Relation not open" << endl;
-			return FAILURE;
-		}
-		if (id == 0 || id == 1) {
-			cout << "Cannot close Relation/Attribute Catalog" << endl;
-			return FAILURE;
-		}
-		int ret = OpenRelations::closeRelation(id);
+
+		int ret = closeRel(relname);
 		if (ret == SUCCESS) {
 			cout << "Relation Closed Successfully\n";
 		} else {
 			printErrorMsg(ret);
 			return FAILURE;
 		}
+
 	} else if (regex_match(input_command, create_table)) {
 		regex_search(input_command, m, create_table);
 

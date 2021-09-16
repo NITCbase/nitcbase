@@ -98,6 +98,25 @@ int renameAtrribute(char relName[ATTR_SIZE], char oldAttrName[ATTR_SIZE], char n
 	return retVal;
 }
 
+int openRel(char relationName[ATTR_SIZE]) {
+	int ret = OpenRelations::openRelation(relationName);
+	return ret;
+}
+
+int closeRel(char relationName[ATTR_SIZE]) {
+
+	int id = OpenRelations::getRelationId(relationName);
+	if (id == E_RELNOTOPEN) {
+		return E_RELNOTOPEN;
+	}
+	if (id == 0 || id == 1) {
+		return E_INVALID;
+	}
+	int ret = OpenRelations::closeRelation(id);
+	return ret;
+
+}
+
 /*gokul
  * Creates and returns a Relation Catalog Record Entry with the parameters provided as argument
  */
