@@ -8,6 +8,7 @@
 int ba_insert(int relid, Attribute *rec);
 int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
 recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
+int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE]);
 int ba_delete(char relName[ATTR_SIZE]);
 
 void add_disk_metainfo();

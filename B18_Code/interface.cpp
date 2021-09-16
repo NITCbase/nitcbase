@@ -86,7 +86,7 @@ int regexMatchAndExecute(const string input_command) {
 		if (ret == SUCCESS)
 			cout << "Imported successfully" << endl;
 		else {
-			cout << "Command Failed" << endl;
+			printErrorMsg(ret);
 			return FAILURE;
 		}
 	} else if (regex_match(input_command, exp)) {
@@ -185,6 +185,25 @@ int regexMatchAndExecute(const string input_command) {
 		if (ret == SUCCESS)
 			cout << "Relation deleted successfully" << endl;
 		else {
+			printErrorMsg(ret);
+			return FAILURE;
+		}
+
+	} else if (regex_match(input_command, rename_table)) {
+
+		regex_search(input_command, m, rename_table);
+		string oldTableName = m[4];
+		string newTableName = m[6];
+		char old_relation_name[ATTR_SIZE];
+		char new_relation_name[ATTR_SIZE];
+		string_to_char_array(oldTableName, old_relation_name, 15);
+		string_to_char_array(newTableName, new_relation_name, 15);
+
+		int ret = renameRel(old_relation_name, new_relation_name);
+
+		if (ret == SUCCESS) {
+			cout << "Renamed Relation Successfully" << endl;
+		} else {
 			printErrorMsg(ret);
 			return FAILURE;
 		}

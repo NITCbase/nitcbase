@@ -310,6 +310,52 @@ int ba_delete(char relName[ATTR_SIZE]) {
 
 }
 
+int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE]) {
+
+	// CHECK IF RELATION WITH NEW NAME ALREADY EXISTS
+	recId prev_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	recId relcat_recid, attrcat_recid;
+	Attribute temp;
+	strcpy(temp.sval, newName);
+	relcat_recid = linear_search(RELCAT_RELID, "RelName", temp, EQ, &prev_recid);
+	if (!((relcat_recid.block == -1) && (relcat_recid.slot == -1)))
+		return E_RELEXIST;
+
+	// CHECK IF RELATION WITH OLD NAME EXISTS
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	strcpy(temp.sval, oldName);
+	relcat_recid = linear_search(RELCAT_RELID, "RelName", temp, EQ, &prev_recid);
+	if ((relcat_recid.block == -1) && (relcat_recid.slot == -1))
+		return E_RELNOTEXIST;
+
+	// UPDATE RELATION CATALOG WITH NEW NAME
+	Attribute relCatRecord[6];
+	getRecord(relCatRecord, relcat_recid.block, relcat_recid.slot);
+	strcpy(relCatRecord[0].sval, newName);
+	setRecord(relCatRecord, relcat_recid.block, relcat_recid.slot);
+
+	// UPDATE ALL ATTRIBUTE CATALOG ENTRIES WITH NEW NAME
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	while (1) {
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
+		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
+			Attribute attrCatRecord[6];
+			getRecord(attrCatRecord, attrcat_recid.block, attrcat_recid.slot);
+			if (strcmp(attrCatRecord[0].sval, oldName) == 0) {
+				strcpy(attrCatRecord[0].sval, newName);
+				setRecord(attrCatRecord, attrcat_recid.block, attrcat_recid.slot);
+			}
+		} else
+			break;
+	}
+
+	return SUCCESS;
+}
+
 /*
  * Retrieves whether the block is occupied or not
  * If occupied returns the type of occupied block (REC: 0, IND_NUMBERERNAL: 1, IND_LEAF: 2)
@@ -564,7 +610,7 @@ int getRelCatEntry(int relationId, Attribute *relcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId ) == FAILURE)
+	if (OpenRelations::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
@@ -585,7 +631,7 @@ int setRelCatEntry(int relationId, Attribute *relcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId ) == FAILURE)
+	if (OpenRelations::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
@@ -608,7 +654,7 @@ int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry)
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId ) == FAILURE)
+	if (OpenRelations::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
@@ -639,7 +685,7 @@ int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId ) == FAILURE)
+	if (OpenRelations::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];

@@ -70,6 +70,20 @@ int deleteRel(char relname[ATTR_SIZE]) {
 	return retval;
 }
 
+int renameRel(char oldRelName[ATTR_SIZE],char newRelName[ATTR_SIZE]) {
+	if(strcmp(oldRelName, "RELATIONCAT") == 0 || strcmp(oldRelName, "ATTRIBUTECAT") == 0) {
+		return E_INVALID;
+	}
+
+	int relId = OpenRelations::checkIfRelationOpen(oldRelName);
+	if(relId >= 0 && relId <12) {
+		return E_RELOPEN;
+	}
+
+	int retVal = ba_renamerel(oldRelName,newRelName);
+	return retVal;
+}
+
 /*gokul
  * Creates and returns a Relation Catalog Record Entry with the parameters provided as argument
  */
