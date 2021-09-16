@@ -1,0 +1,2 @@
+fdisk
+SELECT attr1,attr2 FROM src INTO tar WHERE a>8;

@@ -30,6 +30,24 @@ int executeCommandsFromFile(string fileName);
 
 bool checkValidCsvFile(string filename);
 
+int getOperator(string op_str);
+
+int getIndexOfFromToken(vector<string> command_tokens);
+
+int getIndexOfWhereToken(vector<string> command_tokens);
+
+string getAttrListStringFromCommand(const string input_command, smatch m);
+
+int select_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE]);
+
+int select_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE],  char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]);
+
+int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count, char attrs[][ATTR_SIZE]);
+
+int select_attr_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,  char attrs[][ATTR_SIZE], int op, char value[ATTR_SIZE]);
+
+void print16(char char_string_thing[ATTR_SIZE]);
+
 /* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
  * I have done wherever i saw, check all that you added once again Jezzy
  */
@@ -96,8 +114,8 @@ int regexMatchAndExecute(const string input_command) {
 		string filePath = m[3];
 		filePath = "./Files/" + filePath;
 
-		char relname[16];
-		string_to_char_array(tableName, relname, 15);
+		char relname[ATTR_SIZE];
+		string_to_char_array(tableName, relname, ATTR_SIZE - 1);
 		char fileName[filePath.length() + 1];
 		string_to_char_array(filePath, fileName, filePath.length() + 1);
 
@@ -145,7 +163,7 @@ int regexMatchAndExecute(const string input_command) {
 
 		string tablename = m[3];
 		char relname[ATTR_SIZE];
-		string_to_char_array(tablename, relname, 15);
+		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
 		regex_search(input_command, m, temp);
 		string attrs = m[0];
@@ -156,7 +174,7 @@ int regexMatchAndExecute(const string input_command) {
 		int type_attr[no_attrs];
 
 		for (int i = 0, k = 0; i < no_attrs; i++, k += 2) {
-			string_to_char_array(words[k], attribute[i], 15);
+			string_to_char_array(words[k], attribute[i], ATTR_SIZE - 1);
 			if (words[k + 1] == "STR")
 				type_attr[i] = STRING;
 			else if (words[k + 1] == "NUM")
@@ -174,8 +192,8 @@ int regexMatchAndExecute(const string input_command) {
 	} else if (regex_match(input_command, drop_table)) {
 		regex_search(input_command, m, drop_table);
 		string tablename = m[3];
-		char relname[16];
-		string_to_char_array(tablename, relname, 15);
+		char relname[ATTR_SIZE];
+		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0)
 			cout << "Cannot delete Relation Catalog or Attribute Catalog" << endl;
 		int ret = deleteRel(relname);
@@ -271,148 +289,127 @@ int regexMatchAndExecute(const string input_command) {
 		}
 
 	} else if (regex_match(input_command, select_from)) {
+        regex_search(input_command, m, select_from);
+        string sourceRelName_str = m[4];
+        string targetRelName_str = m[6];
 
-		regex_search(input_command, m, select_from);
-		string source = m[4];
-		string target = m[6];
+        char sourceRelName[ATTR_SIZE];
+        char targetRelName[ATTR_SIZE];
 
-		char sourceRelName[16];
-		char targetRelName[16];
+        string_to_char_array(sourceRelName_str, sourceRelName, ATTR_SIZE - 1);
+        string_to_char_array(targetRelName_str, targetRelName, ATTR_SIZE - 1);
 
-		string_to_char_array(source, sourceRelName, 15);
-		string_to_char_array(target, targetRelName, 15);
+        return select_from_handler(sourceRelName, targetRelName);
 
-		/* Check if the relation is Open */
-		int src_relid = OpenRelations::getRelationId(sourceRelName);
-		if (src_relid == E_RELNOTOPEN) {
-			cout << "Source relation not open" << endl;
-			return FAILURE;
-		}
-
-		/* Get the relation catalog entry for the source relation */
-		Attribute relcatEntry[6];
-		if (getRelCatEntry(src_relid, relcatEntry) != SUCCESS) {
-			cout << "Command Failed: Could not get the relation catalogue entry" << endl;
-			return FAILURE;
-		}
-
-		int nAttrs = (int) relcatEntry[1].nval;
-		/*
-		 * Array for the Attributes of the Target Relation
-		 *  - target relation has same number of attributes as source relation
-		 * Search the Attribute Catalog to find all the attributes belonging to Source Relation
-		 *  - and store them in this array (for projecting)
-		 */
-		char targetAttrs[nAttrs][ATTR_SIZE];
-		Attribute rec_Attrcat[6];
-		int recBlock_Attrcat = ATTRCAT_BLOCK; // Block Number
-		HeadInfo headInfo;
-
-		while (recBlock_Attrcat != -1) {
-			headInfo = getHeader(recBlock_Attrcat);
-
-			unsigned char slotmap[headInfo.numSlots];
-			getSlotmap(slotmap, recBlock_Attrcat);
-
-			for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
-				if (slotmap[slotNum] != SLOT_UNOCCUPIED) {
-					getRecord(rec_Attrcat, recBlock_Attrcat, slotNum);
-					if (strcmp(rec_Attrcat[0].sval, sourceRelName) == 0) {
-						// Copy the attribute name to the attribute offset index
-						strcpy(targetAttrs[(int) rec_Attrcat[5].nval], rec_Attrcat[1].sval);
-					}
-				}
-			}
-			recBlock_Attrcat = headInfo.rblock;
-		}
-
-		// TODO: int ret = project(sourceRelName, targetRelName, nAttrs, targetAttrs);
-		// if ret == SUCCESS cout<<"Select successful"<<endl;
-		// else printErrorMsg(ret); return FAILURE;
 	} else if (regex_match(input_command, select_from_where)) {
-		regex_search(input_command, m, select_from_where);
+        regex_search(input_command, m, select_from_where);
+        string sourceRel_str = m[4];
+        string targetRel_str = m[6];
+        string attribute_str = m[8];
+        string op_str = m[9];
+        string value_str = m[10];
 
-		string sourceRel_str = m[4];
-		string targetRel_str = m[6];
-		string attribute_str = m[8];
-		string op_str = m[9];
-		string value_str = m[10];
+        cout << "DEBUG | " << "value_str = " << value_str << " m[11] = " << m[11] << endl;
 
-		char sourceRelName[16];
-		char targetRelName[16];
-		char attribute[16];
-		char value[16];
+        char sourceRelName[ATTR_SIZE];
+        char targetRelName[ATTR_SIZE];
+        char attribute[ATTR_SIZE];
+        char value[ATTR_SIZE];
+        string_to_char_array(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
+        string_to_char_array(targetRel_str, targetRelName, ATTR_SIZE - 1);
+        string_to_char_array(attribute_str, attribute, ATTR_SIZE - 1);
+        string_to_char_array(value_str, value, ATTR_SIZE - 1);
 
-		string_to_char_array(sourceRel_str, sourceRelName, 15);
-		string_to_char_array(targetRel_str, targetRelName, 15);
-		string_to_char_array(attribute_str, attribute, 15);
-		string_to_char_array(value_str, value, 15);
+        int op = getOperator(op_str);
 
-		int op = 0;
-		if (op_str == "=")
-			op = EQ;
-		else if (op_str == "<")
-			op = LT;
-		else if (op_str == "<=")
-			op = LE;
-		else if (op_str == ">")
-			op = GT;
-		else if (op_str == ">=")
-			op = GE;
-		else if (op_str == "!=")
-			op = NE;
+        // DEBUG //
+        print16(sourceRelName);
+        print16(targetRelName);
+        print16(attribute);
+        print16(value);
+        cout << op_str << endl;
+        /**********/
 
-//        int ret=select(sourceRelName, targetRelName, attribute, op, value);
-//        if(ret==SUCCESS)
-//        {
-//            cout<<"Select executed successfully"<<endl;
-//        }
-//        else
-//        {
-//            print_errormsg(ret);
-//        }
+        return select_from_where_handler(sourceRelName, targetRelName, attribute, op, value);
 
-	} else if (regex_match(input_command, select_attr_from)) {
-		regex_search(input_command, m, select_attr_from);
-		vector<string> command_tokens;
-		for (auto token: m)
-			command_tokens.push_back(token);
-		int index_of_from;
-		for (index_of_from = 0; index_of_from < command_tokens.size(); index_of_from++) {
-			if (command_tokens[index_of_from] == "from" || command_tokens[index_of_from] == "FROM")
-				break;
-		}
-		char src_rel[16];
-		char tar_rel[16];
-		string_to_char_array(command_tokens[index_of_from + 1], src_rel, 15);
-		string_to_char_array(command_tokens[index_of_from + 3], tar_rel, 15);
+    } else if (regex_match(input_command, select_attr_from)) {
+        cout << "DEBUG | Im here" << endl;
+        regex_search(input_command, m, select_attr_from);
+        vector<string> command_tokens;
+        for (auto token: m)
+            command_tokens.push_back(token);
+        cout << "DEBUG | before from" << endl;
+        int index_of_from = getIndexOfFromToken(command_tokens);
 
-		int attrListPos = 1;
-		string attribute_list;
-		string inputCommand = input_command;
-		while (regex_search(inputCommand, m, attrlist)) {
-			if (attrListPos == 2)
-				attribute_list = m.str(0);
-			attrListPos++;
-			// suffix to find the rest of the string.
-			inputCommand = m.suffix().str();
-		}
-		vector<string> attr_tokens = extract_tokens(attribute_list);
+        string sourceRel_str = command_tokens[index_of_from + 1];
+        string targetRel_str = command_tokens[index_of_from + 3];
 
-		int count = attr_tokens.size();
-		char attrs[count][16];
-		for (int i = 0; i < count; i++) {
-			string_to_char_array(attr_tokens[i], attrs[i], 15);
-		}
-//        int ret=project(src_rel,tar_rel,count,attrs);
-//        if(ret==SUCCESS)
-//        {
-//            cout<<"Command executed successfully"<<endl;
-//        }
-//        else
-//        {
-//            print_errormsg(ret);
-//        }
+        char sourceRelName[ATTR_SIZE];
+        char targetRelName[ATTR_SIZE];
+        string_to_char_array(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
+        string_to_char_array(targetRel_str, targetRelName, ATTR_SIZE - 1);
+
+        cout << "DEBUG | before attrlist making" << endl;
+
+        /* Get the attribute list string from the input command */
+        string attribute_list = getAttrListStringFromCommand(input_command, m);
+        vector<string> attr_tokens = extract_tokens(attribute_list);
+
+        int attr_count = attr_tokens.size();
+        char attr_list[attr_count][ATTR_SIZE];
+        for (int attr_no = 0; attr_no < attr_count; attr_no++) {
+            string_to_char_array(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
+        }
+
+        cout << "DEBUG | after attrlist making" << endl;
+
+        // DEBUG //
+        print16(sourceRelName);
+        print16(targetRelName);
+        cout << "DEBUG | attrlist:" << endl;
+        for(auto i=0; i<attr_count; i++) {
+            print16(attr_list[i]);
+        }
+        /**********/
+
+        return select_attr_from_handler(sourceRelName, targetRelName, attr_count, attr_list);
+
+    } else if ((regex_match(input_command, select_attr_from_where))) {
+        regex_search(input_command, m, select_attr_from_where);
+        vector<string> command_tokens;
+        for (auto token: m)
+            command_tokens.push_back(token);
+
+        int index_of_from = getIndexOfFromToken(command_tokens);
+        int index_of_where = getIndexOfWhereToken(command_tokens);
+
+        string sourceRel_str = command_tokens[index_of_from + 1];
+        string targetRel_str = command_tokens[index_of_from + 3];
+        string attribute_str = command_tokens[index_of_where + 1];
+        string op_str = command_tokens[index_of_where + 2];
+        string value_str = command_tokens[index_of_where + 3];
+
+        char sourceRelName[16];
+        char targetRelName[16];
+        char attribute[16];
+        char value[16];
+        int op = getOperator(op_str);
+
+        string_to_char_array(attribute_str, attribute, 15);
+        string_to_char_array(value_str, value, 15);
+        string_to_char_array(sourceRel_str, sourceRelName, 15);
+        string_to_char_array(targetRel_str, targetRelName, 15);
+
+        string attribute_list = getAttrListStringFromCommand(input_command, m);
+        vector<string> attr_tokens = extract_tokens(attribute_list);
+
+        int attr_count = attr_tokens.size();
+        char attr_list[attr_count][ATTR_SIZE];
+        for (int attr_no = 0; attr_no < attr_count; attr_no++) {
+            string_to_char_array(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
+        }
+
+        return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, op, value);
 
 	} else if (regex_match(input_command, select_from_join)) {
 
@@ -536,6 +533,195 @@ int main() {
 			return 0;
 		}
 	}
+}
+
+int getOperator(string op_str) {
+    int op = 0;
+    if (op_str == "=")
+        op = EQ;
+    else if (op_str == "<")
+        op = LT;
+    else if (op_str == "<=")
+        op = LE;
+    else if (op_str == ">")
+        op = GT;
+    else if (op_str == ">=")
+        op = GE;
+    else if (op_str == "!=")
+        op = NE;
+    return op;
+}
+
+int getIndexOfFromToken(vector<string> command_tokens) {
+    int index_of_from;
+    for (index_of_from = 0; index_of_from < command_tokens.size(); index_of_from++) {
+        if (command_tokens[index_of_from] == "from" || command_tokens[index_of_from] == "FROM")
+            break;
+    }
+    return index_of_from;
+}
+
+int getIndexOfWhereToken(vector<string> command_tokens) {
+    int index_of_where;
+    for(index_of_where=0; index_of_where < command_tokens.size(); index_of_where++)
+    {
+        if(command_tokens[index_of_where] == "where" || command_tokens[index_of_where] == "WHERE")
+            break;
+    }
+    return index_of_where;
+}
+
+string getAttrListStringFromCommand(const string input_command, smatch m) {
+    int attrListPos = 1;
+    string attribute_list;
+    string inputCommand = input_command;
+    /*
+     * At second position of the input attribute list will be obtained
+     *      SELECT AttrList FROM  ...
+     *      1      2        3     ...
+     */
+    while (regex_search(inputCommand, m, attrlist)) {
+        if (attrListPos == 2)
+            attribute_list = m.str(0);
+        attrListPos++;
+        // suffix to find the rest of the string.
+        inputCommand = m.suffix().str();
+    }
+
+    vector<string> attr_tokens = extract_tokens(attribute_list);
+
+    int attr_count = attr_tokens.size();
+    char** attrs = new char*[ATTR_SIZE];
+    for (int attr_no = 0; attr_no < attr_count; attr_no++) {
+        string_to_char_array(attr_tokens[attr_no], attrs[attr_no], ATTR_SIZE - 1);
+    }
+
+    return attribute_list;
+}
+
+int select_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE]) {
+    /* Check if the relation is Open */
+    int src_relid = OpenRelations::getRelationId(sourceRelName);
+    if (src_relid == E_RELNOTOPEN) {
+        cout << "Source relation not open" << endl;
+        return FAILURE;
+    }
+
+    /* Get the relation catalog entry for the source relation */
+    Attribute relcatEntry[6];
+    if (getRelCatEntry(src_relid, relcatEntry) != SUCCESS) {
+        cout << "Command Failed: Could not get the relation catalogue entry" << endl;
+        return FAILURE;
+    }
+    /*
+     * Array for the Attributes of the Target Relation
+     *  - target relation has same number of attributes as source relation (nAttrs)
+     * Search the Attribute Catalog to find all the attributes belonging to Source Relation
+     *  - and store them in this array (for projecting)
+     */
+    int nAttrs = (int) relcatEntry[1].nval;
+    char targetAttrs[nAttrs][ATTR_SIZE];
+    Attribute rec_Attrcat[6];
+    int recBlock_Attrcat = ATTRCAT_BLOCK; // Block Number
+    HeadInfo headInfo;
+    while (recBlock_Attrcat != -1) {
+        headInfo = getHeader(recBlock_Attrcat);
+
+        unsigned char slotmap[headInfo.numSlots];
+        getSlotmap(slotmap, recBlock_Attrcat);
+
+        for (int slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
+            if (slotmap[slotNum] != SLOT_UNOCCUPIED) {
+                getRecord(rec_Attrcat, recBlock_Attrcat, slotNum);
+                if (strcmp(rec_Attrcat[0].sval, sourceRelName) == 0) {
+                    // Copy the attribute name to the attribute offset index
+                    strcpy(targetAttrs[(int) rec_Attrcat[5].nval], rec_Attrcat[1].sval);
+                }
+            }
+        }
+        recBlock_Attrcat = headInfo.rblock;
+    }
+
+    // TODO: int ret = project(sourceRelName, targetRelName, nAttrs, targetAttrs);
+    // if ret == SUCCESS cout<<"Select successful"<<endl;
+    // else printErrorMsg(ret); return FAILURE;
+
+    return SUCCESS;
+}
+
+int select_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE],  char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
+    //        int ret=select(sourceRelName, targetRelName, attribute, op, value);
+//        if(ret==SUCCESS)
+//        {
+//            cout<<"Select executed successfully"<<endl;
+//        }
+//        else
+//        {
+//            print_errormsg(ret);
+//        }
+
+    return SUCCESS;
+}
+
+int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count, char attrs[][ATTR_SIZE]) {
+    //        int ret=project(sourceRelName,targetRelName,attr_count,attrs);
+//        if(ret==SUCCESS)
+//        {
+//            cout<<"Command executed successfully"<<endl;
+//        }
+//        else
+//        {
+//            print_errormsg(ret);
+//        }
+
+    return SUCCESS;
+}
+
+int select_attr_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,  char attrs[][ATTR_SIZE], int op, char value[ATTR_SIZE]) {
+    //        int ret=select(src_rel,"temp",attribute,op,val);
+//        if(ret==SUCCESS)
+//        {
+//            //cout<<"I am here\n";
+//            int relid=openRel("temp");
+//            if(relid!=E_RELNOTEXIST&& relid!=E_CACHEFULL)
+//            {
+//
+//                int ret_project=project("temp",tar_rel,count,attrs);
+//                //cout<<ret_project;
+//                if(ret_project==SUCCESS)
+//                {
+//                    //cout<<"I am here\n";
+//                    cout<<"Command executed successfully"<<endl;
+//                    closeRel(relid);
+//                    deleteRel("temp");
+//                    continue;
+//                }
+//                else
+//                {
+//                    closeRel(relid);
+//                    deleteRel("temp");
+//                    print_errormsg(ret_project);
+//                    continue;
+//                }
+//            }
+//            else
+//            {
+//                print_errormsg(relid);
+//                continue;
+//            }
+
+    return SUCCESS;
+
+}
+
+void print16(char char_string_thing[ATTR_SIZE]) {
+    for (int i = 0; i<ATTR_SIZE; i++) {
+        if (char_string_thing[i]=='\0') {
+            break;
+        }
+        cout << char_string_thing[i];
+    }
+    cout << endl;
 }
 
 // TODO: What to do when one line Fails - EXIT?
@@ -666,8 +852,8 @@ vector<string> extract_tokens(string input_command) {
 void string_to_char_array(string x, char *a, int size) {
 	// Reducing size of string to the size provided
 	int i;
-	if (size == 15) {
-		for (i = 0; i < x.size() && i < 15; i++)
+	if (size == ATTR_SIZE - 1) {
+		for (i = 0; i < x.size() && i < ATTR_SIZE - 1; i++)
 			a[i] = x[i];
 		a[i] = '\0';
 	} else {
@@ -682,7 +868,7 @@ bool checkValidCsvFile(string filename) {
 	int pos1 = filename.rfind('.');
 	if (filename.substr(pos1 + 1, filename.length()) == "csv") {
 		string file_name = filename.substr(0, pos1);
-		if (file_name.length() > 15) {
+		if (file_name.length() > ATTR_SIZE - 1) {
 			cout << " File name should have at most 15 characters\n";
 			return false;
 		} else
