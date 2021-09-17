@@ -37,7 +37,7 @@ int insert(vector<string> attributeTokens, char *table_name) {
 
 	// get attribute types from attribute catalog entry
 	int attrTypes[numAttrs];
-	getAttrTypesForRelation(relId, numAttrs, attrTypes);
+    getAttrTypesForRelation(relId, numAttrs, attrTypes);
 
 	// for each attribute, convert string vector to char array
 	char recordArray[numAttrs][ATTR_SIZE];
