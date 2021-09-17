@@ -81,6 +81,9 @@ int OpenRelations::closeRelation(int relationId) {
 	if (relationId < 0 || relationId >= MAX_OPEN) {
 		return E_OUTOFBOUND;
 	}
+    if (relationId == RELCAT_RELID || relationId == ATTRCAT_RELID) {
+        return E_INVALID;
+    }
 	if (strcmp(OpenRelTable[relationId], "NULL") == 0) {
 		return E_RELNOTOPEN;
 	}

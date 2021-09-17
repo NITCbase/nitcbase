@@ -1,6 +1,6 @@
 fdisk;
 SELECT * FROM source_relation INTO target_relation WHERE attrname >= 25;
-SELECT * FROM source_relation INTO target_relation WHERE attrname <= 25.5
+SELECT * FROM source_relation INTO target_relation WHERE attrname <= 25.5;
 SELECT * FROM source_relation INTO target_relation WHERE attrname < 25.321;
 SELECT * FROM source_relation INTO target_relation WHERE attrname > 90.9;
 SELECT * FROM source_relation INTO target_relation WHERE attrname = 90.9;

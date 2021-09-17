@@ -311,8 +311,6 @@ int regexMatchAndExecute(const string input_command) {
         string op_str = m[9];
         string value_str = m[10];
 
-        cout << "DEBUG | " << "value_str = " << value_str << " m[11] = " << m[11] << endl;
-
         char sourceRelName[ATTR_SIZE];
         char targetRelName[ATTR_SIZE];
         char attribute[ATTR_SIZE];
@@ -642,11 +640,15 @@ int select_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_S
         recBlock_Attrcat = headInfo.rblock;
     }
 
-    // TODO: int ret = project(sourceRelName, targetRelName, nAttrs, targetAttrs);
-    // if ret == SUCCESS cout<<"Select successful"<<endl;
-    // else printErrorMsg(ret); return FAILURE;
-
-    return SUCCESS;
+    int ret = project(sourceRelName, targetRelName, nAttrs, targetAttrs);
+    if (ret == SUCCESS) {
+        cout << "Selected successfully, result in: ";
+        print16(targetRelName);
+        return SUCCESS;
+    } else {
+        printErrorMsg(ret);
+        return FAILURE;
+    }
 }
 
 int select_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], char attribute[ATTR_SIZE],
@@ -654,7 +656,8 @@ int select_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[
     //        int ret=select(sourceRelName, targetRelName, attribute, op, value);
 //        if(ret==SUCCESS)
 //        {
-//            cout<<"Select executed successfully"<<endl;
+//                    cout<<"Selected successfully, result in: ";
+//        print16(targetRelName);
 //        }
 //        else
 //        {
@@ -666,15 +669,13 @@ int select_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[
 
 int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,
                              char attrs[][ATTR_SIZE]) {
-    //        int ret=project(sourceRelName,targetRelName,attr_count,attrs);
-//        if(ret==SUCCESS)
-//        {
-//            cout<<"Command executed successfully"<<endl;
-//        }
-//        else
-//        {
-//            print_errormsg(ret);
-//        }
+    int ret = project(sourceRelName, targetRelName, attr_count, attrs);
+    if (ret == SUCCESS) {
+        cout << "Selected successfully, result in: ";
+        print16(targetRelName);
+    } else {
+        printErrorMsg(ret);
+    }
 
     return SUCCESS;
 }

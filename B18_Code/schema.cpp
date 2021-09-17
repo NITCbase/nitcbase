@@ -99,22 +99,15 @@ int renameAtrribute(char relName[ATTR_SIZE], char oldAttrName[ATTR_SIZE], char n
 }
 
 int openRel(char relationName[ATTR_SIZE]) {
-	int ret = OpenRelations::openRelation(relationName);
-	return ret;
+	return OpenRelations::openRelation(relationName);
 }
 
 int closeRel(char relationName[ATTR_SIZE]) {
+	return OpenRelations::closeRelation(OpenRelations::getRelationId(relationName));
+}
 
-	int id = OpenRelations::getRelationId(relationName);
-	if (id == E_RELNOTOPEN) {
-		return E_RELNOTOPEN;
-	}
-	if (id == 0 || id == 1) {
-		return E_INVALID;
-	}
-	int ret = OpenRelations::closeRelation(id);
-	return ret;
-
+int closeRel(int relid) {
+	return OpenRelations::closeRelation(relid);
 }
 
 /*gokul

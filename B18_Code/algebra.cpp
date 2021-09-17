@@ -22,49 +22,129 @@ void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]);
 int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE],
                                   int attrTypes[numAttrs]);
 
+
+int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, char tar_attrs[][ATTR_SIZE]) {
+    int ret;
+    /* Check source relation is open */
+    int srcrelid = OpenRelations::getRelationId(srcrel);
+    if (srcrelid == E_RELNOTOPEN) {
+        // src relation not open
+        return E_RELNOTOPEN;
+    }
+
+    Attribute srcrelcat[NO_OF_ATTRS_RELCAT_ATTRCAT];
+    ret = getRelCatEntry(srcrelid, srcrelcat);
+    int nAttrs = (int) srcrelcat[1].nval;
+
+    int attr_offset[tar_nAttrs];
+    int attr_type[tar_nAttrs];
+    int attr_no;
+    /* Check if attributes of target rel are present in source rel. */
+    for (attr_no = 0; attr_no < tar_nAttrs; attr_no++) {
+        Attribute attrcat[NO_OF_ATTRS_RELCAT_ATTRCAT];
+        ret = getAttrCatEntry(srcrelid, tar_attrs[attr_no], attrcat);
+        if (ret != SUCCESS) {
+            return ret;
+        }
+        attr_offset[attr_no] = (int) attrcat[5].nval;
+        attr_type[attr_no] = (int) attrcat[2].nval;
+    }
+
+    ret = createRel(targetrel, tar_nAttrs, tar_attrs, attr_type);
+    if (ret != SUCCESS) {
+        /* Unsuccessful creation of target relation */
+        return ret;
+    }
+
+    /* Open the target relation */
+    // TODO: MOVE THIS UP - DESIGN CHANGE
+    int targetrelid = openRel(targetrel);
+    if (targetrelid == E_CACHEFULL) {
+        ba_delete(targetrel);
+        return E_CACHEFULL;
+    }
+
+    /*
+     * Get record by record from the source relation
+     *  and take the projected attributes alone for the record
+     */
+    recId prev_recid;
+    prev_recid.block = -1;
+    prev_recid.slot = -1;
+    while (true) {
+        Attribute rec[nAttrs];
+        char attr[ATTR_SIZE];
+        Attribute val;
+        strcpy(val.sval, "PRJCT");
+        strcpy(attr, "PRJCT");
+
+        ret = ba_search(srcrelid, rec, attr, val, PRJCT, &prev_recid);
+        if (ret == SUCCESS) {
+            Attribute proj_rec[tar_nAttrs];
+            for (attr_no = 0; attr_no < tar_nAttrs; attr_no++) {
+                proj_rec[attr_no] = rec[attr_offset[attr_no]];
+            }
+            ret = ba_insert(targetrelid, proj_rec);
+            if (ret != SUCCESS) {
+                // unable to insert into target relation
+                closeRel(targetrelid);
+                ba_delete(targetrel);
+                return ret;
+            }
+        } else
+            break;
+
+    }
+
+    closeRel(targetrelid);
+    return SUCCESS;
+}
+
+
+
 int insert(vector<string> attributeTokens, char *table_name) {
 
-	// check if relation is open
-	int relId = OpenRelations::getRelationId(table_name);
-	if (relId == E_RELNOTOPEN) {
-		return relId;
-	}
+    // check if relation is open
+    int relId = OpenRelations::getRelationId(table_name);
+    if (relId == E_RELNOTOPEN) {
+        return relId;
+    }
 
-	// get #attributes from relation catalog entry
-	int numAttrs = getNumberOfAttrsForRelation(relId);
-	if (numAttrs != attributeTokens.size())
-		return E_NATTRMISMATCH;
+    // get #attributes from relation catalog entry
+    int numAttrs = getNumberOfAttrsForRelation(relId);
+    if (numAttrs != attributeTokens.size())
+        return E_NATTRMISMATCH;
 
-	// get attribute types from attribute catalog entry
-	int attrTypes[numAttrs];
+    // get attribute types from attribute catalog entry
+    int attrTypes[numAttrs];
     getAttrTypesForRelation(relId, numAttrs, attrTypes);
 
-	// for each attribute, convert string vector to char array
-	char recordArray[numAttrs][ATTR_SIZE];
-	for (int i = 0; i < numAttrs; i++) {
-		string attrValue = attributeTokens[i];
-		char tempAttribute[ATTR_SIZE];
-		int j;
-		for (j = 0; j < 15 && j < attrValue.size(); j++) {
-			tempAttribute[j] = attrValue[j];
-		}
-		tempAttribute[j] = '\0';
-		strcpy(recordArray[i], tempAttribute);
-	}
+    // for each attribute, convert string vector to char array
+    char recordArray[numAttrs][ATTR_SIZE];
+    for (int i = 0; i < numAttrs; i++) {
+        string attrValue = attributeTokens[i];
+        char tempAttribute[ATTR_SIZE];
+        int j;
+        for (j = 0; j < 15 && j < attrValue.size(); j++) {
+            tempAttribute[j] = attrValue[j];
+        }
+        tempAttribute[j] = '\0';
+        strcpy(recordArray[i], tempAttribute);
+    }
 
-	// Construct a record ( array of type Attribute ) from previous character array
-	// Perform type checking for number types
-	Attribute record[numAttrs];
-	int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
-	if (retValue == E_ATTRTYPEMISMATCH)
-		return E_ATTRTYPEMISMATCH;
+    // Construct a record ( array of type Attribute ) from previous character array
+    // Perform type checking for number types
+    Attribute record[numAttrs];
+    int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
+    if (retValue == E_ATTRTYPEMISMATCH)
+        return E_ATTRTYPEMISMATCH;
 
-	retValue = ba_insert(relId, record);
-	if (retValue == SUCCESS) {
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
+    retValue = ba_insert(relId, record);
+    if (retValue == SUCCESS) {
+        return SUCCESS;
+    } else {
+        return FAILURE;
+    }
 }
 
 int insert(char relName[16], char *fileName) {
