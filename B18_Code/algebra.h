@@ -6,6 +6,7 @@
 #define B18_CODE_ALGEBRA_H
 
 int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, char tar_attrs[][ATTR_SIZE]);
+int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char val_str[ATTR_SIZE]);
 int insert(std::vector<std::string> attributeTokens, char *table_name);
 int insert(char relName[16], char *fileName);
 int checkAttrTypeOfValue(char *data);

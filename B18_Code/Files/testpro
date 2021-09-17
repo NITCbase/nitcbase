@@ -1,4 +1,0 @@
-fdisk
-SELECT * FROM ATTRIBUTECAT INTO target1;
-SELECT AttributeName, RelName FROM ATTRIBUTECAT INTO target2;
-export target2 res2.csv;

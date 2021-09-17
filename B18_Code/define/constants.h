@@ -50,4 +50,6 @@
 #define RELCAT_RELID 0
 #define ATTRCAT_RELID 1
 
+#define TEMP "temp"
+
 #endif //B18_CODE_CONSTANTS_H

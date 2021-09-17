@@ -32,9 +32,9 @@ int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, c
         return E_RELNOTOPEN;
     }
 
-    Attribute srcrelcat[NO_OF_ATTRS_RELCAT_ATTRCAT];
-    ret = getRelCatEntry(srcrelid, srcrelcat);
-    int nAttrs = (int) srcrelcat[1].nval;
+    Attribute srcrelcatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+    getRelCatEntry(srcrelid, srcrelcatEntry);
+    int nAttrs = (int) srcrelcatEntry[1].nval;
 
     int attr_offset[tar_nAttrs];
     int attr_type[tar_nAttrs];
@@ -101,6 +101,95 @@ int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, c
 }
 
 
+int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char val_str[ATTR_SIZE]) {
+    /* Check source relation is open */
+    int srcrelid = OpenRelations::getRelationId(srcrel);
+    if (srcrelid == E_RELNOTOPEN) {
+        // src relation not open
+        return E_RELNOTOPEN;
+    }
+
+    /* Get the attribute catalog entry for the input attribute on which condition is applied*/
+    Attribute attrcat_entry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+    int flag = getAttrCatEntry(srcrelid, attr, attrcat_entry);
+    if (flag != SUCCESS)
+        return flag;
+
+    /* Convert value c-string to actual NUMBER or STRING attribute */
+    int type = (int) attrcat_entry[2].nval;
+    Attribute val;
+    if (type == NUMBER) {
+        val.nval = stof(val_str);
+    } else if (type == STRING) {
+        strcpy(val.sval, val_str);
+    } else
+        return E_NATTRMISMATCH;
+
+
+    Attribute src_relcat_entry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+    getRelCatEntry(srcrelid, src_relcat_entry);
+
+    int nAttrs = (int) src_relcat_entry[1].nval;
+    char attr_names[nAttrs][ATTR_SIZE];
+    int attr_types[nAttrs];
+
+    /*
+     * Find the names and types of all attributes of source relation and storing them in attr_names and attr_types
+     * Linear search the Attribute Catalog, with :
+     *      - RelName = source relation name
+     *  Repeat the iteration nAttrs times to collect all attributes of source
+     */
+    recId prev_recid;
+    prev_recid.block = -1;
+    prev_recid.slot = -1;
+    recId recid;
+    for (int attr_no = 0; attr_no < nAttrs; attr_no++) {
+        Attribute record[NO_OF_ATTRS_RELCAT_ATTRCAT];
+        Attribute srcrelname_attr;
+        strcpy(srcrelname_attr.sval, srcrel);
+        /* Linear search the Attribute Catalog for attributes of source relation */
+        recid = linear_search(ATTRCAT_RELID, "RelName", srcrelname_attr, EQ, &prev_recid);
+        if (!((recid.block == -1) && (recid.slot == -1))) {
+            getRecord(record, recid.block, recid.slot);
+            strcpy(attr_names[attr_no], record[1].sval);
+            attr_types[attr_no] = (int) record[2].nval;
+        }
+        if ((recid.block == -1) && (recid.slot == -1))
+            return E_ATTRNOTEXIST;
+    }
+
+    /* Create the target relation */
+    int retval = createRel(targetrel, nAttrs, attr_names, attr_types);
+    if (retval != SUCCESS)
+        return retval;
+
+    /* Open the target relation */
+    int target_relid = openRel(targetrel);
+    if (target_relid == -1) {
+        ba_delete(targetrel);
+        return E_CACHEFULL;
+    }
+
+    // TODO: Already present here:
+    //  Call ba_search of block access layer with op=RST for having {-1, -1}
+    prev_recid.block = -1;
+    prev_recid.slot = -1;
+    while (true) {
+        Attribute record[nAttrs];
+        retval = ba_search(srcrelid, record, attr, val, op, &prev_recid);
+        if (retval == SUCCESS) {
+            int ret = ba_insert(target_relid, record);
+            if (ret != SUCCESS) {
+                closeRel(target_relid);
+                ba_delete(targetrel);
+                return ret;
+            }
+        } else
+            break;
+    }
+    closeRel(target_relid);
+    return SUCCESS;
+}
 
 int insert(vector<string> attributeTokens, char *table_name) {
 
@@ -149,263 +238,265 @@ int insert(vector<string> attributeTokens, char *table_name) {
 
 int insert(char relName[16], char *fileName) {
 
-	char ch;
+    char ch;
 
-	// check if relation is open
-	int relId = OpenRelations::getRelationId(relName);
-	if (relId == E_RELNOTOPEN) {
-		return relId;
-	}
+    // check if relation is open
+    int relId = OpenRelations::getRelationId(relName);
+    if (relId == E_RELNOTOPEN) {
+        return relId;
+    }
 
-	// get #attributes from relation catalog entry
-	int numAttrs = getNumberOfAttrsForRelation(relId);
+    // get #attributes from relation catalog entry
+    int numAttrs = getNumberOfAttrsForRelation(relId);
 
-	// get attribute types from attribute catalog entry
-	int attrTypes[numAttrs];
-	getAttrTypesForRelation(relId, numAttrs, attrTypes);
+    // get attribute types from attribute catalog entry
+    int attrTypes[numAttrs];
+    getAttrTypesForRelation(relId, numAttrs, attrTypes);
 
 
-	char *record = (char *) malloc(sizeof(char));
-	int len = 1;
+    char *record = (char *) malloc(sizeof(char));
+    int len = 1;
 
-	FILE *file = fopen(fileName, "r");
-	while (1) {
-		ch = fgetc(file);
-		if (ch == EOF)
-			break;
-		while (ch == ' ' || ch == '\t' || ch == '\n') {
-			ch = fgetc(file);
-		}
-		if (ch == EOF)
-			break;
-		len = 1;
-		int fieldsCount = 0;
-		char oldch = ',';
-		while ((ch != '\n') && (ch != EOF)) {
-			if (ch == ',')
-				fieldsCount++;
+    FILE *file = fopen(fileName, "r");
+    while (1) {
+        ch = fgetc(file);
+        if (ch == EOF)
+            break;
+        while (ch == ' ' || ch == '\t' || ch == '\n') {
+            ch = fgetc(file);
+        }
+        if (ch == EOF)
+            break;
+        len = 1;
+        int fieldsCount = 0;
+        char oldch = ',';
+        while ((ch != '\n') && (ch != EOF)) {
+            if (ch == ',')
+                fieldsCount++;
 
-			if (oldch == ch && ch == ',') {
-				cout << "Null values not allowed\n";
-				return FAILURE;
-			}
+            if (oldch == ch && ch == ',') {
+                cout << "Null values not allowed\n";
+                return FAILURE;
+            }
 
-			record[len - 1] = ch;
-			len++;
-			record = (char *) realloc(record, (len) * sizeof(char));
-			oldch = ch;
-			ch = fgetc(file);
+            record[len - 1] = ch;
+            len++;
+            record = (char *) realloc(record, (len) * sizeof(char));
+            oldch = ch;
+            ch = fgetc(file);
 
-		}
+        }
 
-		if (oldch == ',' && ch != '\n') {
-			cout << "Null values not allowed in attribute values\n";
-			return FAILURE;
-		}
+        if (oldch == ',' && ch != '\n') {
+            cout << "Null values not allowed in attribute values\n";
+            return FAILURE;
+        }
 
-		if (numAttrs != fieldsCount + 1 && ch != '\n') {
-			std::cout << "Mismatch in number of attributes\n";
-			return FAILURE;
-		}
-		record[len - 1] = '\0';
-		int i = 0;
-		//record contains each record in the file (seperated by commas)
-		char recordArray[numAttrs][ATTR_SIZE];
-		int j = 0;
+        if (numAttrs != fieldsCount + 1 && ch != '\n') {
+            std::cout << "Mismatch in number of attributes\n";
+            return FAILURE;
+        }
+        record[len - 1] = '\0';
+        int i = 0;
+        //record contains each record in the file (seperated by commas)
+        char recordArray[numAttrs][ATTR_SIZE];
+        int j = 0;
 
-		while (j < numAttrs) {
-			int k = 0;
+        while (j < numAttrs) {
+            int k = 0;
 
-			while (((record[i] != ',') && (record[i] != '\0')) && (k < 15)) {
-				recordArray[j][k++] = record[i++];
-			}
-			if (k == 15) {
-				while (record[i] != ',')
-					i++;
-			}
-			i++;
-			recordArray[j][k] = '\0';
-			j++;
-		}
+            while (((record[i] != ',') && (record[i] != '\0')) && (k < 15)) {
+                recordArray[j][k++] = record[i++];
+            }
+            if (k == 15) {
+                while (record[i] != ',')
+                    i++;
+            }
+            i++;
+            recordArray[j][k] = '\0';
+            j++;
+        }
 
-		// Construct a record ( array of type Attribute ) from previous character array
-		// Perform type checking for number types
-		Attribute record[numAttrs];
-		int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
-		if (retValue == E_ATTRTYPEMISMATCH)
-			return E_ATTRTYPEMISMATCH;
+        // Construct a record ( array of type Attribute ) from previous character array
+        // Perform type checking for number types
+        Attribute record[numAttrs];
+        int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
+        if (retValue == E_ATTRTYPEMISMATCH)
+            return E_ATTRTYPEMISMATCH;
 
-		retValue = ba_insert(relId, record);
-		if (retValue != SUCCESS) {
-			return FAILURE;
-		}
+        retValue = ba_insert(relId, record);
+        if (retValue != SUCCESS) {
+            return FAILURE;
+        }
 
-		if (ch == EOF)
-			break;
-	}
+        if (ch == EOF)
+            break;
+    }
 
-	fclose(file);
-	return SUCCESS;
+    fclose(file);
+    return SUCCESS;
 }
 
-int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[ATTR_SIZE], char attr1[ATTR_SIZE], char attr2[ATTR_SIZE]) {
+int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[ATTR_SIZE], char attr1[ATTR_SIZE],
+         char attr2[ATTR_SIZE]) {
 
-	// IF ANY SOURCE RELATION IS NOT OPEN, return E_RELNOTOPEN
-	int srcRelId1 = OpenRelations::getRelationId(srcrel1);
-	if (srcRelId1 == E_RELNOTOPEN)
-		return srcRelId1;
-	int srcRelId2 = OpenRelations::getRelationId(srcrel2);
-	if (srcRelId2 == E_RELNOTOPEN)
-		return srcRelId2;
+    // IF ANY SOURCE RELATION IS NOT OPEN, return E_RELNOTOPEN
+    int srcRelId1 = OpenRelations::getRelationId(srcrel1);
+    if (srcRelId1 == E_RELNOTOPEN)
+        return srcRelId1;
+    int srcRelId2 = OpenRelations::getRelationId(srcrel2);
+    if (srcRelId2 == E_RELNOTOPEN)
+        return srcRelId2;
 
-	// GET RELATION CATALOG ENTRIES OF JOIN ATTRIBUTES OF SRC RELATIONS
-	Attribute attrcat_entry1[6];
-	int flag1 = getAttrCatEntry(srcRelId1, attr1, attrcat_entry1);
-	Attribute attrcat_entry2[6];
-	int flag2 = getAttrCatEntry(srcRelId2, attr2, attrcat_entry2);
+    // GET RELATION CATALOG ENTRIES OF JOIN ATTRIBUTES OF SRC RELATIONS
+    Attribute attrcat_entry1[6];
+    int flag1 = getAttrCatEntry(srcRelId1, attr1, attrcat_entry1);
+    Attribute attrcat_entry2[6];
+    int flag2 = getAttrCatEntry(srcRelId2, attr2, attrcat_entry2);
 
-	// if attr1 is not present in rel1 or attr2 not present in rel2 (failure of call to Openreltable) return E_ATTRNOTEXIST.
-	if (flag1 != SUCCESS || flag2 != SUCCESS)
-		return E_ATTRNOTEXIST;
+    // if attr1 is not present in rel1 or attr2 not present in rel2 (failure of call to Openreltable) return E_ATTRNOTEXIST.
+    if (flag1 != SUCCESS || flag2 != SUCCESS)
+        return E_ATTRNOTEXIST;
 
-	// if attr1 and attr2 are of different types return E_ATTRTYPEMISMATCH
-	if (attrcat_entry1[2].nval != attrcat_entry2[2].nval)
-		return E_ATTRTYPEMISMATCH;
+    // if attr1 and attr2 are of different types return E_ATTRTYPEMISMATCH
+    if (attrcat_entry1[2].nval != attrcat_entry2[2].nval)
+        return E_ATTRTYPEMISMATCH;
 
-	// GET RELATION CATALOG ENTRIES OF SRC RELATIONS
-	union Attribute relcat_entry1[NO_OF_ATTRS_RELCAT_ATTRCAT];
-	getRelCatEntry(srcRelId1, relcat_entry1);
-	int nAttrs1 = static_cast<int>(relcat_entry1[1].nval);
+    // GET RELATION CATALOG ENTRIES OF SRC RELATIONS
+    union Attribute relcat_entry1[NO_OF_ATTRS_RELCAT_ATTRCAT];
+    getRelCatEntry(srcRelId1, relcat_entry1);
+    int nAttrs1 = static_cast<int>(relcat_entry1[1].nval);
 
-	union Attribute relcat_entry2[NO_OF_ATTRS_RELCAT_ATTRCAT];
-	getRelCatEntry(srcRelId2, relcat_entry2);
-	int nAttrs2 = static_cast<int>(relcat_entry2[1].nval);
+    union Attribute relcat_entry2[NO_OF_ATTRS_RELCAT_ATTRCAT];
+    getRelCatEntry(srcRelId2, relcat_entry2);
+    int nAttrs2 = static_cast<int>(relcat_entry2[1].nval);
 
-	/*
-	 * TODO :
-	 * Once B+ tree layer is implemented, ensure index exists for at least one attribute
-	 */
+    /*
+     * TODO :
+     * Once B+ tree layer is implemented, ensure index exists for at least one attribute
+     */
 
-	/* TARGET RELATION -
-	 * targetRelAttrNames : array of attribute names
-	 * targetRelAttrTypes : array of attribute types
-	 */
+    /* TARGET RELATION -
+     * targetRelAttrNames : array of attribute names
+     * targetRelAttrTypes : array of attribute types
+     */
 
-	char targetRelAttrNames[nAttrs1 + nAttrs2 - 1][ATTR_SIZE];
-	int targetRelAttrTypes[nAttrs1 + nAttrs2 - 1];
+    char targetRelAttrNames[nAttrs1 + nAttrs2 - 1][ATTR_SIZE];
+    int targetRelAttrTypes[nAttrs1 + nAttrs2 - 1];
 
-	char srcRelation1[ATTR_SIZE];
-	OpenRelations::getRelationName(srcRelId1, srcRelation1 );
-	for (int iter = 0; iter < nAttrs1; iter++) {
-		Attribute attrCatalogEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
-		getAttrCatEntry(srcRelId1, iter, attrCatalogEntry);
-		strncpy(targetRelAttrNames[iter], attrCatalogEntry[1].sval, ATTR_SIZE);
-		targetRelAttrTypes[iter] = attrCatalogEntry[2].nval;
-	}
-	int attrIndex = nAttrs1;
+    char srcRelation1[ATTR_SIZE];
+    OpenRelations::getRelationName(srcRelId1, srcRelation1);
+    for (int iter = 0; iter < nAttrs1; iter++) {
+        Attribute attrCatalogEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+        getAttrCatEntry(srcRelId1, iter, attrCatalogEntry);
+        strncpy(targetRelAttrNames[iter], attrCatalogEntry[1].sval, ATTR_SIZE);
+        targetRelAttrTypes[iter] = attrCatalogEntry[2].nval;
+    }
+    int attrIndex = nAttrs1;
 
-	char srcRelation2[ATTR_SIZE];
-	OpenRelations::getRelationName(srcRelId2, srcRelation2);
-	for (int iter = 0; iter < nAttrs2; iter++) {
-		Attribute attrCatalogEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
-		getAttrCatEntry(srcRelId2, iter, attrCatalogEntry);
+    char srcRelation2[ATTR_SIZE];
+    OpenRelations::getRelationName(srcRelId2, srcRelation2);
+    for (int iter = 0; iter < nAttrs2; iter++) {
+        Attribute attrCatalogEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+        getAttrCatEntry(srcRelId2, iter, attrCatalogEntry);
 
-		if (strcmp(attr2, attrCatalogEntry[1].sval) != 0) {
-			targetRelAttrTypes[attrIndex] = attrCatalogEntry[2].nval;
-			strncpy(targetRelAttrNames[attrIndex++], attrCatalogEntry[1].sval, ATTR_SIZE);
-		}
-	}
+        if (strcmp(attr2, attrCatalogEntry[1].sval) != 0) {
+            targetRelAttrTypes[attrIndex] = attrCatalogEntry[2].nval;
+            strncpy(targetRelAttrNames[attrIndex++], attrCatalogEntry[1].sval, ATTR_SIZE);
+        }
+    }
 
-	int flag = createRel(targetRelation, nAttrs1 + nAttrs2 - 1, targetRelAttrNames, targetRelAttrTypes);
-	if (flag != SUCCESS) {
-		return flag; // target rel may already exist or attrs more than limit or ...
-	}
+    int flag = createRel(targetRelation, nAttrs1 + nAttrs2 - 1, targetRelAttrNames, targetRelAttrTypes);
+    if (flag != SUCCESS) {
+        return flag; // target rel may already exist or attrs more than limit or ...
+    }
 
-	int targetRelId = OpenRelations::openRelation(targetRelation);
+    int targetRelId = OpenRelations::openRelation(targetRelation);
 
-	if (targetRelId == E_CACHEFULL) {
-		deleteRel(targetRelation);
-		return E_CACHEFULL;
-	}
+    if (targetRelId == E_CACHEFULL) {
+        deleteRel(targetRelation);
+        return E_CACHEFULL;
+    }
 
-	Attribute record1[nAttrs1];
-	recId prev_recid1;
-	prev_recid1.block = -1;
-	prev_recid1.slot = -1;
-	Attribute dummy;
-	strcpy(dummy.sval, " ");
+    Attribute record1[nAttrs1];
+    recId prev_recid1;
+    prev_recid1.block = -1;
+    prev_recid1.slot = -1;
+    Attribute dummy;
+    strcpy(dummy.sval, " ");
 
-	// FORMING TARGET RELATION
-	/*
-	 *
-	 */
-	while (ba_search(srcRelId1, record1, "PROJECT", dummy, PRJCT, &prev_recid1) == SUCCESS) {
+    // FORMING TARGET RELATION
+    /*
+     *
+     */
+    while (ba_search(srcRelId1, record1, "PROJECT", dummy, PRJCT, &prev_recid1) == SUCCESS) {
 
-		Attribute record2[nAttrs2];
-		Attribute targetRecord[nAttrs1 + nAttrs2 - 1];
-		recId prev_recid2;
-		prev_recid2.block = -1;
-		prev_recid2.slot = -1;
+        Attribute record2[nAttrs2];
+        Attribute targetRecord[nAttrs1 + nAttrs2 - 1];
+        recId prev_recid2;
+        prev_recid2.block = -1;
+        prev_recid2.slot = -1;
 
-		while (ba_search(srcRelId2, record2, attr2, record1[static_cast<int>(attrcat_entry1[5].nval)], EQ, &prev_recid2) ==SUCCESS) {
+        while (ba_search(srcRelId2, record2, attr2, record1[static_cast<int>(attrcat_entry1[5].nval)], EQ,
+                         &prev_recid2) == SUCCESS) {
 
-			for (int iter = 0; iter < nAttrs1; iter++)
-				targetRecord[iter] = record1[iter];
-			int targetIndex = nAttrs1;
-			for (int iter = 0; iter < nAttrs2; iter++) {
-				if (iter != static_cast<int>(attrcat_entry2[5].nval))
-					targetRecord[targetIndex++] = record2[iter];
-			}
+            for (int iter = 0; iter < nAttrs1; iter++)
+                targetRecord[iter] = record1[iter];
+            int targetIndex = nAttrs1;
+            for (int iter = 0; iter < nAttrs2; iter++) {
+                if (iter != static_cast<int>(attrcat_entry2[5].nval))
+                    targetRecord[targetIndex++] = record2[iter];
+            }
 
-			flag = ba_insert(targetRelId, targetRecord);
+            flag = ba_insert(targetRelId, targetRecord);
 
-			if (flag != SUCCESS) {
-				OpenRelations::closeRelation(targetRelId);
-				deleteRel(targetRelation);
-				return flag;
-			}
+            if (flag != SUCCESS) {
+                OpenRelations::closeRelation(targetRelId);
+                deleteRel(targetRelation);
+                return flag;
+            }
 
-		}
-	}
+        }
+    }
 
-	OpenRelations::closeRelation(targetRelId);
-	return SUCCESS;
+    OpenRelations::closeRelation(targetRelId);
+    return SUCCESS;
 }
 
 
 // TODO : Find library functions for this?
 int checkAttrTypeOfValue(char *data) {
-	int count_int = 0, count_dot = 0, count_string = 0, i;
-	for (i = 0; data[i] != '\0'; i++) {
+    int count_int = 0, count_dot = 0, count_string = 0, i;
+    for (i = 0; data[i] != '\0'; i++) {
 
-		if (data[i] >= '0' && data[i] <= '9')
-			count_int++;
-		if (data[i] == '.')
-			count_dot++;
-		else
-			count_string++;
-	}
+        if (data[i] >= '0' && data[i] <= '9')
+            count_int++;
+        if (data[i] == '.')
+            count_dot++;
+        else
+            count_string++;
+    }
 
-	if (count_dot == 1 && count_int == (strlen(data) - 1))
-		return NUMBER;
-	if (count_int == strlen(data)) {
-		return NUMBER;
-	} else
-		return STRING;
+    if (count_dot == 1 && count_int == (strlen(data) - 1))
+        return NUMBER;
+    if (count_int == strlen(data)) {
+        return NUMBER;
+    } else
+        return STRING;
 }
 
 /*
  * Gets #ttribute of relation from Relation Catalog Entry
  */
 int getNumberOfAttrsForRelation(int relationId) {
-	Attribute relCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
-	int retValue;
-	retValue = getRelCatEntry(relationId, relCatEntry);
-	if (retValue != SUCCESS) {
-		return retValue;
-	}
-	int numAttrs = static_cast<int>(relCatEntry[1].nval);
-	return numAttrs;
+    Attribute relCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+    int retValue;
+    retValue = getRelCatEntry(relationId, relCatEntry);
+    if (retValue != SUCCESS) {
+        return retValue;
+    }
+    int numAttrs = static_cast<int>(relCatEntry[1].nval);
+    return numAttrs;
 }
 
 /*
@@ -413,12 +504,12 @@ int getNumberOfAttrsForRelation(int relationId) {
  */
 void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]) {
 
-	Attribute attrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
+    Attribute attrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
 
-	for (int offsetIter = 0; offsetIter < numAttrs; ++offsetIter) {
-		getAttrCatEntry(relId, offsetIter, attrCatEntry);
-		attrTypes[static_cast<int>(attrCatEntry[5].nval)] = static_cast<int>(attrCatEntry[2].nval);
-	}
+    for (int offsetIter = 0; offsetIter < numAttrs; ++offsetIter) {
+        getAttrCatEntry(relId, offsetIter, attrCatEntry);
+        attrTypes[static_cast<int>(attrCatEntry[5].nval)] = static_cast<int>(attrCatEntry[2].nval);
+    }
 }
 
 
@@ -432,19 +523,20 @@ void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]) {
  *      SUCCESS
  *      E_ATTRTYPEMISMATCH : types dont match
  */
-int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE], int attrTypes[numAttrs]) {
-	for (int l = 0; l < numAttrs; l++) {
+int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE],
+                                  int attrTypes[numAttrs]) {
+    for (int l = 0; l < numAttrs; l++) {
 
-		if (attrTypes[l] == NUMBER) {
-			if (checkAttrTypeOfValue(recordArray[l]) == NUMBER)
-				record[l].nval = atof(recordArray[l]);
-			else
-				return E_ATTRTYPEMISMATCH;
-		}
+        if (attrTypes[l] == NUMBER) {
+            if (checkAttrTypeOfValue(recordArray[l]) == NUMBER)
+                record[l].nval = atof(recordArray[l]);
+            else
+                return E_ATTRTYPEMISMATCH;
+        }
 
-		if (attrTypes[l] == STRING) {
-			strcpy(record[l].sval, recordArray[l]);
-		}
-	}
-	return SUCCESS;
+        if (attrTypes[l] == STRING) {
+            strcpy(record[l].sval, recordArray[l]);
+        }
+    }
+    return SUCCESS;
 }

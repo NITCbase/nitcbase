@@ -112,25 +112,16 @@ int ba_search(relId relid, Attribute *record, char attrName[ATTR_SIZE], Attribut
 	recId recid;
 	if (op == PRJCT) {
 		recid = linear_search(relid, attrName, attrval, op, prev_recid);
-
 	} else {
 		Attribute attrcat_entry[6];
 		getAttrCatEntry(relid, attrName, attrcat_entry);
 		// Get the root_block from attribute catalog entry for the given attribute
 		int root_block = attrcat_entry[4].nval;
-		// TODO: Until indexing is allowed this if-condition can be commented
 		if (root_block == -1) {
-			/*
-			 * Index does not exist for the attribute
-			 * Do Linear Search corresponding to the attribute with attribute name attrName and with value attrval
-			 *
-			 */
+            // No indexing for the attribute
 			recid = linear_search(relid, attrName, attrval, op, prev_recid);
 		} else {
-			/*
-			 * Index exists for the attribute
-			 * Do B+ Tree Search corresponding to the attribute with attribute name attrName and with value attrval
-			 */
+            // Indexing exists for the attribute
 			// TODO: recid = bplus_search(relid, attrName, attrval, op,&prev_recid);
 		}
 	}

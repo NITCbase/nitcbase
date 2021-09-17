@@ -47,7 +47,7 @@ int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[A
                              char attrs[][ATTR_SIZE]);
 
 int select_attr_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,
-                                   char attrs[][ATTR_SIZE], int op, char value[ATTR_SIZE]);
+                                   char attrs[][ATTR_SIZE], char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]);
 
 void print16(char char_string_thing[ATTR_SIZE]);
 
@@ -124,7 +124,7 @@ int regexMatchAndExecute(const string input_command) {
         int ret = exportRelation(relname, fileName);
 
         if (ret == SUCCESS)
-            cout << "Exported successfully" << endl;
+            cout << "Exported successfully into: " << filePath << endl;
         else {
             cout << "Export Command Failed" << endl;
             return FAILURE;
@@ -417,7 +417,8 @@ int regexMatchAndExecute(const string input_command) {
         }
         /**********/
 
-        return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, op, value);
+        return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, attribute, op,
+                                              value);
 
     } else if (regex_match(input_command, select_from_join)) {
 
@@ -475,12 +476,12 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tokens[refIndex + 8], attr1, 15);
         string_to_char_array(tokens[refIndex + 10], attr2, 15);
 
-        int ret = join(src_rel1, src_rel2, "temp", attr1, attr2);
+        int ret = join(src_rel1, src_rel2, TEMP, attr1, attr2);
 
         int relId;
         if (ret == SUCCESS) {
 
-            relId = OpenRelations::openRelation("temp");
+            relId = OpenRelations::openRelation(TEMP);
             if (!(relId >= 0 && relId < MAXOPEN)) {
                 cout << "openRel Failed" << endl;
             }
@@ -503,12 +504,12 @@ int regexMatchAndExecute(const string input_command) {
                 string_to_char_array(words[i], attrs[i], 15);
             }
 
-//			int ret_project = project("temp", tar_rel, attrCount, attrs);
+//			int ret_project = project(TEMP, tar_rel, attrCount, attrs);
 //
 //			if (ret_project == SUCCESS) {
 //				cout << "Join successful" << endl;
 //				OpenRelations::closeRelation(relId);
-//				deleteRel("temp");
+//				deleteRel(TEMP);
 //			} else {
 //				printErrorMsg(ret_project);
 //				return FAILURE;
@@ -642,7 +643,7 @@ int select_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_S
 
     int ret = project(sourceRelName, targetRelName, nAttrs, targetAttrs);
     if (ret == SUCCESS) {
-        cout << "Selected successfully, result in: ";
+        cout << "Selected successfully, result in relation: ";
         print16(targetRelName);
         return SUCCESS;
     } else {
@@ -653,25 +654,9 @@ int select_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_S
 
 int select_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], char attribute[ATTR_SIZE],
                               int op, char value[ATTR_SIZE]) {
-    //        int ret=select(sourceRelName, targetRelName, attribute, op, value);
-//        if(ret==SUCCESS)
-//        {
-//                    cout<<"Selected successfully, result in: ";
-//        print16(targetRelName);
-//        }
-//        else
-//        {
-//            print_errormsg(ret);
-//        }
-
-    return SUCCESS;
-}
-
-int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,
-                             char attrs[][ATTR_SIZE]) {
-    int ret = project(sourceRelName, targetRelName, attr_count, attrs);
+    int ret = select(sourceRelName, targetRelName, attribute, op, value);
     if (ret == SUCCESS) {
-        cout << "Selected successfully, result in: ";
+        cout << "Selected successfully, result in relation: ";
         print16(targetRelName);
     } else {
         printErrorMsg(ret);
@@ -680,42 +665,44 @@ int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[A
     return SUCCESS;
 }
 
-int select_attr_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,
-                                   char attrs[][ATTR_SIZE], int op, char value[ATTR_SIZE]) {
-    //        int ret=select(src_rel,"temp",attribute,op,val);
-//        if(ret==SUCCESS)
-//        {
-//            //cout<<"I am here\n";
-//            int relid=openRel("temp");
-//            if(relid!=E_RELNOTEXIST&& relid!=E_CACHEFULL)
-//            {
-//
-//                int ret_project=project("temp",tar_rel,count,attrs);
-//                //cout<<ret_project;
-//                if(ret_project==SUCCESS)
-//                {
-//                    //cout<<"I am here\n";
-//                    cout<<"Command executed successfully"<<endl;
-//                    closeRel(relid);
-//                    deleteRel("temp");
-//                    continue;
-//                }
-//                else
-//                {
-//                    closeRel(relid);
-//                    deleteRel("temp");
-//                    print_errormsg(ret_project);
-//                    continue;
-//                }
-//            }
-//            else
-//            {
-//                print_errormsg(relid);
-//                continue;
-//            }
-
+int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,
+                             char attrs[][ATTR_SIZE]) {
+    int ret = project(sourceRelName, targetRelName, attr_count, attrs);
+    if (ret == SUCCESS) {
+        cout << "Selected successfully, result in relation: ";
+        print16(targetRelName);
+    } else {
+        printErrorMsg(ret);
+    }
     return SUCCESS;
+}
 
+int select_attr_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,
+                                   char attrs[][ATTR_SIZE], char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
+    int ret = select(sourceRelName, TEMP, attribute, op, value);
+    if (ret == SUCCESS) {
+        int relid = openRel(TEMP);
+        if (relid != E_RELNOTEXIST && relid != E_CACHEFULL) {
+            int ret_project = project(TEMP, targetRelName, attr_count, attrs);
+            if (ret_project == SUCCESS) {
+                cout << "Selected successfully, result in relation: ";
+                print16(targetRelName);
+                closeRel(relid);
+                deleteRel(TEMP);
+            } else {
+                closeRel(relid);
+                deleteRel(TEMP);
+                printErrorMsg(ret_project);
+                return FAILURE;
+            }
+        } else {
+            printErrorMsg(relid);
+            return FAILURE;
+        }
+        return SUCCESS;
+    } else {
+        return FAILURE;
+    }
 }
 
 void print16(char char_string_thing[ATTR_SIZE]) {
