@@ -323,11 +323,11 @@ int regexMatchAndExecute(const string input_command) {
         int op = getOperator(op_str);
 
         // LOGGING DEBUG //
-        print16(sourceRelName);
-        print16(targetRelName);
-        print16(attribute);
-        print16(value);
-        cout << op_str << endl;
+//        print16(sourceRelName);
+//        print16(targetRelName);
+//        print16(attribute);
+//        print16(value);
+//        cout << op_str << endl;
         /**********/
 
         return select_from_where_handler(sourceRelName, targetRelName, attribute, op, value);
@@ -358,13 +358,13 @@ int regexMatchAndExecute(const string input_command) {
         }
 
         // LOGGING DEBUG //
-        print16(sourceRelName);
-        print16(targetRelName);
-        cout << attr_count << endl;
-        cout << "DEBUG | attrlist:" << endl;
-        for (auto i = 0; i < attr_count; i++) {
-            print16(attr_list[i]);
-        }
+//        print16(sourceRelName);
+//        print16(targetRelName);
+//        cout << attr_count << endl;
+//        cout << "DEBUG | attrlist:" << endl;
+//        for (auto i = 0; i < attr_count; i++) {
+//            print16(attr_list[i]);
+//        }
         /**********/
 
         return select_attr_from_handler(sourceRelName, targetRelName, attr_count, attr_list);
@@ -405,16 +405,16 @@ int regexMatchAndExecute(const string input_command) {
         }
 
         // LOGGING DEBUG //
-        print16(sourceRelName);
-        print16(targetRelName);
-        print16(attribute);
-        print16(value);
-        cout << op_str << endl;
-        cout << attr_count << endl;
-        cout << "DEBUG | attrlist:" << endl;
-        for (auto i = 0; i < attr_count; i++) {
-            print16(attr_list[i]);
-        }
+//        print16(sourceRelName);
+//        print16(targetRelName);
+//        print16(attribute);
+//        print16(value);
+//        cout << op_str << endl;
+//        cout << attr_count << endl;
+//        cout << "DEBUG | attrlist:" << endl;
+//        for (auto i = 0; i < attr_count; i++) {
+//            print16(attr_list[i]);
+//        }
         /**********/
 
         return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, attribute, op,

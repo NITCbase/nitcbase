@@ -87,7 +87,7 @@ int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, c
             ret = ba_insert(targetrelid, proj_rec);
             if (ret != SUCCESS) {
                 // unable to insert into target relation
-                closeRel(targetrelid);
+                closeRel(targetrel);
                 ba_delete(targetrel);
                 return ret;
             }
@@ -96,7 +96,7 @@ int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, c
 
     }
 
-    closeRel(targetrelid);
+    closeRel(targetrel);
     return SUCCESS;
 }
 
@@ -180,14 +180,14 @@ int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZ
         if (retval == SUCCESS) {
             int ret = ba_insert(target_relid, record);
             if (ret != SUCCESS) {
-                closeRel(target_relid);
+                closeRel(targetrel);
                 ba_delete(targetrel);
                 return ret;
             }
         } else
             break;
     }
-    closeRel(target_relid);
+    closeRel(targetrel);
     return SUCCESS;
 }
 
