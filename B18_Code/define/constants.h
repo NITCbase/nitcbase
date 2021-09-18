@@ -1,7 +1,8 @@
 #ifndef B18_CODE_CONSTANTS_H
 #define B18_CODE_CONSTANTS_H
 
-#define DISK_PATH "./Disk/disk"
+#define DISK_PATH "../Disk/disk"
+#define FILES_PATH "../Files/"
 
 #define BLOCK_SIZE 2048
 #define ATTR_SIZE 16
