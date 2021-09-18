@@ -109,7 +109,7 @@ void dump_attrcat() {
 }
 
 void dumpBlockAllocationMap() {
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, 0, SEEK_SET);
 	unsigned char blockAllocationMap[4 * BLOCK_SIZE];
 	fread(blockAllocationMap, 4 * BLOCK_SIZE, 1, disk);

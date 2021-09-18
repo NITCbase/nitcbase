@@ -121,7 +121,7 @@ int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZ
     int type = (int) attrcat_entry[2].nval;
     Attribute val;
     if (type == NUMBER) {
-        val.nval = stof(val_str);
+        val.nval = std::stof(val_str);
     } else if (type == STRING) {
         strcpy(val.sval, val_str);
     } else

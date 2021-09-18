@@ -402,7 +402,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
  * If Not returns UNUSED_BLK: 3
  */
 int getBlockType(int blocknum) {
-	FILE *disk = fopen("disk", "rb");
+	FILE *disk = fopen(DISK_PATH, "rb");
 	fseek(disk, 0, SEEK_SET);
 	unsigned char blockAllocationMap[4 * BLOCK_SIZE];
 	fread(blockAllocationMap, 4 * BLOCK_SIZE, 1, disk);
@@ -415,7 +415,7 @@ int getBlockType(int blocknum) {
  */
 HeadInfo getHeader(int blockNum) {
 	HeadInfo header;
-	FILE *disk = fopen("disk", "rb");
+	FILE *disk = fopen(DISK_PATH, "rb");
 	fseek(disk, blockNum * BLOCK_SIZE, SEEK_SET);
 	fread(&header, 32, 1, disk);
 	fclose(disk);
@@ -426,7 +426,7 @@ HeadInfo getHeader(int blockNum) {
  * Writes header for 'blockNum'th block into disk given the header information
  */
 void setHeader(struct HeadInfo *header, int blockNum) {
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, blockNum * BLOCK_SIZE, SEEK_SET);
 	fwrite(header, 32, 1, disk);
 	fclose(disk);
@@ -436,7 +436,7 @@ void setHeader(struct HeadInfo *header, int blockNum) {
  * Reads slotmap for 'blockNum'th block from disk
  */
 void getSlotmap(unsigned char *SlotMap, int blockNum) {
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, blockNum * BLOCK_SIZE, SEEK_SET);
 	RecBlock R;
 	fread(&R, BLOCK_SIZE, 1, disk);
@@ -449,7 +449,7 @@ void getSlotmap(unsigned char *SlotMap, int blockNum) {
  * Writes slotmap for 'blockNum'th block into disk given the number of blocks occupied
  */
 void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, blockNum * BLOCK_SIZE + 32, SEEK_SET);
 	fwrite(SlotMap, no_of_slots, 1, disk);
 	fclose(disk);
@@ -460,7 +460,7 @@ void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
  */
 int getFreeRecBlock() {
 	// TODO: Title for this
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, 0, SEEK_SET);
 
 	unsigned char blockAllocationMap[4 * BLOCK_SIZE];
@@ -577,7 +577,7 @@ int getRecord(Attribute *rec, int blockNum, int slotNum) {
 	if (slotNum < 0 || slotNum > (numOfSlots - 1))
 		return E_OUTOFBOUND;
 
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	int BlockType = getBlockType(blockNum);
 
 	if (BlockType == REC) {
@@ -620,7 +620,7 @@ int setRecord(Attribute *rec, int blockNum, int slotNum) {
 		return E_OUTOFBOUND;
 
 	int BlockType = getBlockType(blockNum);
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 
 	if (BlockType == REC) {
 		/* offset :
@@ -757,7 +757,7 @@ int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry) {
  */
 int deleteBlock(int blockNum) {
 	FILE *disk;
-	disk = fopen("disk", "rb+");
+	disk = fopen(DISK_PATH, "rb+");
 
 	/* Clear the data present in the block */
 	fseek(disk, BLOCK_SIZE * blockNum, SEEK_SET);
@@ -800,7 +800,7 @@ int deleteRelCatEntry(recId relcat_recid, Attribute relcat_rec[6]) {
 	relcat_rec[2].nval = relcat_rec[2].nval - no_of_attrs;
 	setRecord(relcat_rec, 4, 1);
 
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, (relcat_recid.block) * BLOCK_SIZE + HEADER_SIZE + SLOTMAP_SIZE_RELCAT_ATTRCAT +
 	            relcat_recid.slot * NO_OF_ATTRS_RELCAT_ATTRCAT * ATTR_SIZE, SEEK_SET);
 	for (int i = 0; i < 16 * 6; i++)
@@ -819,7 +819,7 @@ int deleteRelCatEntry(recId relcat_recid, Attribute relcat_rec[6]) {
  */
 int deleteAttrCatEntry(recId attrcat_recid) {
 	/* Clear the Attribute Catalog Record present in the given (Slot & Block) of the Disk */
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, (attrcat_recid.block) * BLOCK_SIZE + HEADER_SIZE + SLOTMAP_SIZE_RELCAT_ATTRCAT +
 	            (attrcat_recid.slot) * NO_OF_ATTRS_RELCAT_ATTRCAT * ATTR_SIZE, SEEK_SET);
 	for (int i = 0; i < ATTR_SIZE * NO_OF_ATTRS_RELCAT_ATTRCAT; i++)

@@ -6,7 +6,7 @@
 #include "Disk.h"
 
 int Disk::createDisk() {
-	FILE *disk = fopen("disk","wb+");
+	FILE *disk = fopen(DISK_PATH,"wb+");
 	if(disk == NULL)
 		return FAILURE;
 	fseek(disk, 0, SEEK_SET);
@@ -25,7 +25,7 @@ Disk::~Disk() {
 }
 
 int Disk::readBlock(unsigned char *block, int blockNum) {
-	FILE *disk = fopen("disk","rb");
+	FILE *disk = fopen(DISK_PATH,"rb");
 	const int offset = blockNum * BLOCK_SIZE;
 	fseek(disk, offset, SEEK_SET);
 	fread(block, BLOCK_SIZE, 1, disk);
@@ -33,7 +33,7 @@ int Disk::readBlock(unsigned char *block, int blockNum) {
 }
 
 int Disk::writeBlock(unsigned char *block, int blockNum) {
-	FILE *disk = fopen("disk","wb");
+	FILE *disk = fopen(DISK_PATH,"wb");
 	int offset = blockNum * BLOCK_SIZE;
 	fseek(disk, offset, SEEK_SET);
 	fwrite(block, BLOCK_SIZE, 1, disk);
@@ -45,7 +45,7 @@ int Disk::writeBlock(unsigned char *block, int blockNum) {
  * Set the reserved entries in block allocation map
  */
 void Disk::formatDisk() {
-	FILE *disk = fopen("disk", "wb+");
+	FILE *disk = fopen(DISK_PATH, "wb+");
 	const int reserved = 6;
 	const int offset = DISK_SIZE;
 
