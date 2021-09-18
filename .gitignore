@@ -22,4 +22,6 @@
 /B18_Code/block_allocation_map
 /B18_Code/disk
 
+/B18_Code/CMakeFiles
+
 .idea/csv-plugin.xml
