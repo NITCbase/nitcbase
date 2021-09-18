@@ -1,0 +1,12 @@
+fdisk
+CREATE TABLE new (name STR,age NUM);
+ALTER TABLE RENAME new TO Students;
+OPEN TABLE Students;
+INSERT INTO Students VALUES (abc, 10.1);
+INSERT INTO Students VALUES (xyz, 20.1);
+CLOSE TABLE Students;
+ALTER TABLE RENAME Students COLUMN name TO userID;
+export Students Students.csv
+dump relcat
+dump attrcat
+exit

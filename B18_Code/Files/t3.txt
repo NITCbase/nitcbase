@@ -1,0 +1,8 @@
+fdisk
+CREATE TABLE color (color STR, id NUM, item STR);
+OPEN TABLE color;
+INSERT INTO color VALUES FROM color.csv;
+export color color1.csv
+dump relcat
+dump attrcat
+exit
