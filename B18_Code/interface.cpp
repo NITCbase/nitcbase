@@ -481,8 +481,8 @@ int regexMatchAndExecute(const string input_command) {
         int relId;
         if (ret == SUCCESS) {
 
-            relId = OpenRelations::openRelation(TEMP);
-            if (!(relId >= 0 && relId < MAXOPEN)) {
+            relId = OpenRelations::openRelation("temp");
+            if (!(relId >= 0 && relId < MAX_OPEN)) {
                 cout << "openRel Failed" << endl;
             }
 

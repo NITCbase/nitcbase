@@ -5,6 +5,8 @@
 #include "block_access.h"
 #include "OpenRelTable.h"
 #include <string>
+#include <cstring>
+#include <cstdlib>
 
 int check_duplicate_attributes(int nAttrs, char attrs[][ATTR_SIZE]);
 

@@ -5,7 +5,7 @@
 #ifndef B18_CODE_OPENRELTABLE_H
 #define B18_CODE_OPENRELTABLE_H
 
-#include "../define/constants.h"
+#include "define/constants.h"
 #include "block_access.h"
 
 //extern char OpenRelTable[MAX_OPEN][16];

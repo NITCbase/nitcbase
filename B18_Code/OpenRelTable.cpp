@@ -2,6 +2,7 @@
 // Created by Jessiya Joy on 12/09/21.
 //
 #include <string>
+#include <cstring>
 #include "define/constants.h"
 #include "define/errors.h"
 #include "disk_structures.h"

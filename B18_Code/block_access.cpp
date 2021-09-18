@@ -3,6 +3,7 @@
 //
 #include <cstdio>
 #include <string>
+#include <cstring>
 #include "define/constants.h"
 #include "define/errors.h"
 #include "disk_structures.h"
@@ -336,7 +337,7 @@ int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE]) {
 		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
 			Attribute attrCatRecord[6];
 			getRecord(attrCatRecord, attrcat_recid.block, attrcat_recid.slot);
-			if (strcmp(attrCatRecord[0].sval, oldName) == 0) {
+			if (std::strcmp(attrCatRecord[0].sval, oldName) == 0) {
 				strcpy(attrCatRecord[0].sval, newName);
 				setRecord(attrCatRecord, attrcat_recid.block, attrcat_recid.slot);
 			}
@@ -356,7 +357,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 	recId relcat_recid, attrcat_recid;
 	Attribute attrcat_record[6];
 	Attribute temp;
-	strcpy(temp.sval, relName);
+	std::strcpy(temp.sval, relName);
 	relcat_recid = linear_search(RELCAT_RELID, "RelName", temp, EQ, &prev_recid);
 	if ((relcat_recid.block == -1) && (relcat_recid.slot == -1)) {
 		return E_RELNOTEXIST;
@@ -370,7 +371,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
 		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
 			getRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
-			if (strcmp(attrcat_record[1].sval, newName) == 0)
+			if (std::strcmp(attrcat_record[1].sval, newName) == 0)
 				return E_ATTREXIST;
 		} else
 			break;
@@ -385,7 +386,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
 		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
 			getRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
-			if (strcmp(attrcat_record[1].sval, oldName) == 0) {
+			if (std::strcmp(attrcat_record[1].sval, oldName) == 0) {
 				strcpy(attrcat_record[1].sval, newName);
 				setRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
 				return SUCCESS;

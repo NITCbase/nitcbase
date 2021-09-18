@@ -206,24 +206,23 @@ int importRelation(char *fileName) {
 	}
 
 	firstLine[numOfCharactersInLine - 1] = '\0';
-	int i = 0, attrOffset, k;
+	int currentCharIndexInLine = 0, attrOffsetIterator, attributeIndexIterator;
 	char attributeNames[numOfAttributes][ATTR_SIZE];
-	attrOffset = 0;
-	while (attrOffset < numOfAttributes) {
-		k = 0;
-		while (((firstLine[i] != ',') && (firstLine[i] != '\0')) && (k < 15)) {
-			attributeNames[attrOffset][k++] = firstLine[i++];
+	attrOffsetIterator = 0;
+	while (attrOffsetIterator < numOfAttributes) {
+		attributeIndexIterator = 0;
+		while (((firstLine[currentCharIndexInLine] != ',') && (firstLine[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < 15)) {
+			attributeNames[attrOffsetIterator][attributeIndexIterator++] = firstLine[currentCharIndexInLine++];
 		}
-		if (k == 15) {
-			while (firstLine[i] != ',')
-				i++;
+		if (attributeIndexIterator == 15) {
+			while (firstLine[currentCharIndexInLine] != ',')
+				currentCharIndexInLine++;
 		}
-		attributeNames[attrOffset][k] = '\0';
-		attrOffset++;
-		i++;
+		attributeNames[attrOffsetIterator][attributeIndexIterator] = '\0';
+		attrOffsetIterator++;
+		currentCharIndexInLine++;
 	}
-	i = 0;
-	// ------------------------
+	currentCharIndexInLine = 0;
 
 	/*
 	 *  INFER ATTRIBUTE TYPES FROM SECOND LINE OF FILE
@@ -236,25 +235,24 @@ int importRelation(char *fileName) {
 		secondLine = (char *) realloc(secondLine, (numOfCharactersInLine) * sizeof(char));
 	}
 	secondLine[numOfCharactersInLine - 1] = '\0';
-	i = 0;
+	currentCharIndexInLine = 0;
 	char secondLineFields[numOfAttributes][ATTR_SIZE];
 	int attrTypes[numOfAttributes];
-	attrOffset = 0;
-	while (attrOffset < numOfAttributes) {
-		k = 0;
-		while (((secondLine[i] != ',') && (secondLine[i] != '\0')) && (k < 15)) {
-			secondLineFields[attrOffset][k++] = secondLine[i++];
+	attrOffsetIterator = 0;
+	while (attrOffsetIterator < numOfAttributes) {
+		attributeIndexIterator = 0;
+		while (((secondLine[currentCharIndexInLine] != ',') && (secondLine[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < 15)) {
+			secondLineFields[attrOffsetIterator][attributeIndexIterator++] = secondLine[currentCharIndexInLine++];
 		}
-		secondLineFields[attrOffset][k] = '\0';
-		attrTypes[attrOffset] = checkAttrTypeOfValue(secondLineFields[attrOffset]);
+		secondLineFields[attrOffsetIterator][attributeIndexIterator] = '\0';
+		attrTypes[attrOffsetIterator] = checkAttrTypeOfValue(secondLineFields[attrOffsetIterator]);
 
-		attrOffset++;
-		i++;
+		attrOffsetIterator++;
+		currentCharIndexInLine++;
 	}
-	//-------------------------
 
 	// EXTRACT RELATION NAME FROM FILE PATH
-	i = 0;
+	currentCharIndexInLine = 0;
 	char relationName[ATTR_SIZE];
 	int fileNameIterator = strlen(fileName) - 1;
 	while (fileName[fileNameIterator] != '.') {fileNameIterator--;
@@ -292,7 +290,7 @@ int importRelation(char *fileName) {
 	while ((currentCharacter = fgetc(file)) != '\n')
 		continue;
 
-	char *record = (char *) malloc(sizeof(char));
+	char *currentLineAsCharArray = (char *) malloc(sizeof(char));
 	numOfCharactersInLine = 1;
 
 	while (1) {
@@ -317,13 +315,12 @@ int importRelation(char *fileName) {
 
 				OpenRelations::closeRelation(relId);
 				ba_delete(relationName);
-				//cout<<currentCharacter;
 				cout << "Null values are not allowed in attribute fields\n";
 				return FAILURE;
 			}
-			record[numOfCharactersInLine - 1] = currentCharacter;
+			currentLineAsCharArray[numOfCharactersInLine - 1] = currentCharacter;
 			numOfCharactersInLine++;
-			record = (char *) realloc(record, (numOfCharactersInLine) * sizeof(char));
+			currentLineAsCharArray = (char *) realloc(currentLineAsCharArray, (numOfCharactersInLine) * sizeof(char));
 			previousCharacter = currentCharacter;
 
 			currentCharacter = fgetc(file);
@@ -343,31 +340,29 @@ int importRelation(char *fileName) {
 			cout << "Mismatch in number of attributes\n";
 			return FAILURE;
 		}
-		record[numOfCharactersInLine - 1] = '\0';
-		i = 0;
+		currentLineAsCharArray[numOfCharactersInLine - 1] = '\0';
+		currentCharIndexInLine = 0;
 
-		char recordArray[numOfAttributes][ATTR_SIZE];
-		attrOffset = 0;
-		while (attrOffset < numOfAttributes) {
-			k = 0;
+		char attributesCharArray[numOfAttributes][ATTR_SIZE];
+		attrOffsetIterator = 0;
+		while (attrOffsetIterator < numOfAttributes) {
+			attributeIndexIterator = 0;
 
-			while (((record[i] != ',') && (record[i] != '\0')) && (k < 15)) {
-				recordArray[attrOffset][k++] = record[i++];
+			while (((currentLineAsCharArray[currentCharIndexInLine] != ',') && (currentLineAsCharArray[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < 15)) {
+				attributesCharArray[attrOffsetIterator][attributeIndexIterator++] = currentLineAsCharArray[currentCharIndexInLine++];
 			}
-			if (k == 15) {
-				while (record[i] != ',')
-					i++;
+			if (attributeIndexIterator == 15) {
+				while (currentLineAsCharArray[currentCharIndexInLine] != ',')
+					currentCharIndexInLine++;
 			}
-			i++;
-			recordArray[attrOffset][k] = '\0';
+			currentCharIndexInLine++;
+			attributesCharArray[attrOffsetIterator][attributeIndexIterator] = '\0';
 
-			attrOffset++;
+			attrOffsetIterator++;
 		}
 
-		// Construct a record ( array of attrTypes Attribute ) from previous character array
-		// Perform attrTypes checking for number types
 		Attribute record[numOfAttributes];
-		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, recordArray, attrTypes);
+		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, attributesCharArray, attrTypes);
 		if (retValue == E_ATTRTYPEMISMATCH)
 			return E_ATTRTYPEMISMATCH;
 
@@ -537,11 +532,3 @@ void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineF
 		fputs("\n", fp);
 	}
 }
-
-//void getAttrNamesFromFirstLineOfFile(FILE* fp, ) {
-//
-//}
-//
-//void inferAttrTypesFromSecondLine() {
-//
-//}

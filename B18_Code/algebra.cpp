@@ -3,6 +3,8 @@
 //
 #include <iostream>
 #include <vector>
+#include <cstring>
+#include <string>
 #include "define/constants.h"
 #include "define/errors.h"
 #include "disk_structures.h"
@@ -11,16 +13,16 @@
 #include "OpenRelTable.h"
 #include "schema.h"
 
-using namespace std;
+//using namespace std;
 
 int checkAttrTypeOfValue(char *data);
 
 int getNumberOfAttrsForRelation(int relationId);
 
-void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]);
+void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[]);
 
-int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE],
-                                  int attrTypes[numAttrs]);
+int constructRecordFromAttrsArray(int numAttrs, Attribute record[], char recordArray[][ATTR_SIZE],
+                                  int attrTypes[]);
 
 
 int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, char tar_attrs[][ATTR_SIZE]) {
@@ -191,7 +193,7 @@ int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZ
     return SUCCESS;
 }
 
-int insert(vector<string> attributeTokens, char *table_name) {
+int insert(std::vector<std::string> attributeTokens, char *table_name) {
 
     // check if relation is open
     int relId = OpenRelations::getRelationId(table_name);
@@ -208,133 +210,133 @@ int insert(vector<string> attributeTokens, char *table_name) {
     int attrTypes[numAttrs];
     getAttrTypesForRelation(relId, numAttrs, attrTypes);
 
-    // for each attribute, convert string vector to char array
-    char recordArray[numAttrs][ATTR_SIZE];
-    for (int i = 0; i < numAttrs; i++) {
-        string attrValue = attributeTokens[i];
-        char tempAttribute[ATTR_SIZE];
-        int j;
-        for (j = 0; j < 15 && j < attrValue.size(); j++) {
-            tempAttribute[j] = attrValue[j];
-        }
-        tempAttribute[j] = '\0';
-        strcpy(recordArray[i], tempAttribute);
-    }
+	// for each attribute, convert string vector to char array
+	char recordArray[numAttrs][ATTR_SIZE];
+	for (int i = 0; i < numAttrs; i++) {
+		std::string attrValue = attributeTokens[i];
+		char tempAttribute[ATTR_SIZE];
+		int j;
+		for (j = 0; j < 15 && j < attrValue.size(); j++) {
+			tempAttribute[j] = attrValue[j];
+		}
+		tempAttribute[j] = '\0';
+		strcpy(recordArray[i], tempAttribute);
+	}
 
-    // Construct a record ( array of type Attribute ) from previous character array
-    // Perform type checking for number types
-    Attribute record[numAttrs];
-    int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
-    if (retValue == E_ATTRTYPEMISMATCH)
-        return E_ATTRTYPEMISMATCH;
+	// Construct a record ( array of type Attribute ) from previous character array
+	// Perform type checking for number types
+	Attribute record[numAttrs];
+	int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
+	if (retValue == E_ATTRTYPEMISMATCH)
+		return E_ATTRTYPEMISMATCH;
 
-    retValue = ba_insert(relId, record);
-    if (retValue == SUCCESS) {
-        return SUCCESS;
-    } else {
-        return FAILURE;
-    }
+	retValue = ba_insert(relId, record);
+	if (retValue == SUCCESS) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
 }
 
-int insert(char relName[16], char *fileName) {
+int insert(char relName[ATTR_SIZE], char *fileName) {
 
-    char ch;
+	char currentCharacter;
 
-    // check if relation is open
-    int relId = OpenRelations::getRelationId(relName);
-    if (relId == E_RELNOTOPEN) {
-        return relId;
-    }
+	// check if relation is open
+	int relId = OpenRelations::getRelationId(relName);
+	if (relId == E_RELNOTOPEN) {
+		return relId;
+	}
 
-    // get #attributes from relation catalog entry
-    int numAttrs = getNumberOfAttrsForRelation(relId);
+	// get #attributes from relation catalog entry
+	int numOfAttributes = getNumberOfAttrsForRelation(relId);
 
-    // get attribute types from attribute catalog entry
-    int attrTypes[numAttrs];
-    getAttrTypesForRelation(relId, numAttrs, attrTypes);
+	// get attribute types from attribute catalog entry
+	int attrTypes[numOfAttributes];
+	getAttrTypesForRelation(relId, numOfAttributes, attrTypes);
 
 
-    char *record = (char *) malloc(sizeof(char));
-    int len = 1;
+	char *currentLineAsCharArray = (char *) malloc(sizeof(char));
+	int numOfCharactersInLine = 1;
 
-    FILE *file = fopen(fileName, "r");
-    while (1) {
-        ch = fgetc(file);
-        if (ch == EOF)
-            break;
-        while (ch == ' ' || ch == '\t' || ch == '\n') {
-            ch = fgetc(file);
-        }
-        if (ch == EOF)
-            break;
-        len = 1;
-        int fieldsCount = 0;
-        char oldch = ',';
-        while ((ch != '\n') && (ch != EOF)) {
-            if (ch == ',')
-                fieldsCount++;
+	FILE *file = fopen(fileName, "r");
+	while (1) {
+		currentCharacter = fgetc(file);
+		if (currentCharacter == EOF)
+			break;
+		while (currentCharacter == ' ' || currentCharacter == '\t' || currentCharacter == '\n') {
+			currentCharacter = fgetc(file);
+		}
+		if (currentCharacter == EOF)
+			break;
 
-            if (oldch == ch && ch == ',') {
-                cout << "Null values not allowed\n";
-                return FAILURE;
-            }
+		numOfCharactersInLine = 1;
+		int numOfFieldsInLine = 0;
 
-            record[len - 1] = ch;
-            len++;
-            record = (char *) realloc(record, (len) * sizeof(char));
-            oldch = ch;
-            ch = fgetc(file);
+		char previousCharacter = ',';
+		while ((currentCharacter != '\n') && (currentCharacter != EOF)) {
+			if (currentCharacter == ',')
+				numOfFieldsInLine++;
 
-        }
+			if (previousCharacter == currentCharacter && currentCharacter == ',') {
+				std::cout << "Null values not allowed\n";
+				return FAILURE;
+			}
 
-        if (oldch == ',' && ch != '\n') {
-            cout << "Null values not allowed in attribute values\n";
-            return FAILURE;
-        }
+			currentLineAsCharArray[numOfCharactersInLine - 1] = currentCharacter;
+			numOfCharactersInLine++;
+			currentLineAsCharArray = (char *) realloc(currentLineAsCharArray, (numOfCharactersInLine) * sizeof(char));
+			previousCharacter = currentCharacter;
+			currentCharacter = fgetc(file);
 
-        if (numAttrs != fieldsCount + 1 && ch != '\n') {
-            std::cout << "Mismatch in number of attributes\n";
-            return FAILURE;
-        }
-        record[len - 1] = '\0';
-        int i = 0;
-        //record contains each record in the file (seperated by commas)
-        char recordArray[numAttrs][ATTR_SIZE];
-        int j = 0;
+		}
 
-        while (j < numAttrs) {
-            int k = 0;
+		if (previousCharacter == ',' && currentCharacter != '\n') {
+			std::cout << "Null values not allowed in attribute values\n";
+			return FAILURE;
+		}
 
-            while (((record[i] != ',') && (record[i] != '\0')) && (k < 15)) {
-                recordArray[j][k++] = record[i++];
-            }
-            if (k == 15) {
-                while (record[i] != ',')
-                    i++;
-            }
-            i++;
-            recordArray[j][k] = '\0';
-            j++;
-        }
+		if (numOfAttributes != numOfFieldsInLine + 1 && currentCharacter != '\n') {
+			std::cout << "Mismatch in number of attributes\n";
+			return FAILURE;
+		}
+		currentLineAsCharArray[numOfCharactersInLine - 1] = '\0';
+		int currentCharIndexInLine = 0;
 
-        // Construct a record ( array of type Attribute ) from previous character array
-        // Perform type checking for number types
-        Attribute record[numAttrs];
-        int retValue = constructRecordFromAttrsArray(numAttrs, record, recordArray, attrTypes);
-        if (retValue == E_ATTRTYPEMISMATCH)
-            return E_ATTRTYPEMISMATCH;
+		char attributesCharArray[numOfAttributes][ATTR_SIZE];
+		int attrOffsetIterator = 0;
 
-        retValue = ba_insert(relId, record);
-        if (retValue != SUCCESS) {
-            return FAILURE;
-        }
+		while (attrOffsetIterator < numOfAttributes) {
+			int attributeIndexIterator = 0;
 
-        if (ch == EOF)
-            break;
-    }
+			while (((currentLineAsCharArray[currentCharIndexInLine] != ',') && (currentLineAsCharArray[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < 15)) {
+				attributesCharArray[attrOffsetIterator][attributeIndexIterator++] = currentLineAsCharArray[currentCharIndexInLine++];
+			}
+			if (attributeIndexIterator == 15) {
+				while (currentLineAsCharArray[currentCharIndexInLine] != ',')
+					currentCharIndexInLine++;
+			}
+			currentCharIndexInLine++;
+			attributesCharArray[attrOffsetIterator][attributeIndexIterator] = '\0';
+			attrOffsetIterator++;
+		}
 
-    fclose(file);
-    return SUCCESS;
+		Attribute record[numOfAttributes];
+		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, attributesCharArray, attrTypes);
+		if (retValue == E_ATTRTYPEMISMATCH)
+			return E_ATTRTYPEMISMATCH;
+
+		retValue = ba_insert(relId, record);
+		if (retValue != SUCCESS) {
+			return FAILURE;
+		}
+
+		if (currentCharacter == EOF)
+			break;
+	}
+
+	fclose(file);
+	return SUCCESS;
 }
 
 int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[ATTR_SIZE], char attr1[ATTR_SIZE],
@@ -502,7 +504,7 @@ int getNumberOfAttrsForRelation(int relationId) {
 /*
  * Gets attribute types of relation from Attribute Catalog Entry
  */
-void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]) {
+void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[]) {
 
     Attribute attrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
 
@@ -523,20 +525,19 @@ void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[numAttrs]) {
  *      SUCCESS
  *      E_ATTRTYPEMISMATCH : types dont match
  */
-int constructRecordFromAttrsArray(int numAttrs, Attribute record[numAttrs], char recordArray[numAttrs][ATTR_SIZE],
-                                  int attrTypes[numAttrs]) {
-    for (int l = 0; l < numAttrs; l++) {
+int constructRecordFromAttrsArray(int numAttrs, Attribute record[], char recordArray[][ATTR_SIZE], int attrTypes[]) {
+	for (int l = 0; l < numAttrs; l++) {
 
-        if (attrTypes[l] == NUMBER) {
-            if (checkAttrTypeOfValue(recordArray[l]) == NUMBER)
-                record[l].nval = atof(recordArray[l]);
-            else
-                return E_ATTRTYPEMISMATCH;
-        }
+		if (attrTypes[l] == NUMBER) {
+			if (checkAttrTypeOfValue(recordArray[l]) == NUMBER)
+				record[l].nval = atof(recordArray[l]);
+			else
+				return E_ATTRTYPEMISMATCH;
+		}
 
-        if (attrTypes[l] == STRING) {
-            strcpy(record[l].sval, recordArray[l]);
-        }
-    }
-    return SUCCESS;
+		if (attrTypes[l] == STRING) {
+			strcpy(record[l].sval, recordArray[l]);
+		}
+	}
+	return SUCCESS;
 }
