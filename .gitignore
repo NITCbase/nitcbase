@@ -1,6 +1,9 @@
 # Ignore Mac system files
 .DS_store
 
+# Igonre .idea folder files
+.idea
+
 # Ignore cmake debug files
 /Archive/cmake-build-debug
 
@@ -15,6 +18,7 @@
 
 /B18_Code/XFS_Interface_Code/cmake-build-debug
 /B18_Code/XFS_Interface_Code/.idea
+/B18_Code/XFS_Interface_Code/CMakeFiles
 
 /B18_Code/attribute_catalog
 /B18_Code/relation_catalog
