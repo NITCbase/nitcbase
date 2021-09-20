@@ -2,7 +2,7 @@
 .DS_store
 
 # Igonre .idea folder files
-.idea
+.idea/
 
 # Ignore cmake debug files
 /Archive/cmake-build-debug
