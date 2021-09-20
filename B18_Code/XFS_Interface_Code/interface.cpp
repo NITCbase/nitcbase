@@ -49,6 +49,9 @@ int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[A
 int select_attr_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attr_count,
                                    char attrs[][ATTR_SIZE], char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]);
 
+int select_attr_from_join_handler(char sourceRelOneName[ATTR_SIZE], char sourceRelTwoName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attrCount,
+                                  char joinAttributeOne[ATTR_SIZE], char joinAttributeTwo[ATTR_SIZE], char attributeList[][ATTR_SIZE]);
+
 void print16(char char_string_thing[ATTR_SIZE]);
 
 /* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
@@ -135,7 +138,7 @@ int regexMatchAndExecute(const string input_command) {
         regex_search(input_command, m, open_table);
         string tablename = m[3];
         char relname[ATTR_SIZE];
-        string_to_char_array(tablename, relname, 15);
+        string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
         int ret = openRel(relname);
         if (ret >= 0 && ret <= 11) {
@@ -150,7 +153,7 @@ int regexMatchAndExecute(const string input_command) {
         regex_search(input_command, m, close_table);
         string tablename = m[3];
         char relname[ATTR_SIZE];
-        string_to_char_array(tablename, relname, 15);
+        string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
         int ret = closeRel(relname);
         if (ret == SUCCESS) {
@@ -213,8 +216,8 @@ int regexMatchAndExecute(const string input_command) {
         string newTableName = m[6];
         char old_relation_name[ATTR_SIZE];
         char new_relation_name[ATTR_SIZE];
-        string_to_char_array(oldTableName, old_relation_name, 15);
-        string_to_char_array(newTableName, new_relation_name, 15);
+        string_to_char_array(oldTableName, old_relation_name, ATTR_SIZE - 1);
+        string_to_char_array(newTableName, new_relation_name, ATTR_SIZE - 1);
 
         int ret = renameRel(old_relation_name, new_relation_name);
 
@@ -234,9 +237,9 @@ int regexMatchAndExecute(const string input_command) {
         char relname[ATTR_SIZE];
         char old_col[ATTR_SIZE];
         char new_col[ATTR_SIZE];
-        string_to_char_array(tablename, relname, 15);
-        string_to_char_array(oldcolumnname, old_col, 15);
-        string_to_char_array(newcolumnname, new_col, 15);
+        string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+        string_to_char_array(oldcolumnname, old_col, ATTR_SIZE - 1);
+        string_to_char_array(newcolumnname, new_col, ATTR_SIZE - 1);
 
         int ret = renameAtrribute(relname, old_col, new_col);
 
@@ -252,7 +255,7 @@ int regexMatchAndExecute(const string input_command) {
         regex_search(input_command, m, insert_single);
         string table_name = m[3];
         char rel_name[ATTR_SIZE];
-        string_to_char_array(table_name, rel_name, 15);
+        string_to_char_array(table_name, rel_name, ATTR_SIZE - 1);
         regex_search(input_command, m, temp);
         string attrs = m[0];
         vector<string> words = extract_tokens(attrs);
@@ -270,7 +273,7 @@ int regexMatchAndExecute(const string input_command) {
         string tablename = m[3];
         char relname[16];
         string p = FILES_PATH;
-        string_to_char_array(tablename, relname, 15);
+        string_to_char_array(tablename, relname, ATTR_SIZE - 1);
         string t = m[6];
         p = p + t;
         char Filepath[p.length() + 1];
@@ -390,10 +393,10 @@ int regexMatchAndExecute(const string input_command) {
         char value[16];
         int op = getOperator(op_str);
 
-        string_to_char_array(attribute_str, attribute, 15);
-        string_to_char_array(value_str, value, 15);
-        string_to_char_array(sourceRel_str, sourceRelName, 15);
-        string_to_char_array(targetRel_str, targetRelName, 15);
+        string_to_char_array(attribute_str, attribute, ATTR_SIZE - 1);
+        string_to_char_array(value_str, value, ATTR_SIZE - 1);
+        string_to_char_array(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
+        string_to_char_array(targetRel_str, targetRelName, ATTR_SIZE - 1);
 
         string attribute_list = getAttrListStringFromCommand(input_command, m);
         vector<string> attr_tokens = extract_tokens(attribute_list);
@@ -424,25 +427,25 @@ int regexMatchAndExecute(const string input_command) {
 
         regex_search(input_command, m, select_from_join);
 
-        // m[4] and m[10] should be equal ( src_rel1)
-        // m[6] and m[102 should be equal ( src_rel2)
+        // m[4] and m[10] should be equal ( = sourceRelOneName)
+        // m[6] and m[102 should be equal ( = sourceRelTwoName)
         if (m[4] != m[10] || m[6] != m[12]) {
             cout << "Syntax Error" << endl;
             return FAILURE;
         }
-        char src_rel1[ATTR_SIZE];
-        char src_rel2[ATTR_SIZE];
-        char tar_rel[ATTR_SIZE];
-        char attr1[ATTR_SIZE];
-        char attr2[ATTR_SIZE];
+        char sourceRelOneName[ATTR_SIZE];
+        char sourceRelTwoName[ATTR_SIZE];
+        char targetRelName[ATTR_SIZE];
+        char joinAttributeOne[ATTR_SIZE];
+        char joinAttributeTwo[ATTR_SIZE];
 
-        string_to_char_array(m[4], src_rel1, 15);
-        string_to_char_array(m[6], src_rel2, 15);
-        string_to_char_array(m[8], tar_rel, 15);
-        string_to_char_array(m[11], attr1, 15);
-        string_to_char_array(m[13], attr2, 15);
+        string_to_char_array(m[4], sourceRelOneName, ATTR_SIZE - 1);
+        string_to_char_array(m[6], sourceRelTwoName, ATTR_SIZE - 1);
+        string_to_char_array(m[8], targetRelName, ATTR_SIZE - 1);
+        string_to_char_array(m[11], joinAttributeOne, ATTR_SIZE - 1);
+        string_to_char_array(m[13], joinAttributeTwo, ATTR_SIZE - 1);
 
-        int ret = join(src_rel1, src_rel2, tar_rel, attr1, attr2);
+        int ret = join(sourceRelOneName, sourceRelTwoName, targetRelName, joinAttributeOne, joinAttributeTwo);
         if (ret == SUCCESS) {
             cout << "Join successful" << endl;
         } else {
@@ -464,61 +467,38 @@ int regexMatchAndExecute(const string input_command) {
                 break;
         }
 
-        char src_rel1[ATTR_SIZE];
-        char src_rel2[ATTR_SIZE];
-        char tar_rel[ATTR_SIZE];
-        char attr1[ATTR_SIZE];
-        char attr2[ATTR_SIZE];
+        char sourceRelOneName[ATTR_SIZE];
+        char sourceRelTwoName[ATTR_SIZE];
+        char targetRelName[ATTR_SIZE];
+        char joinAttributeOne[ATTR_SIZE];
+        char joinAttributeTwo[ATTR_SIZE];
 
-        string_to_char_array(tokens[refIndex + 1], src_rel1, 15);
-        string_to_char_array(tokens[refIndex + 3], src_rel2, 15);
-        string_to_char_array(tokens[refIndex + 5], tar_rel, 15);
-        string_to_char_array(tokens[refIndex + 8], attr1, 15);
-        string_to_char_array(tokens[refIndex + 10], attr2, 15);
+        string_to_char_array(tokens[refIndex + 1], sourceRelOneName, ATTR_SIZE - 1);
+        string_to_char_array(tokens[refIndex + 3], sourceRelTwoName, ATTR_SIZE - 1);
+        string_to_char_array(tokens[refIndex + 5], targetRelName, ATTR_SIZE - 1);
+        string_to_char_array(tokens[refIndex + 8], joinAttributeOne, ATTR_SIZE - 1);
+        string_to_char_array(tokens[refIndex + 10], joinAttributeTwo, ATTR_SIZE - 1);
 
-        int ret = join(src_rel1, src_rel2, TEMP, attr1, attr2);
+	    int attrListPos = 1;
+	    string attributesListAsStrings;
+	    string inputCommand = input_command;
+	    while (regex_search(inputCommand, m, attrlist)) {
+		    if (attrListPos == 2)
+			    attributesListAsStrings = m.str(0);
+		    attrListPos++;
+		    // suffix to find the rest of the string.
+		    inputCommand = m.suffix().str();
+	    }
 
-        int relId;
-        if (ret == SUCCESS) {
+	    vector<string> attributesListAsWords = extract_tokens(attributesListAsStrings);
+	    int attrCount = attributesListAsWords.size();
+	    char attributeList[attrCount][ATTR_SIZE];
+	    for (int i = 0; i < attrCount; i++) {
+		    string_to_char_array(attributesListAsWords[i], attributeList[i], ATTR_SIZE - 1);
+	    }
 
-            relId = OpenRelations::openRelation("temp");
-            if (!(relId >= 0 && relId < MAX_OPEN)) {
-                cout << "openRel Failed" << endl;
-            }
-
-            int attrListPos = 1;
-            string attribute_list;
-            string inputCommand = input_command;
-            while (regex_search(inputCommand, m, attrlist)) {
-                if (attrListPos == 2)
-                    attribute_list = m.str(0);
-                attrListPos++;
-                // suffix to find the rest of the string.
-                inputCommand = m.suffix().str();
-            }
-
-            vector<string> words = extract_tokens(attribute_list);
-            int attrCount = words.size();
-            char attrs[attrCount][ATTR_SIZE];
-            for (int i = 0; i < attrCount; i++) {
-                string_to_char_array(words[i], attrs[i], 15);
-            }
-
-//			int ret_project = project(TEMP, tar_rel, attrCount, attrs);
-//
-//			if (ret_project == SUCCESS) {
-//				cout << "Join successful" << endl;
-//				OpenRelations::closeRelation(relId);
-//				deleteRel(TEMP);
-//			} else {
-//				printErrorMsg(ret_project);
-//				return FAILURE;
-//			}
-
-        } else {
-            printErrorMsg(ret);
-            return FAILURE;
-        }
+	    return select_attr_from_join_handler(sourceRelOneName, sourceRelTwoName, targetRelName, attrCount,
+	                                         joinAttributeOne, joinAttributeTwo, attributeList);
 
     } else {
         cout << "Syntax Error" << endl;
@@ -703,6 +683,40 @@ int select_attr_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRel
     } else {
         return FAILURE;
     }
+}
+
+int select_attr_from_join_handler(char sourceRelOneName[ATTR_SIZE], char sourceRelTwoName[ATTR_SIZE], char targetRelName[ATTR_SIZE], int attrCount,
+                                  char joinAttributeOne[ATTR_SIZE], char joinAttributeTwo[ATTR_SIZE], char attributeList[][ATTR_SIZE]) {
+
+	int ret = join(sourceRelOneName, sourceRelTwoName, TEMP, joinAttributeOne, joinAttributeTwo);
+
+	int relId;
+	if (ret == SUCCESS) {
+
+		relId = OpenRelations::openRelation(TEMP);
+		if (!(relId >= 0 && relId < MAX_OPEN)) {
+			cout << "openRel Failed" << endl;
+			deleteRel(TEMP);
+			printErrorMsg(relId);
+			return FAILURE;
+		}
+
+		int ret_project = project(TEMP, targetRelName, attrCount, attributeList);
+
+		if (ret_project == SUCCESS) {
+			cout << "Join successful" << endl;
+			OpenRelations::closeRelation(relId);
+			deleteRel(TEMP);
+			return SUCCESS;
+		} else {
+			printErrorMsg(ret_project);
+			return FAILURE;
+		}
+
+	} else {
+		printErrorMsg(ret);
+		return FAILURE;
+	}
 }
 
 void print16(char char_string_thing[ATTR_SIZE]) {
