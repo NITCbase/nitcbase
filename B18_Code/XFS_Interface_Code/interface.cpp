@@ -644,6 +644,7 @@ int select_from_where_handler(char sourceRelName[ATTR_SIZE], char targetRelName[
         print16(targetRelName);
     } else {
         printErrorMsg(ret);
+        return FAILURE;
     }
 
     return SUCCESS;
@@ -657,6 +658,7 @@ int select_attr_from_handler(char sourceRelName[ATTR_SIZE], char targetRelName[A
         print16(targetRelName);
     } else {
         printErrorMsg(ret);
+        return FAILURE;
     }
     return SUCCESS;
 }

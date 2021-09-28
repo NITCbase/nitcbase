@@ -1,0 +1,16 @@
+fdisk
+import health3.csv
+import grades-lastname.csv
+OPEN TABLE grades-lastname
+OPEN TABLE health3
+echo selecting all people who have F grade
+SELECT * FROM grades-lastname INTO grades-fail WHERE Grade = F;
+export grades-fail grades-fail.csv
+ls
+open table grades-fail
+open table health3
+echo joining grades-fail and health3 tables by using Last_Name
+SELECT * FROM grades-fail JOIN health3 INTO grade-F-details WHERE grades-fail.Last_Name = health3.Last_Name;
+ls
+export grade-F-details grade-F-details.csv
+exit
