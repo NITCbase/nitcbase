@@ -462,7 +462,7 @@ int exportRelation(char *relname, char *filename) {
 	for (attrNo = 0; attrNo < numOfAttrs; attrNo++) {
 		fputs(attrName[attrNo], fp_export);
 		if (attrNo != numOfAttrs - 1)
-			fputs(", ", fp_export);
+			fputs(",", fp_export);
 	}
 
 	fputs("\n", fp_export);
@@ -494,16 +494,15 @@ int exportRelation(char *relname, char *filename) {
 				char s[16];
 				for (int l = 0; l < numOfAttrs; l++) {
 					if (attrType[l] == NUMBER) {
-						sprintf(s, "%f ", A[l].nval);
+						sprintf(s, "%f", A[l].nval);
 						fputs(s, fp_export);
 					}
 					if (attrType[l] == STRING) {
 						fputs(A[l].sval, fp_export);
 					}
 					if (l != numOfAttrs - 1)
-						fputs(", ", fp_export);
+						fputs(",", fp_export);
 				}
-				fputs("\n", fp_export);
 			}
 		}
 

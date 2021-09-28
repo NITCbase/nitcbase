@@ -1,0 +1,11 @@
+fdisk
+import health3.csv
+import grades.csv
+open table health3
+open table grades
+SELECT * FROM health3 JOIN grades INTO Students WHERE health3.id = grades.id;
+ls
+dump relcat
+dump attrcat
+export Students Students.csv
+exit
