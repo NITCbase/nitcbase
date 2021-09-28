@@ -53,6 +53,8 @@ int select_attr_from_join_handler(char sourceRelOneName[ATTR_SIZE], char sourceR
 
 void print16(char char_string_thing[ATTR_SIZE]);
 
+void print16(char char_string_thing[ATTR_SIZE], bool newline);
+
 /* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
  * I have done wherever i saw, check all that you added once again Jezzy
  */
@@ -130,9 +132,11 @@ int regexMatchAndExecute(const string input_command) {
 
         int ret = exportRelation(relname, fileName);
 
-        if (ret == SUCCESS)
-            cout << "Exported successfully into: " << filePath << endl;
-        else {
+        if (ret == SUCCESS) {
+            cout << "Exported ";
+            print16(relname, false);
+            cout << " successfully to: " << filePath << endl;
+        } else {
             cout << "Export Command Failed" << endl;
             return FAILURE;
         }
@@ -146,7 +150,9 @@ int regexMatchAndExecute(const string input_command) {
 
         int ret = openRel(relname);
         if (ret >= 0 && ret <= 11) {
-            cout << "Relation opened successfully\n";
+            cout << "Relation ";
+            print16(relname, false);
+            cout << " opened successfully\n";
         } else {
             printErrorMsg(ret);
             return FAILURE;
@@ -161,7 +167,9 @@ int regexMatchAndExecute(const string input_command) {
 
         int ret = closeRel(relname);
         if (ret == SUCCESS) {
-            cout << "Relation Closed Successfully\n";
+            cout << "Relation ";
+            print16(relname, false);
+            cout << " closed successfully\n";
         } else {
             printErrorMsg(ret);
             return FAILURE;
@@ -192,7 +200,9 @@ int regexMatchAndExecute(const string input_command) {
 
         int ret = createRel(relname, no_attrs, attribute, type_attr);
         if (ret == SUCCESS) {
-            cout << "Relation created successfully" << endl;
+            cout << "Relation ";
+            print16(relname, false);
+            cout << " created successfully" << endl;
         } else {
             printErrorMsg(ret);
             return FAILURE;
@@ -206,9 +216,11 @@ int regexMatchAndExecute(const string input_command) {
         if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0)
             cout << "Cannot delete Relation Catalog or Attribute Catalog" << endl;
         int ret = deleteRel(relname);
-        if (ret == SUCCESS)
-            cout << "Relation deleted successfully" << endl;
-        else {
+        if (ret == SUCCESS) {
+            cout << "Relation ";
+            print16(relname, false);
+            cout << " deleted successfully\n";
+        } else {
             printErrorMsg(ret);
             return FAILURE;
         }
@@ -733,6 +745,19 @@ void print16(char char_string_thing[ATTR_SIZE]) {
         cout << char_string_thing[i];
     }
     cout << endl;
+}
+
+void print16(char char_string_thing[ATTR_SIZE], bool newline) {
+    for (int i = 0; i < ATTR_SIZE; i++) {
+        if (char_string_thing[i] == '\0') {
+            break;
+        }
+        cout << char_string_thing[i];
+    }
+    if(newline) {
+        cout << endl;
+    }
+    return;
 }
 
 // TODO: What to do when one line Fails - EXIT?

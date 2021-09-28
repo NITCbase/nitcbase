@@ -23,7 +23,7 @@ std::regex echo("\\s*(ECHO|echo)\\s+([a-zA-Z0-9 _,()'?:.-]+)\\s*[;]*");
 
 // TODO: Remove Semicolons, Make ALL Commands accept all Lower or all upper case as well
 /* DDL Commands*/
-std::regex create_table("\\s*(CREATE|create)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*\\(\\s*([A-Za-z0-9_-]+\\s+(STR|NUM),[ ]*\\s*)*([A-Za-z0-9_-]+\\s+(STR|NUM))\\s*\\)\\s*[;]*");
+std::regex create_table("\\s*(CREATE|create)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*\\(\\s*([A-Za-z0-9_-]+\\s+(STR|NUM),[ ]*\\s*)*([A-Za-z0-9_-]+\\s+(STR|NUM))\\s*\\)\\s*[;]*\\s*");
 std::regex drop_table("\\s*(DROP|drop)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*[;]*\\s*");
 std::regex open_table("\\s*(OPEN|open)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*[;]*\\s*");
 std::regex close_table("\\s*(CLOSE|close)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*[;]*\\s*");

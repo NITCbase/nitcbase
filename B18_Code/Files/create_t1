@@ -1,0 +1,49 @@
+fdisk
+ls
+CREATE TABLE new1(Id NUM, Name STR, Age NUM);
+CREATE TABLE new2(Id NUM, Name STR, Age NUM, Height NUM);
+CREATE TABLE new3(Id NUM, Name STR, Age NUM, Gender NUM);
+CREATE TABLE new4(Id NUM, Name STR, Age NUM);
+CREATE TABLE new5(Id NUM, Name STR, Age NUM);
+CREATE TABLE new6(Id NUM, Name STR, Age NUM);
+CREATE TABLE new7(Id NUM, Name STR, Age NUM);
+CREATE TABLE new8(Id NUM, Name STR, Age NUM, Grade STR);
+CREATE TABLE new9(Id NUM, Name STR, Age NUM);
+CREATE TABLE new10(Id NUM, Name STR, Age NUM);
+CREATE TABLE new11(Id NUM, Name STR, Age NUM);
+CREATE TABLE new12(Id NUM, Name STR, Age NUM);
+CREATE TABLE new13(Id NUM, Name STR, Age NUM);
+CREATE TABLE new14(Id NUM, Name STR, Age NUM);
+CREATE TABLE new15(Id NUM, Name STR, Age NUM);
+CREATE TABLE new16(Id NUM, Name STR, Age NUM);
+CREATE TABLE new17(Id NUM, Name STR, Age NUM);
+CREATE TABLE new18(Id NUM, Name STR, Age NUM, Weight NUM, Hair STR);
+ls
+dump relcat
+dump attrcat
+export RELATIONCAT relcat_full.csv
+export ATTRIBUTECAT attrcat_full.csv
+DROP TABLE new1;
+DROP TABLE new2;
+DROP TABLE new3;
+DROP TABLE new4;
+DROP TABLE new5;
+DROP TABLE new6;
+DROP TABLE new7;
+DROP TABLE new8;
+DROP TABLE new9;
+DROP TABLE new10;
+DROP TABLE new11;
+DROP TABLE new12;
+DROP TABLE new13;
+DROP TABLE new14;
+DROP TABLE new15;
+DROP TABLE new16;
+DROP TABLE new17;
+DROP TABLE new18;
+ls
+dump relcat
+dump attrcat
+export RELATIONCAT relcat_fin.csv
+export ATTRIBUTECAT attrcat_fin.csv
+exit
