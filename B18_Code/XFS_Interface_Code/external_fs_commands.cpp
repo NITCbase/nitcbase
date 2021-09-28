@@ -503,6 +503,7 @@ int exportRelation(char *relname, char *filename) {
 					if (l != numOfAttrs - 1)
 						fputs(",", fp_export);
 				}
+				fputs("\n", fp_export);
 			}
 		}
 

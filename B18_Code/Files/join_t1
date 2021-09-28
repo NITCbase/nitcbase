@@ -3,7 +3,7 @@ import health3.csv
 import grades.csv
 open table health3
 open table grades
-SELECT * FROM health3 JOIN grades INTO Students WHERE health3.id = grades.id;
+SELECT * FROM grades JOIN health3 INTO Students WHERE grades.id = health3.id;
 ls
 dump relcat
 dump attrcat
