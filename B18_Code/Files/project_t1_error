@@ -1,0 +1,6 @@
+fdisk
+import health3.csv
+open table health3
+echo trying project when an attribute in attribute list does not belong to the relation:
+SELECT Last_Name, First_Name, Middle_Name FROM health3 INTO health-names;
+exit

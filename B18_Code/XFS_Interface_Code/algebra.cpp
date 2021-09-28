@@ -121,12 +121,14 @@ int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZ
     int type = (int) attrcat_entry[2].nval;
     Attribute val;
     if (type == NUMBER) {
-        val.nval = std::stof(val_str);
+        try {
+            val.nval = std::stof(val_str);
+        } catch(std::invalid_argument& e) {
+            return E_ATTRTYPEMISMATCH;
+        }
     } else if (type == STRING) {
         strcpy(val.sval, val_str);
-    } else
-        return E_NATTRMISMATCH;
-
+    }
 
     Attribute src_relcat_entry[NO_OF_ATTRS_RELCAT_ATTRCAT];
     getRelCatEntry(srcrelid, src_relcat_entry);

@@ -1,22 +1,6 @@
 fdisk
-CLOSE TABLE helloworld
 import health3.csv
 OPEN TABLE health3
-echo select people aged less than 26
-SELECT * FROM health3 INTO health3_young WHERE Age < 26;
-export health3_young health3_young.csv
-OPEN TABLE health3_young
-echo select people aged less than 26 and weighing more than 190
-SELECT * FROM health3_young INTO health3_tmp WHERE Weight >= 190;
-OPEN TABLE health3_tmp
-echo select people aged less than 26 and weighing more than 190 and height equal to 74
-SELECT * FROM health3_tmp INTO health3_unhealthy WHERE Height = 74;
-CLOSE TABLE health3_young
-CLOSE TABLE health3_tmp
-DROP TABLE health3_young
-DROP TABLE health3_tmp
-export health3_unhealthy health3_unhealthy.csv
-CLOSE TABLE health3_unhealthy;
-DROP TABLE health3_young;
-DROP TABLE health3_unhealthy;
+echo select when attribute value's type has mismatch
+SELECT * FROM health3 INTO health3_young WHERE Age < young;
 exit
