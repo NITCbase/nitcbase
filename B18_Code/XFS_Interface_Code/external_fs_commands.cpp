@@ -180,16 +180,10 @@ void ls() {
 	}
 	std::cout << "\n";
 }
-/*
- * attr -1st line
- * attr_type - 2nd line
- * attribute - attribute names
- *
- */
+
 int importRelation(char *fileName) {
 
 	FILE *file = fopen(fileName, "r");
-
 
 	/*
 	 *  GET ATTRIBUTE NAMES FROM FIRST LINE OF FILE
