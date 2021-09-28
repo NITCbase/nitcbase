@@ -1,11 +1,15 @@
 fdisk
 import health3.csv
 import grades.csv
+import grades-lastname.csv
 open table health3
 open table grades
+open table grades-lastname
 SELECT * FROM grades JOIN health3 INTO Students WHERE grades.id = health3.id;
+SELECT * FROM grades-lastname JOIN health3 INTO Students_lastname WHERE grades-lastname.Last_Name = health3.Last_Name;
 ls
 dump relcat
 dump attrcat
 export Students Students.csv
+export Students_lastname Students_lastname.csv
 exit
