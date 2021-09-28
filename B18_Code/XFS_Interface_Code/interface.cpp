@@ -1,7 +1,6 @@
 //
 // Created by Gokul Sreekumar on 16/08/21.
 //
-// TODO : rename interface_new.cpp to interface.cpp
 // TODO : review if we need to keep ';' at the end of commands
 #include <iostream>
 #include <fstream>
@@ -271,7 +270,7 @@ int regexMatchAndExecute(const string input_command) {
     } else if (regex_match(input_command, insert_multiple)) {
         regex_search(input_command, m, insert_multiple);
         string tablename = m[3];
-        char relname[16];
+        char relname[ATTR_SIZE];
         string p = FILES_PATH;
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
         string t = m[6];
@@ -387,10 +386,10 @@ int regexMatchAndExecute(const string input_command) {
         string op_str = command_tokens[index_of_where + 2];
         string value_str = command_tokens[index_of_where + 3];
 
-        char sourceRelName[16];
-        char targetRelName[16];
-        char attribute[16];
-        char value[16];
+        char sourceRelName[ATTR_SIZE];
+        char targetRelName[ATTR_SIZE];
+        char attribute[ATTR_SIZE];
+        char value[ATTR_SIZE];
         int op = getOperator(op_str);
 
         string_to_char_array(attribute_str, attribute, ATTR_SIZE - 1);
