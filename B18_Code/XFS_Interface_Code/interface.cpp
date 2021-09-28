@@ -62,6 +62,11 @@ int regexMatchAndExecute(const string input_command) {
         display_help();
     } else if (regex_match(input_command, ex)) {
         return EXIT;
+    } else if (regex_match(input_command, echo)) {
+        regex_search(input_command, m, echo);
+        string message = m[2];
+        /* TODO: add bmap, relcat, attrcat check */
+        cout << message << endl;
     } else if (regex_match(input_command, run)) {
         regex_search(input_command, m, run);
         string file_name = m[2];
