@@ -1,0 +1,78 @@
+fdisk
+ls
+CREATE TABLE new(Age NUM, Name STR)
+ls
+CREATE TABLE new1(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new2(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new3(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new4(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new5(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new6(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new7(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new8(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new9(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new10(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new11(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new12(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new13(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new14(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new15(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new16(Age NUM, Name STR, Salary NUM)
+ls
+CREATE TABLE new17(Age NUM, Name STR, Salary NUM)
+ls
+export RELATIONCAT all_relcat.csv
+export ATTRIBUTECAT all_attrcat.csv
+DROP TABLE new
+ls
+DROP TABLE new1
+ls
+DROP TABLE new2
+ls
+DROP TABLE new3
+ls
+DROP TABLE new4
+ls
+DROP TABLE new5
+ls
+DROP TABLE new6
+ls
+DROP TABLE new7
+ls
+DROP TABLE new8
+ls
+DROP TABLE new9
+ls
+DROP TABLE new10
+ls
+DROP TABLE new11
+ls
+DROP TABLE new12
+ls
+DROP TABLE new13
+ls
+DROP TABLE new14
+ls
+DROP TABLE new15
+ls
+DROP TABLE new16
+ls
+DROP TABLE new17
+ls
+export RELATIONCAT fin_relcat.csv
+export ATTRIBUTECAT fin_attrcat.csv

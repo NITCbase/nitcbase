@@ -1,6 +1,0 @@
-fdisk
-import fruits.csv
-export fruits fruits1.csv
-dump relcat
-dump attrcat
-exit

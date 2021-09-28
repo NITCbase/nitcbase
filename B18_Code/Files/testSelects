@@ -1,9 +1,0 @@
-fdisk
-SELECT * FROM ATTRIBUTECAT INTO target1;
-export target1 res1.csv;
-SELECT AttributeName, RelName FROM ATTRIBUTECAT INTO target2;
-export target2 res2.csv;
-SELECT * FROM ATTRIBUTECAT INTO target3 WHERE RelName = RELATIONCAT;
-export target3 res3.csv;
-SELECT AttributeName, RelName, AttributeType FROM ATTRIBUTECAT INTO target4 WHERE AttributeType = 3;
-export target4 res4.csv;

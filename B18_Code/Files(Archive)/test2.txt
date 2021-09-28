@@ -1,0 +1,13 @@
+fdisk
+CREATE TABLE rainbow (color STR);
+OPEN TABLE rainbow;
+INSERT INTO rainbow VALUES (red);
+INSERT INTO rainbow VALUES (green);
+INSERT INTO rainbow VALUES (blue);
+INSERT INTO rainbow VALUES (yellow);
+INSERT INTO rainbow VALUES (purple);
+INSERT INTO rainbow VALUES (pink);
+export rainbow rainbow.csv
+dump relcat
+dump attrcat
+exit
