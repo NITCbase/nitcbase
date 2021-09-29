@@ -1,0 +1,24 @@
+fdisk
+create table a(id NUM)
+create table b(id NUM)
+create table c(id NUM)
+create table d(id NUM)
+create table e(id NUM)
+create table f(id NUM)
+create table g(id NUM)
+create table h(id NUM)
+create table i(id NUM)
+create table j(id NUM)
+create table k(id NUM)
+open table a
+open table b
+open table c
+open table d
+open table e
+open table f
+open table g
+open table h
+open table i
+open table j
+open table k
+exit

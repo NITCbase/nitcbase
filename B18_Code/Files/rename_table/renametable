@@ -1,0 +1,22 @@
+*** renaming RELATIONCAT / ATTRIBUTECAT
+alter table rename ATTRIBUTECAT to a
+alter table rename RELATIONCAT to a
+
+*** renaming when relation already exists
+fdisk
+create table a(id NUM)
+create table b(id NUM)
+alter table rename a to b
+exit
+
+*** renaming when relation does not exist
+fdisk
+alter table rename a to b
+exit
+
+*** renaming when relation open
+fdisk
+create table a(id NUM)
+open table a
+alter table rename a to b
+exit

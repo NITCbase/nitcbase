@@ -105,7 +105,10 @@ int openRel(char relationName[ATTR_SIZE]) {
 }
 
 int closeRel(char relationName[ATTR_SIZE]) {
-	return OpenRelations::closeRelation(OpenRelations::getRelationId(relationName));
+	int relId = OpenRelations::getRelationId(relationName);
+	if(relId< 0 || relId >= MAX_OPEN)
+		return E_RELNOTOPEN;
+	return OpenRelations::closeRelation(relId);
 }
 
 int closeRel(int relid) {
