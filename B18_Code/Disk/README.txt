@@ -1,2 +1,2 @@
-A Binary File that disk is present in this directory
+A Binary File in which disk for NITCbase is simulated
 NITCBase Filesystem is present inside this "disk" binary file
