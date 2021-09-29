@@ -17,7 +17,7 @@ std::regex imp("\\s*(IMPORT|import)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*[;]*");
 std::regex exp("\\s*(EXPORT|export)\\s+([A-Za-z0-9_-]+)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*[;]*");
 std::regex list_all("\\s*(LS|ls)\\s*[;]*");
 std::regex ex("\\s*(EXIT|exit)\\s*\\s*[;]*");
-std::regex run("\\s*(RUN|run)\\s+([a-zA-Z0-9_.-]+)\\s*[;]*");
+std::regex run("\\s*(RUN|run)\\s+([a-zA-Z0-9_/.-]+)\\s*[;]*");
 std::regex echo("\\s*(ECHO|echo)\\s+([a-zA-Z0-9 _,()'?:.-]+)\\s*[;]*");
 // std::regex run("\\s*(RUN|run)\\s+([a-zA-Z0-9_-]+\\.txt)\\s*"); // IF WE NEED .txt in run file name
 
