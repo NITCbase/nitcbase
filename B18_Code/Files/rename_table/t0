@@ -1,0 +1,5 @@
+echo renaming relation students to pupil
+fdisk
+create table students(id NUM)
+alter table rename students to pupil
+exit

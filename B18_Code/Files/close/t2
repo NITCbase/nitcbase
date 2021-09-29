@@ -1,0 +1,4 @@
+fdisk
+echo trying to close a relation which is not open
+create table students(id NUM)
+close table students

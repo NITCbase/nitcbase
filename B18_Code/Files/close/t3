@@ -1,0 +1,3 @@
+fdisk
+echo trying to close RELATIONCAT / ATTRIBUTECAT
+close table RELATIONCAT
