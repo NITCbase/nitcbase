@@ -1,0 +1,6 @@
+echo trying to rename relation to a name which already exists
+fdisk
+create table a(id NUM)
+create table b(id NUM)
+alter table rename a to b
+exit

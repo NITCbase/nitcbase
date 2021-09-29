@@ -1,0 +1,4 @@
+echo trying to rename a relation which does not exist
+fdisk
+alter table rename a to b
+exit
