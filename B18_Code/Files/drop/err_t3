@@ -1,0 +1,6 @@
+fdisk
+echo dropping an open relation
+CREATE TABLE new1(id NUM);
+OPEN TABLE new1;
+DROP TABLE new1;
+exit

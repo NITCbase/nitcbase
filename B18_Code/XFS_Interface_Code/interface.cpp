@@ -92,14 +92,14 @@ int regexMatchAndExecute(const string input_command) {
     } else if (regex_match(input_command, list_all)) {
         ls();
     } else if (regex_match(input_command, imp)) {
-        string Filepath;
-        string p = FILES_PATH;
+        string filepath_str;
+        string complete_filepath = FILES_PATH;
         regex_search(input_command, m, imp);
-        Filepath = m[2];
-        p = p + Filepath;
-        char f[p.length() + 1];
-        string_to_char_array(p, f, p.length() + 1);
-        FILE *file = fopen(f, "r");
+        filepath_str = m[2];
+        complete_filepath = complete_filepath + filepath_str;
+        char filepath[complete_filepath.length() + 1];
+        string_to_char_array(complete_filepath, filepath, complete_filepath.length() + 1);
+        FILE *file = fopen(filepath, "r");
         if (!file) {
             cout << "Invalid file path or file does not exist" << endl;
             return FAILURE;
@@ -111,10 +111,10 @@ int regexMatchAndExecute(const string input_command) {
             cout << "Command Failed" << endl;
             return FAILURE;
         }
-        int ret = importRelation(f);
-        if (ret == SUCCESS)
-            cout << "Imported successfully" << endl;
-        else {
+        int ret = importRelation(filepath);
+        if (ret == SUCCESS) {
+            cout << "Imported from " << complete_filepath << " successfully" << endl;
+        } else {
             printErrorMsg(ret);
             return FAILURE;
         }
@@ -213,8 +213,11 @@ int regexMatchAndExecute(const string input_command) {
         string tablename = m[3];
         char relname[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
-        if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0)
-            cout << "Cannot delete Relation Catalog or Attribute Catalog" << endl;
+        if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0) {
+            cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
+            return FAILURE;
+        }
+
         int ret = deleteRel(relname);
         if (ret == SUCCESS) {
             cout << "Relation ";
@@ -901,12 +904,12 @@ void string_to_char_array(string x, char *a, int size) {
 }
 
 bool checkValidCsvFile(const string filename) {
-    int pos1 = filename.rfind('.');
-    if (filename.substr(pos1 + 1, filename.length()) == "csv") {
-        string file_name = filename.substr(0, pos1);
+    int pos_dot = filename.rfind('.');
+    if (filename.substr(pos_dot + 1, filename.length()) == "csv") {
+        string file_name = filename.substr(0, pos_dot);
         if (file_name.length() > ATTR_SIZE - 1) {
-            cout << " File name should have at most 15 characters\n";
-            return false;
+            cout << "File name is more than 15 characters, trimming to get relation name\n";
+            return true;
         } else
             return true;
     } else

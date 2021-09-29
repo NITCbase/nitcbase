@@ -1,0 +1,2 @@
+echo dropping attrcat
+DROP TABLE ATTRIBUTECAT

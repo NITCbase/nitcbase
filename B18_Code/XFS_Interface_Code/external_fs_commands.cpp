@@ -270,20 +270,20 @@ int importRelation(char *fileName) {
 	currentCharIndexInLine = 0;
 	char relationName[ATTR_SIZE];
 	int fileNameIterator = strlen(fileName) - 1;
-	while (fileName[fileNameIterator] != '.') {fileNameIterator--;
+	while (fileName[fileNameIterator] != '.') {
+		fileNameIterator--;
 	}
 	fileNameIterator--;
 	int end = fileNameIterator;
 	while (fileName[fileNameIterator] != '/') {
 		fileNameIterator--;
 	}
-	int start = fileNameIterator + 1;
-	int f = 0;
-	for (; start <= end; start++) {
-		relationName[f] = fileName[start];
-		f++;
+	int start;
+	int relname_iter;
+	for (start = fileNameIterator + 1, relname_iter = 0; start <= end && relname_iter < 15; start++, relname_iter++) {
+		relationName[relname_iter] = fileName[start];
 	}
-	relationName[f] = '\0';
+	relationName[relname_iter] = '\0';
 
 	// CREATE RELATION
 	int ret;
