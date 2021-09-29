@@ -1,0 +1,5 @@
+echo renaming attr which does not exist
+fdisk
+create table a(id NUM)
+alter table rename a column identifier to rollno
+exit

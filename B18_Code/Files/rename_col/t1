@@ -1,0 +1,6 @@
+echo renaming column when relation open
+fdisk
+create table a(id NUM)
+open table a
+alter table rename a column id to rollno
+exit
