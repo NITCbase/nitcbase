@@ -1,0 +1,3 @@
+fdisk
+echo trying to open a relation which does not exist
+open table students

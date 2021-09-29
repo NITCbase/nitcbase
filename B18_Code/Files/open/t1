@@ -20,5 +20,6 @@ open table g
 open table h
 open table i
 open table j
+echo opened 10 tables, now trying to open 11th table
 open table k
 exit
