@@ -1,0 +1,2 @@
+echo Dropping a table which does not exist
+DROP TABLE non-existent;

@@ -149,7 +149,7 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
         int ret = openRel(relname);
-        if (ret >= 0 && ret <= 11) {
+        if (ret >= 0 && ret <= MAX_OPEN - 1) {
             cout << "Relation ";
             print16(relname, false);
             cout << " opened successfully\n";
