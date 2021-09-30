@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstring>
 #include <string>
+#include <unordered_set>
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "disk_structures.h"
@@ -353,9 +354,9 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
         return srcRelId2;
 
     // GET RELATION CATALOG ENTRIES OF JOIN ATTRIBUTES OF SRC RELATIONS
-    Attribute attrcat_entry1[6];
+    Attribute attrcat_entry1[NO_OF_ATTRS_RELCAT_ATTRCAT];
     int flag1 = getAttrCatEntry(srcRelId1, attr1, attrcat_entry1);
-    Attribute attrcat_entry2[6];
+    Attribute attrcat_entry2[NO_OF_ATTRS_RELCAT_ATTRCAT];
     int flag2 = getAttrCatEntry(srcRelId2, attr2, attrcat_entry2);
 
     // if attr1 is not present in rel1 or attr2 not present in rel2 (failure of call to Openreltable) return E_ATTRNOTEXIST.
@@ -385,8 +386,11 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
      * targetRelAttrTypes : array of attribute types
      */
 
+    // GET THE NAMES AND TYPES OF ATTRIBUTES IN TARGET RELATION
+
     char targetRelAttrNames[nAttrs1 + nAttrs2 - 1][ATTR_SIZE];
     int targetRelAttrTypes[nAttrs1 + nAttrs2 - 1];
+    std::unordered_set<std::string> targetRelAttributesSet;
 
     char srcRelation1[ATTR_SIZE];
     OpenRelations::getRelationName(srcRelId1, srcRelation1);
@@ -394,6 +398,7 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
         Attribute attrCatalogEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
         getAttrCatEntry(srcRelId1, iter, attrCatalogEntry);
         strncpy(targetRelAttrNames[iter], attrCatalogEntry[1].sval, ATTR_SIZE);
+        targetRelAttributesSet.insert(attrCatalogEntry[1].sval);
         targetRelAttrTypes[iter] = attrCatalogEntry[2].nval;
     }
     int attrIndex = nAttrs1;
@@ -405,18 +410,24 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
         getAttrCatEntry(srcRelId2, iter, attrCatalogEntry);
 
         if (strcmp(attr2, attrCatalogEntry[1].sval) != 0) {
+
+	        // check if any 2 attributes in source relations have same name
+	        if(targetRelAttributesSet.find(attrCatalogEntry[1].sval) != targetRelAttributesSet.end()) {
+		        std::cout << "source relations have at least one attribute (other than join attributes) with same name\n";
+		        return FAILURE;
+	        }
+
             targetRelAttrTypes[attrIndex] = attrCatalogEntry[2].nval;
             strncpy(targetRelAttrNames[attrIndex++], attrCatalogEntry[1].sval, ATTR_SIZE);
         }
     }
 
+    // CREATE TARGET RELATION AND OPEN IT OPEN REL TABLE
     int flag = createRel(targetRelation, nAttrs1 + nAttrs2 - 1, targetRelAttrNames, targetRelAttrTypes);
     if (flag != SUCCESS) {
-        return flag; // target rel may already exist or attrs more than limit or ...
+        return flag;
     }
-
     int targetRelId = OpenRelations::openRelation(targetRelation);
-
     if (targetRelId == E_CACHEFULL) {
         deleteRel(targetRelation);
         return E_CACHEFULL;
