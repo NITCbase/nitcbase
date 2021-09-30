@@ -1,0 +1,8 @@
+fdisk
+import pupil.csv
+import reward.csv
+open table pupil
+open table reward
+echo trying to perform join on attributes with different types
+SELECT * FROM pupil JOIN reward INTO test_join2 WHERE pupil.marks = reward.grade;
+exit

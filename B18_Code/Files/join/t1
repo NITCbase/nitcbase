@@ -1,15 +1,8 @@
 fdisk
-import health3.csv
-import grades.csv
-import grades-lastname.csv
-open table health3
-open table grades
-open table grades-lastname
-SELECT * FROM grades JOIN health3 INTO Students WHERE grades.id = health3.id;
-SELECT * FROM grades-lastname JOIN health3 INTO Students_lastname WHERE grades-lastname.Last_Name = health3.Last_Name;
-ls
-dump relcat
-dump attrcat
-export Students Students.csv
-export Students_lastname Students_lastname.csv
+import pupil.csv
+import reward.csv
+open table pupil
+echo performing join on 2 tables - pupil, reward
+echo table reward is not open
+SELECT * FROM pupil JOIN reward INTO pupil_reward WHERE pupil.final_grade = reward.grade;
 exit

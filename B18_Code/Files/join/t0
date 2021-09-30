@@ -1,0 +1,11 @@
+fdisk
+import pupil.csv
+import reward.csv
+open table pupil
+open table reward
+echo performing join on 2 tables - pupil, reward
+SELECT * FROM pupil JOIN reward INTO pupil_reward WHERE pupil.final_grade = reward.grade;
+dump relcat
+dump attrcat
+export pupil_reward pupil_reward.csv
+exit

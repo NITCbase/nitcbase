@@ -1,0 +1,9 @@
+fdisk
+import pupil.csv
+import pupil1.csv
+open table pupil
+open table pupil1
+echo source relations have two attributes with same name : name, final_grade
+echo trying to perform join on name
+SELECT * FROM pupil JOIN pupil1 INTO test_join1 WHERE pupil.name = pupil1.name;
+exit
