@@ -1,0 +1,5 @@
+fdisk
+CREATE TABLE color (color STR, id NUM);
+OPEN TABLE color;
+echo trying to insert records into TABLE from a file with differing number of attributes
+INSERT INTO color VALUES FROM color_values.csv;
