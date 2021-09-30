@@ -1,0 +1,3 @@
+fdisk
+echo trying to import relation from a file having invalid characters as attribute values
+import fruits_e4.csv

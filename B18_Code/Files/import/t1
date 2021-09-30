@@ -1,0 +1,3 @@
+fdisk
+echo trying to import relation from a file with different number of attributes in a row
+import fruits_e1.csv

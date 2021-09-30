@@ -1,0 +1,4 @@
+fdisk
+CREATE TABLE fruits(Id NUM);
+echo trying to import relation from a file when a relation with same name already exists
+import fruits.csv

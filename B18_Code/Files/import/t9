@@ -1,0 +1,4 @@
+fdisk
+echo trying to import relation from a file with filename having more than 15 characters
+import fruits_large_name_trim.csv
+ls

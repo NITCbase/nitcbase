@@ -1,0 +1,6 @@
+fdisk
+import fruits.csv
+export fruits fruits_new.csv
+dump relcat
+dump attrcat
+exit
