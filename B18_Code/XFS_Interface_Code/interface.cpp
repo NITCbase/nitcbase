@@ -182,6 +182,12 @@ int regexMatchAndExecute(const string input_command) {
         char relname[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
+        // 'temp' is used for internal purposes as of now
+        if (std::strcmp(relname, TEMP) == 0) {
+            cout << "Error: relation name 'temp' is used for internal purposes" << endl;
+            return FAILURE;
+        }
+
         regex_search(input_command, m, temp);
         string attrs = m[0];
         vector<string> words = extract_tokens(attrs);

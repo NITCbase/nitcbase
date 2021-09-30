@@ -1,0 +1,9 @@
+echo -------------
+run insert/err_t1
+echo -------------
+run insert/err_t2
+echo -------------
+run insert/err_t3
+echo -------------
+fdisk
+exit

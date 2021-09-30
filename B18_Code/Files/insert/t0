@@ -1,0 +1,14 @@
+fdisk
+echo creating a new relation Student_Grades
+CREATE TABLE Student_Grades(ID NUM, FirstName STR, Grade STR);
+echo inserting few records
+OPEN TABLE Student_Grades;
+INSERT INTO Student_Grades VALUES (1, Isa, S);
+INSERT INTO Student_Grades VALUES (2, Lynne, A);
+INSERT INTO Student_Grades VALUES (3, Stacy, C);
+INSERT INTO Student_Grades VALUES (4, Mark, B);
+INSERT INTO Student_Grades VALUES (5, Luna, D);
+CLOSE TABLE Student_Grades;
+echo exporting this table
+export Student_Grades Student_Grades.csv
+fdisk

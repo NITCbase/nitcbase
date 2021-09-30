@@ -1,0 +1,5 @@
+fdisk
+echo the actual type of the attribute in the relation is different from the type of provided attribute in the record
+CREATE TABLE new(ID NUM);
+OPEN TABLE new;
+INSERT INTO new VALUES (Hello);

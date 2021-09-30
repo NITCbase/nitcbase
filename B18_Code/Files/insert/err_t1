@@ -1,0 +1,4 @@
+fdisk
+echo inserting when relation to insert into is not open
+CREATE TABLE new(ID NUM);
+INSERT INTO new VALUES (1);

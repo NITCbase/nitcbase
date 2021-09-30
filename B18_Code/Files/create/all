@@ -1,5 +1,10 @@
+echo -------------
 run create/t1
+echo -------------
 run create/err_t0
+echo -------------
 run create/err_t1
+echo -------------
 run create/err_t2
+echo -------------
 exit
