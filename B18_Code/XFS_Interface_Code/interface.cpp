@@ -856,6 +856,8 @@ void printErrorMsg(int ret) {
         cout << "Error: Mismatch in attribute type" << endl;
     else if (ret == E_INVALID)
         cout << "Error: Invalid index or argument" << endl;
+    else if (ret == E_MAXRELATIONS)
+        cout << "Error: Maximum number of relations already present" << endl;
 }
 
 vector<string> extract_tokens(string input_command) {

@@ -3,4 +3,3 @@ import health3.csv
 echo creating a relation of same name as an existing one
 CREATE TABLE health3(id NUM);
 DROP TABLE health3
-exit

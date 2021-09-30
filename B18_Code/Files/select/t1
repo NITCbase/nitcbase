@@ -20,4 +20,3 @@ DROP TABLE health3_tmp
 export health3_unhealthy health3_unhealthy.csv
 export health3_wt_equal health3_wt_equal.csv
 ls
-exit

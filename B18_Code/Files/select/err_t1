@@ -3,4 +3,3 @@ import health3.csv
 OPEN TABLE health3
 echo select when attribute value's type has mismatch
 SELECT * FROM health3 INTO health3_young WHERE Age < young;
-exit

@@ -20,5 +20,6 @@
 #define E_RELOPEN -16
 #define E_ATTRTYPEMISMATCH -17
 #define E_INVALID -18
+#define E_MAXRELATIONS -19
 
 #endif //B18_CODE_ERRORS_H

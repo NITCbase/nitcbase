@@ -46,4 +46,3 @@ dump relcat
 dump attrcat
 export RELATIONCAT relcat_fin.csv
 export ATTRIBUTECAT attrcat_fin.csv
-exit

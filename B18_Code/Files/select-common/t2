@@ -23,6 +23,5 @@ OPEN TABLE rel10;
 echo selecting from relation catalog after 12 total opened tables
 SELECT * FROM RELATIONCAT INTO relcat1;
 fdisk
-exit
 
 

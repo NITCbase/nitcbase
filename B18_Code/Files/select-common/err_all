@@ -1,0 +1,4 @@
+run select-common/t1
+run select-common/t2
+run select-common/t3
+exit

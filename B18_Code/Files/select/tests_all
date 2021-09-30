@@ -1,0 +1,4 @@
+fdisk
+run select/t1
+run select/t2
+exit

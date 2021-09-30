@@ -1,0 +1,4 @@
+run create/err_t0
+run create/err_t1
+run create/err_t2
+exit

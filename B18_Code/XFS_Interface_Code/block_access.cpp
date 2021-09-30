@@ -85,8 +85,12 @@ int ba_insert(int relid, Attribute *rec) {
 
 	// no free slot found
 	if (recid.block == -1 && recid.slot == -1) {
-		return FAILURE;
-	}
+        return FAILURE;
+	} else if (recid.block == E_MAXRELATIONS && recid.slot == E_MAXRELATIONS) {
+        // only one block allowed for RELCAT
+        return E_MAXRELATIONS;
+    }
+
 	setRecord(rec, recid.block, recid.slot);
 
 	// increment #entries in header (as record is inserted)
@@ -527,8 +531,13 @@ recId getFreeSlot(int block_num) {
 	/*
 	 * no free slots in current record blocks
 	 * get new record block
+	 * in case of RELCAT, do not go for next block (only one block allowed)
 	 */
-	block_num = getFreeRecBlock();
+    if (prev_block_num == RELCAT_BLOCK) {
+       return {E_MAXRELATIONS, E_MAXRELATIONS};
+    } else {
+        block_num = getFreeRecBlock();
+    }
 
 	// no free blocks available in disk
 	if (block_num == -1) {

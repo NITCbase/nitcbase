@@ -17,4 +17,3 @@ SELECT * FROM grade-F-details INTO grade-F-fancy WHERE Last_Name > Guthrie;
 ls
 export grade-F-details grade-F-details.csv
 export grade-F-fancy grade-F-fancy.csv
-exit
