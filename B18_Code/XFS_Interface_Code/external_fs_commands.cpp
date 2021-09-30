@@ -22,6 +22,8 @@ void writeHeaderToFile(FILE *fp_export, HeadInfo h);
 
 void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineFlag);
 
+bool checkIfInvalidCharacter(char character);
+
 
 void dump_relcat() {
     string relation_catalog = "relation_catalog";
@@ -194,7 +196,6 @@ int importRelation(char *fileName) {
 	int numOfAttributes = 1;
 	previousCharacter = ',';
 	while ((currentCharacter = fgetc(file)) != '\n') {
-
 		if (currentCharacter == EOF)
 			break;
 		while (currentCharacter == ' ' || currentCharacter == '\t' || currentCharacter == '\n') {
@@ -205,7 +206,7 @@ int importRelation(char *fileName) {
 		if (currentCharacter == ',') {
 			numOfAttributes++;
 			if (previousCharacter == currentCharacter) {
-				cout << "Null values are not allowed in attributeNames names\n";
+				cout << "Null values are not allowed in attribute names\n";
 				return FAILURE;
 			}
 		}
@@ -216,7 +217,7 @@ int importRelation(char *fileName) {
 	}
 
 	if (previousCharacter == ',') {
-		cout << "Null values are not allowed in attributeNames names\n";
+		cout << "Null values are not allowed in attribute names\n";
 		return FAILURE;
 	}
 
@@ -226,10 +227,14 @@ int importRelation(char *fileName) {
 	attrOffsetIterator = 0;
 	while (attrOffsetIterator < numOfAttributes) {
 		attributeIndexIterator = 0;
-		while (((firstLine[currentCharIndexInLine] != ',') && (firstLine[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < 15)) {
+		while (((firstLine[currentCharIndexInLine] != ',') && (firstLine[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < ATTR_SIZE - 1)) {
+			if (checkIfInvalidCharacter(firstLine[currentCharIndexInLine])) {
+				cout << "Invalid character : '" << firstLine[currentCharIndexInLine] <<  "' in attribute name\n";
+				return FAILURE;
+			}
 			attributeNames[attrOffsetIterator][attributeIndexIterator++] = firstLine[currentCharIndexInLine++];
 		}
-		if (attributeIndexIterator == 15) {
+		if (attributeIndexIterator == ATTR_SIZE - 1) {
 			while (firstLine[currentCharIndexInLine] != ',')
 				currentCharIndexInLine++;
 		}
@@ -256,7 +261,7 @@ int importRelation(char *fileName) {
 	attrOffsetIterator = 0;
 	while (attrOffsetIterator < numOfAttributes) {
 		attributeIndexIterator = 0;
-		while (((secondLine[currentCharIndexInLine] != ',') && (secondLine[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < 15)) {
+		while (((secondLine[currentCharIndexInLine] != ',') && (secondLine[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < ATTR_SIZE - 1)) {
 			secondLineFields[attrOffsetIterator][attributeIndexIterator++] = secondLine[currentCharIndexInLine++];
 		}
 		secondLineFields[attrOffsetIterator][attributeIndexIterator] = '\0';
@@ -280,8 +285,11 @@ int importRelation(char *fileName) {
 	}
 	int start;
 	int relname_iter;
-	for (start = fileNameIterator + 1, relname_iter = 0; start <= end && relname_iter < 15; start++, relname_iter++) {
+	for (start = fileNameIterator + 1, relname_iter = 0; start <= end && relname_iter < ATTR_SIZE - 1; start++, relname_iter++) {
 		relationName[relname_iter] = fileName[start];
+	}
+	if (relname_iter == ATTR_SIZE - 1) {
+		cout << "File name is more than 15 characters, trimming to get relation name\n";
 	}
 	relationName[relname_iter] = '\0';
 
@@ -290,7 +298,7 @@ int importRelation(char *fileName) {
 	ret = createRel(relationName, numOfAttributes, attributeNames, attrTypes);
 	if (ret != SUCCESS) {
 		cout << "Import not possible as createRel failed\n";
-		return FAILURE;
+		return ret;
 	}
 
 	// OPEN RELATION
@@ -308,7 +316,8 @@ int importRelation(char *fileName) {
 	char *currentLineAsCharArray = (char *) malloc(sizeof(char));
 	numOfCharactersInLine = 1;
 
-	while (1) {
+	int lineNumber = 2;
+	while (true) {
 		currentCharacter = fgetc(file);
 		if (currentCharacter == EOF)
 			break;
@@ -327,7 +336,6 @@ int importRelation(char *fileName) {
 			if (currentCharacter == ',')
 				numOfFieldsInLine++;
 			if (currentCharacter == previousCharacter && currentCharacter == ',') {
-
 				OpenRelations::closeRelation(relId);
 				ba_delete(relationName);
 				cout << "Null values are not allowed in attribute fields\n";
@@ -342,14 +350,14 @@ int importRelation(char *fileName) {
 
 		}
 
-		if (previousCharacter == ',' && currentCharacter != '\n') {
+		if (previousCharacter == ',') {
 			OpenRelations::closeRelation(relId);
 			ba_delete(relationName);
 
 			cout << "Null values are not allowed in attribute fields\n";
 			return FAILURE;
 		}
-		if (numOfAttributes != numOfFieldsInLine + 1 && currentCharacter != '\n') {
+		if (numOfAttributes != numOfFieldsInLine + 1) {
 			OpenRelations::closeRelation(relId);
 			ba_delete(relationName);
 			cout << "Mismatch in number of attributes\n";
@@ -363,10 +371,10 @@ int importRelation(char *fileName) {
 		while (attrOffsetIterator < numOfAttributes) {
 			attributeIndexIterator = 0;
 
-			while (((currentLineAsCharArray[currentCharIndexInLine] != ',') && (currentLineAsCharArray[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < 15)) {
+			while (((currentLineAsCharArray[currentCharIndexInLine] != ',') && (currentLineAsCharArray[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < ATTR_SIZE - 1)) {
 				attributesCharArray[attrOffsetIterator][attributeIndexIterator++] = currentLineAsCharArray[currentCharIndexInLine++];
 			}
-			if (attributeIndexIterator == 15) {
+			if (attributeIndexIterator == ATTR_SIZE - 1) {
 				while (currentLineAsCharArray[currentCharIndexInLine] != ',')
 					currentCharIndexInLine++;
 			}
@@ -378,8 +386,18 @@ int importRelation(char *fileName) {
 
 		Attribute record[numOfAttributes];
 		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, attributesCharArray, attrTypes);
-		if (retValue == E_ATTRTYPEMISMATCH)
+
+		if (retValue == E_ATTRTYPEMISMATCH) {
+			OpenRelations::closeRelation(relId);
+			ba_delete(relationName);
 			return E_ATTRTYPEMISMATCH;
+		}
+		else if (retValue == E_INVALID) {
+			OpenRelations::closeRelation(relId);
+			ba_delete(relationName);
+			cout << "Invalid character at line " << lineNumber << " in file \n";
+			return FAILURE;
+		}
 
 		int retVal = ba_insert(relId, record);
 
@@ -387,11 +405,12 @@ int importRelation(char *fileName) {
 			OpenRelations::closeRelation(relId);
 			ba_delete(relationName);
 			cout << "Insert failed" << endl;
-			return FAILURE;
+			return retVal;
 		}
 		if (currentCharacter == EOF)
 			break;
 
+		lineNumber++;
 	}
 	OpenRelations::closeRelation(relId);
 	fclose(file);
@@ -491,7 +510,7 @@ int exportRelation(char *relname, char *filename) {
 		for (slotNum = 0; slotNum < num_slots; slotNum++) {
 			if (slotmap[slotNum] == SLOT_OCCUPIED) {
 				getRecord(A, block_num, slotNum);
-				char s[16];
+				char s[ATTR_SIZE];
 				for (int l = 0; l < numOfAttrs; l++) {
 					if (attrType[l] == NUMBER) {
 						sprintf(s, "%f", A[l].nval);
@@ -526,14 +545,14 @@ void writeHeaderToFile(FILE *fp_export, HeadInfo h) {
 }
 
 void writeHeaderFieldToFile(FILE *fp, int32_t headerField) {
-	char tmp[16];
+	char tmp[ATTR_SIZE];
 	sprintf(tmp, "%d", headerField);
 	fputs(tmp, fp);
 	fputs(",", fp);
 }
 
 void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineFlag) {
-	char tmp[16];
+	char tmp[ATTR_SIZE];
 	if (type == NUMBER) {
 		sprintf(tmp, "%d", (int) attribute.nval);
 		fputs(tmp, fp);
@@ -546,4 +565,11 @@ void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineF
 	} else {
 		fputs("\n", fp);
 	}
+}
+
+bool checkIfInvalidCharacter(char character) {
+	if (character >= 48 && character <= 57 || character >= 65 && character <= 90 || character >= 97 && character <= 122 || character == '-' || character == '_') {
+		return false;
+	}
+	return true;
 }

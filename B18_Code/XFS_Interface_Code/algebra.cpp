@@ -13,8 +13,7 @@
 #include "block_access.h"
 #include "OpenRelTable.h"
 #include "schema.h"
-
-//using namespace std;
+#include "external_fs_commands.h"
 
 int checkAttrTypeOfValue(char *data);
 
@@ -22,8 +21,7 @@ int getNumberOfAttrsForRelation(int relationId);
 
 void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[]);
 
-int constructRecordFromAttrsArray(int numAttrs, Attribute record[], char recordArray[][ATTR_SIZE],
-                                  int attrTypes[]);
+int constructRecordFromAttrsArray(int numAttrs, Attribute record[], char recordArray[][ATTR_SIZE], int attrTypes[]);
 
 
 int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, char tar_attrs[][ATTR_SIZE]) {
@@ -263,7 +261,8 @@ int insert(char relName[ATTR_SIZE], char *fileName) {
 	int numOfCharactersInLine = 1;
 
 	FILE *file = fopen(fileName, "r");
-	while (1) {
+	int lineNumber = 1;
+	while (true) {
 		currentCharacter = fgetc(file);
 		if (currentCharacter == EOF)
 			break;
@@ -294,12 +293,12 @@ int insert(char relName[ATTR_SIZE], char *fileName) {
 
 		}
 
-		if (previousCharacter == ',' && currentCharacter != '\n') {
+		if (previousCharacter == ',') {
 			std::cout << "Null values not allowed in attribute values\n";
 			return FAILURE;
 		}
 
-		if (numOfAttributes != numOfFieldsInLine + 1 && currentCharacter != '\n') {
+		if (numOfAttributes != numOfFieldsInLine + 1) {
 			std::cout << "Mismatch in number of attributes\n";
 			return FAILURE;
 		}
@@ -328,6 +327,14 @@ int insert(char relName[ATTR_SIZE], char *fileName) {
 		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, attributesCharArray, attrTypes);
 		if (retValue == E_ATTRTYPEMISMATCH)
 			return E_ATTRTYPEMISMATCH;
+		else if (retValue == E_INVALID) {
+			if(lineNumber > 1) {
+				std::cout << "Rows till line " << lineNumber - 1 << " successfully inserted\n";
+			}
+			std::cout << "Invalid character at line " << lineNumber << " in file \n";
+			std::cout << "Subsequent lines will be skipped\n";
+			return FAILURE;
+		}
 
 		retValue = ba_insert(relId, record);
 		if (retValue != SUCCESS) {
@@ -336,6 +343,8 @@ int insert(char relName[ATTR_SIZE], char *fileName) {
 
 		if (currentCharacter == EOF)
 			break;
+
+		lineNumber++;
 	}
 
 	fclose(file);
@@ -539,17 +548,27 @@ void getAttrTypesForRelation(int relId, int numAttrs, int attrTypes[]) {
  *      E_ATTRTYPEMISMATCH : types dont match
  */
 int constructRecordFromAttrsArray(int numAttrs, Attribute record[], char recordArray[][ATTR_SIZE], int attrTypes[]) {
-	for (int l = 0; l < numAttrs; l++) {
+	for (int attributeOffset = 0; attributeOffset < numAttrs; attributeOffset++) {
 
-		if (attrTypes[l] == NUMBER) {
-			if (checkAttrTypeOfValue(recordArray[l]) == NUMBER)
-				record[l].nval = atof(recordArray[l]);
+		if (attrTypes[attributeOffset] == NUMBER) {
+			if (checkAttrTypeOfValue(recordArray[attributeOffset]) == NUMBER)
+				record[attributeOffset].nval = atof(recordArray[attributeOffset]);
 			else
 				return E_ATTRTYPEMISMATCH;
 		}
 
-		if (attrTypes[l] == STRING) {
-			strcpy(record[l].sval, recordArray[l]);
+		if (attrTypes[attributeOffset] == STRING) {
+			for (int charIndex = 0; charIndex < ATTR_SIZE; ++charIndex) {
+				char ch = recordArray[attributeOffset][charIndex];
+				if (ch == '\0')
+					break;
+				if (checkIfInvalidCharacter(ch)) {
+//					std::cout << "attr : " << recordArray[attributeOffset];
+//					std::cout << "  attr letter : " << ch;
+					return E_INVALID;
+				}
+			}
+			strcpy(record[attributeOffset].sval, recordArray[attributeOffset]);
 		}
 	}
 	return SUCCESS;

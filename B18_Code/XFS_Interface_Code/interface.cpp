@@ -106,11 +106,7 @@ int regexMatchAndExecute(const string input_command) {
         }
         fclose(file);
         string Filename = m[2];
-        bool r = checkValidCsvFile(Filename);
-        if (!r) {
-            cout << "Command Failed" << endl;
-            return FAILURE;
-        }
+
         int ret = importRelation(filepath);
         if (ret == SUCCESS) {
             cout << "Imported from " << complete_filepath << " successfully" << endl;

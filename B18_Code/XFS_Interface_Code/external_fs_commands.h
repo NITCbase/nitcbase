@@ -11,5 +11,6 @@ void dumpBlockAllocationMap();
 void ls();
 int importRelation(char *fileName);
 int exportRelation(char *relname, char *filename);
+bool checkIfInvalidCharacter(char character);
 
 #endif //B18_CODE_EXTERNAL_FS_COMMANDS_H
