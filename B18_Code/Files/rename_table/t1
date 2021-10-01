@@ -3,4 +3,3 @@ fdisk
 create table a(id NUM)
 open table a
 alter table rename a to b
-exit

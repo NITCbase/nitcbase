@@ -1,0 +1,9 @@
+echo ---- 1 -----
+run join/t1
+echo ---- 2 -----
+run join/t2
+echo ---- 3 -----
+run join/t3
+echo ---- 4 -----
+run join/t4
+exit

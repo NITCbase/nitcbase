@@ -1,0 +1,7 @@
+echo ---- 1 -----
+run close/t1
+echo ---- 2 -----
+run close/t2
+echo ---- 3 -----
+run close/t3
+exit
