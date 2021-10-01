@@ -1,3 +1,4 @@
 fdisk
-echo importing relation from a file having null attribute values
-import fruits_e3.csv
+echo trying to import relation from a file with attribute name having more than 15 characters
+import fruits_e5.csv
+export fruits_e5 fruits_e5_new.csv

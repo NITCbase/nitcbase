@@ -1,0 +1,41 @@
+fdisk
+echo trying to open two new tables, doing fdisk and then checking if OPEN_REL_TABLE got cleared
+CREATE TABLE Student_Grades(ID NUM, FirstName STR, Grade STR);
+CREATE TABLE Student_Grades1(ID NUM, FirstName STR);
+echo inserting few records
+OPEN TABLE Student_Grades;
+OPEN TABLE Student_Grades1;
+INSERT INTO Student_Grades VALUES (1, Isa, S);
+INSERT INTO Student_Grades VALUES (2, Lynne, A);
+INSERT INTO Student_Grades VALUES (3, Stacy, C);
+INSERT INTO Student_Grades VALUES (4, Mark, B);
+INSERT INTO Student_Grades VALUES (5, Luna, D);
+INSERT INTO Student_Grades1 VALUES (1, Isa);
+INSERT INTO Student_Grades1 VALUES (2, Lynne);
+INSERT INTO Student_Grades1 VALUES (3, Stacy);
+INSERT INTO Student_Grades1 VALUES (4, Mark);
+INSERT INTO Student_Grades1 VALUES (5, Luna);
+fdisk
+ls
+create table a(id NUM)
+create table b(id NUM)
+create table c(id NUM)
+create table d(id NUM)
+create table e(id NUM)
+create table f(id NUM)
+create table g(id NUM)
+create table h(id NUM)
+create table i(id NUM)
+create table j(id NUM)
+create table k(id NUM)
+open table a
+open table b
+open table c
+open table d
+open table e
+open table f
+open table g
+open table h
+open table i
+open table j
+exit

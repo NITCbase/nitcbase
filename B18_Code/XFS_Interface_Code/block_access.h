@@ -14,8 +14,11 @@ int ba_delete(char relName[ATTR_SIZE]);
 
 void add_disk_metainfo();
 HeadInfo getHeader(int blockNum);
+void setHeader(struct HeadInfo *header, int blockNum);
 void getSlotmap(unsigned char *SlotMap, int blockNum);
+void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum);
 int getRecord(Attribute *rec, int blockNum, int slotNum);
+int setRecord(Attribute *rec, int blockNum, int slotNum);
 int getRelCatEntry(int relationId, Attribute *relcat_entry);
 int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry);
 int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry);

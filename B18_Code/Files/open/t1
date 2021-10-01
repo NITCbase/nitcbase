@@ -1,4 +1,5 @@
 fdisk
+echo opening more than allowed number of tables
 create table a(id NUM)
 create table b(id NUM)
 create table c(id NUM)

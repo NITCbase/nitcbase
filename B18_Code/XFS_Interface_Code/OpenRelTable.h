@@ -12,9 +12,7 @@
 
 class OpenRelations {
 	static char OpenRelTable[MAX_OPEN][ATTR_SIZE];
-
 public:
-
 	static void initializeOpenRelationTable();
 	static int getRelationId(char relationName[ATTR_SIZE]);
 	static int getRelationName(int relationId, char relationName[ATTR_SIZE]);

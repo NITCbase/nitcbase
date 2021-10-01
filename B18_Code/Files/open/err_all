@@ -1,0 +1,9 @@
+echo -------------
+run open/t1
+echo -------------
+run open/t2
+echo -------------
+run open/t99
+echo -------------
+fdisk
+exit

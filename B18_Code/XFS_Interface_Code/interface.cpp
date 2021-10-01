@@ -78,7 +78,8 @@ int regexMatchAndExecute(const string input_command) {
     } else if (regex_match(input_command, fdisk)) {
         Disk::createDisk();
         Disk::formatDisk();
-        add_disk_metainfo();
+        // Re-initialize OpenRelTable
+        OpenRelations::initializeOpenRelationTable();
         cout << "Disk formatted" << endl;
     } else if (regex_match(input_command, dump_rel)) {
         dump_relcat();

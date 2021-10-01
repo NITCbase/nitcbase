@@ -1,5 +1,5 @@
 echo -------------
-run create/t1
+run create/t0
 echo -------------
 run create/err_t0
 echo -------------
