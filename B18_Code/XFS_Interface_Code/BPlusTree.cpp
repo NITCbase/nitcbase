@@ -26,7 +26,7 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 
 	// check if an index already exists for the attribute or not
 	if (attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval != -1) {
-		this->rootBlock = attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+		this->rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
 		return;
 	}
 
@@ -125,8 +125,8 @@ struct recId BPlusTree::BPlusSearch(Attribute attrVal, int op) {
 	// TODO
 }
 
-int BPlusTree::getRootBlock() {
-
+int BPlusTree::getRootBlock() const {
+	return this->rootBlock;
 }
 
 int BPlusTree::bPlusDestroy(int blockNum) {

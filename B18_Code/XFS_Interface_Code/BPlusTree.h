@@ -15,7 +15,7 @@ private :
 
 public:
 	BPlusTree(int relid, char attrName[ATTR_SIZE]);
-	int getRootBlock();
+	int getRootBlock() const;
 	int bPlusInsert(union Attribute val, struct recId recordId);
 	struct recId BPlusSearch(union Attribute attrVal, int op);
 	int bPlusDestroy(int blockNum);

@@ -14,6 +14,7 @@
 #include "block_access.h"
 #include "algebra.h"
 #include "external_fs_commands.h"
+#include "BPlusTree.h"
 
 using namespace std;
 
@@ -248,7 +249,9 @@ int regexMatchAndExecute(const string input_command) {
 			printErrorMsg(E_RELNOTOPEN);
 			return FAILURE;
 		}
-		int ret = bplus_create(relId, attr_name);
+
+		BPlusTree bPlusTree = BPlusTree(relId, attr_name);
+		int ret = bPlusTree.getRootBlock();
 		if (ret == SUCCESS)
 			cout << "Index created successfully\n";
 		else {
