@@ -38,7 +38,7 @@ enum BlockHeaderField {
 	RESERVED = 28
 };
 
-enum RelationCatalogEntryField {
+enum RelCatFieldIndex {
 	RELATION_NAME_INDEX = 0,
 	NO_ATTRIBUTES_INDEX = 1,
 	NO_RECORDS_INDEX = 2,
@@ -47,7 +47,7 @@ enum RelationCatalogEntryField {
 	NO_SLOTS_PER_BLOCK_INDEX = 5
 };
 
-enum AttributeCatalogEntryField {
+enum AttrCatFieldIndex {
 	REL_NAME_INDEX = 0,
 	ATTRIBUTE_NAME_INDEX = 1,
 	ATTRIBUTE_TYPE_INDEX = 2,
