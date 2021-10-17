@@ -85,11 +85,11 @@ int ba_insert(int relid, Attribute *rec) {
 
 	// no free slot found
 	if (recid.block == -1 && recid.slot == -1) {
-        return FAILURE;
+		return FAILURE;
 	} else if (recid.block == E_MAXRELATIONS && recid.slot == E_MAXRELATIONS) {
-        // only one block allowed for RELCAT
-        return E_MAXRELATIONS;
-    }
+		// only one block allowed for RELCAT
+		return E_MAXRELATIONS;
+	}
 
 	setRecord(rec, recid.block, recid.slot);
 
@@ -123,10 +123,10 @@ int ba_search(relId relid, Attribute *record, char attrName[ATTR_SIZE], Attribut
 		// Get the root_block from attribute catalog entry for the given attribute
 		int root_block = attrcat_entry[4].nval;
 		if (root_block == -1) {
-            // No indexing for the attribute
+			// No indexing for the attribute
 			recid = linear_search(relid, attrName, attrval, op, prev_recid);
 		} else {
-            // Indexing exists for the attribute
+			// Indexing exists for the attribute
 			// TODO: recid = bplus_search(relid, attrName, attrval, op,&prev_recid);
 		}
 	}
@@ -459,6 +459,25 @@ void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
 	fclose(disk);
 }
 
+int getFreeBlock(int block_type) {
+
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, 0, SEEK_SET);
+	unsigned char blockAllocationMap[4 * BLOCK_SIZE];
+	fread(blockAllocationMap, 4 * BLOCK_SIZE, 1, disk);
+	for (int iter = 0; iter < 4 * BLOCK_SIZE; iter++) {
+		if ((int32_t) (blockAllocationMap[iter]) == UNUSED_BLK) {
+			blockAllocationMap[iter] = (unsigned char) block_type;
+			fseek(disk, 0, SEEK_SET);
+			fwrite(blockAllocationMap, BLOCK_SIZE * 4, 1, disk);
+			fclose(disk);
+			return iter;
+		}
+	}
+
+	return FAILURE;
+}
+
 /*
  *
  */
@@ -533,11 +552,11 @@ recId getFreeSlot(int block_num) {
 	 * get new record block
 	 * in case of RELCAT, do not go for next block (only one block allowed)
 	 */
-    if (prev_block_num == RELCAT_BLOCK) {
-       return {E_MAXRELATIONS, E_MAXRELATIONS};
-    } else {
-        block_num = getFreeRecBlock();
-    }
+	if (prev_block_num == RELCAT_BLOCK) {
+		return {E_MAXRELATIONS, E_MAXRELATIONS};
+	} else {
+		block_num = getFreeRecBlock();
+	}
 
 	// no free blocks available in disk
 	if (block_num == -1) {
@@ -730,26 +749,26 @@ int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry)
 /*
  * Reads attribute catalogue entry from disk for the given attribute name of a given relation
  */
-int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry) {
+int getAttrCatEntry(int relationId, int offset, Attribute *attrCatEntry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
 	if (OpenRelTable::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
-	char relName[16];
+	char relName[ATTR_SIZE];
 	OpenRelTable::getRelationName(relationId, relName);
 
-	int curr_block = 5;
+	int curr_block = ATTRCAT_BLOCK;
 	int next_block = -1;
 	while (curr_block != -1) {
-		struct HeadInfo header;
+		HeadInfo header;
 		header = getHeader(curr_block);
 		next_block = header.rblock;
 		for (int i = 0; i < 20; i++) {
-			getRecord(attrcat_entry, curr_block, i);
-			if (strcmp(attrcat_entry[0].sval, relName) == 0) {
-				if (static_cast<int>(attrcat_entry[5].nval) == offset)
+			getRecord(attrCatEntry, curr_block, i);
+			if (strcmp(attrCatEntry[0].sval, relName) == 0) {
+				if (static_cast<int>(attrCatEntry[5].nval) == offset)
 					return SUCCESS;
 			}
 		}
@@ -758,6 +777,38 @@ int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry) {
 	return E_ATTRNOTEXIST;
 }
 
+/*
+ * Writes relation catalogue entry into disk
+ */
+int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCatEntry) {
+	if (relationId < 0 || relationId >= MAX_OPEN)
+		return E_OUTOFBOUND;
+
+	if (OpenRelTable::checkIfRelationOpen(relationId) == FAILURE)
+		return E_NOTOPEN;
+
+	char relName[ATTR_SIZE];
+	OpenRelTable::getRelationName(relationId, relName);
+
+	int curr_block = ATTRCAT_BLOCK;
+	int next_block;
+	while (curr_block != -1) {
+		HeadInfo header;
+		header = getHeader(curr_block);
+		next_block = header.rblock;
+		for (int slotIter = 0; slotIter < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotIter++) {
+			getRecord(attrCatEntry, curr_block, slotIter);
+			if (strcmp(attrCatEntry[ATTRCAT_REL_NAME_INDEX].sval, relName) == 0) {
+				if (strcmp(attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrName) == 0) {
+					setRecord(attrCatEntry, curr_block, slotIter);
+					return SUCCESS;
+				}
+			}
+		}
+		curr_block = next_block;
+	}
+	return E_ATTRNOTEXIST;
+}
 
 /*
  * Deletes the given block from the disk

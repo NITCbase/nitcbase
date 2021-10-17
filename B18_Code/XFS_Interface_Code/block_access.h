@@ -21,7 +21,10 @@ int getRecord(Attribute *rec, int blockNum, int slotNum);
 int setRecord(Attribute *rec, int blockNum, int slotNum);
 int getRelCatEntry(int relationId, Attribute *relcat_entry);
 int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry);
-int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry);
+int getAttrCatEntry(int relationId, int offset, Attribute *attrCatEntry);
 int setRelCatEntry(int relationId, Attribute *relcat_entry);
+int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCatEntry);
+
+int getFreeBlock(int block_type);
 
 #endif //B18_CODE_BLOCK_ACCESS_H
