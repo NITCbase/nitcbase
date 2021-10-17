@@ -62,7 +62,7 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 
 int deleteRel(char relname[ATTR_SIZE]) {
 	// get the relation's open relation id
-	int relid = OpenRelations::getRelationId(relname);
+	int relid = OpenRelTable::getRelationId(relname);
 
 	// if relation is open return E_RELOPEN - cannot be deleted
 	if (relid != E_RELNOTOPEN)
@@ -77,7 +77,7 @@ int renameRel(char oldRelName[ATTR_SIZE], char newRelName[ATTR_SIZE]) {
 		return E_INVALID;
 	}
 
-	int relId = OpenRelations::checkIfRelationOpen(oldRelName);
+	int relId = OpenRelTable::checkIfRelationOpen(oldRelName);
 	if (relId >= 0 && relId < 12) {
 		return E_RELOPEN;
 	}
@@ -91,7 +91,7 @@ int renameAtrribute(char relName[ATTR_SIZE], char oldAttrName[ATTR_SIZE], char n
 		return E_INVALID;
 	}
 
-	int relId = OpenRelations::checkIfRelationOpen(relName);
+	int relId = OpenRelTable::checkIfRelationOpen(relName);
 	if (relId >= 0 && relId < 12) {
 		return E_RELOPEN;
 	}
@@ -101,18 +101,18 @@ int renameAtrribute(char relName[ATTR_SIZE], char oldAttrName[ATTR_SIZE], char n
 }
 
 int openRel(char relationName[ATTR_SIZE]) {
-	return OpenRelations::openRelation(relationName);
+	return OpenRelTable::openRelation(relationName);
 }
 
 int closeRel(char relationName[ATTR_SIZE]) {
-	int relId = OpenRelations::getRelationId(relationName);
+	int relId = OpenRelTable::getRelationId(relationName);
 	if(relId< 0 || relId >= MAX_OPEN)
 		return E_RELNOTOPEN;
-	return OpenRelations::closeRelation(relId);
+	return OpenRelTable::closeRelation(relId);
 }
 
 int closeRel(int relid) {
-	return OpenRelations::closeRelation(relid);
+	return OpenRelTable::closeRelation(relid);
 }
 
 /*gokul

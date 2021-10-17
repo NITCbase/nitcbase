@@ -261,7 +261,7 @@ int ba_delete(char relName[ATTR_SIZE]) {
 	}
 
 	/* Check if a relation with the given name exists in Open Relation Table */
-	if (OpenRelations::checkIfRelationOpen(relName) == SUCCESS) {
+	if (OpenRelTable::checkIfRelationOpen(relName) == SUCCESS) {
 		return FAILURE;
 	}
 
@@ -659,11 +659,11 @@ int getRelCatEntry(int relationId, Attribute *relcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId) == FAILURE)
+	if (OpenRelTable::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
-	OpenRelations::getRelationName(relationId, relName);
+	OpenRelTable::getRelationName(relationId, relName);
 
 	for (int i = 0; i < 20; i++) {
 		getRecord(relcat_entry, 4, i);
@@ -680,11 +680,11 @@ int setRelCatEntry(int relationId, Attribute *relcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId) == FAILURE)
+	if (OpenRelTable::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
-	OpenRelations::getRelationName(relationId, relName);
+	OpenRelTable::getRelationName(relationId, relName);
 
 	Attribute relcat_entry1[6];
 	for (int i = 0; i < 20; i++) {
@@ -703,11 +703,11 @@ int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry)
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId) == FAILURE)
+	if (OpenRelTable::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
-	OpenRelations::getRelationName(relationId, relName);
+	OpenRelTable::getRelationName(relationId, relName);
 
 	int curr_block = 5;
 	int next_block = -1;
@@ -734,11 +734,11 @@ int getAttrCatEntry(int relationId, int offset, Attribute *attrcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
-	if (OpenRelations::checkIfRelationOpen(relationId) == FAILURE)
+	if (OpenRelTable::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
 	char relName[16];
-	OpenRelations::getRelationName(relationId, relName);
+	OpenRelTable::getRelationName(relationId, relName);
 
 	int curr_block = 5;
 	int next_block = -1;

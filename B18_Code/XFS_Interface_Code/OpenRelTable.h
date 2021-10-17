@@ -8,10 +8,14 @@
 #include "../define/constants.h"
 #include "block_access.h"
 
-//extern char OpenRelTable[MAX_OPEN][16];
+typedef struct OpenRelTableMetaInfo{
+	bool free;
+	char relName[ATTR_SIZE];
+} OpenRelTableMetaInfo;
 
-class OpenRelations {
-	static char OpenRelTable[MAX_OPEN][ATTR_SIZE];
+class OpenRelTable {
+//	static char OpenRelTable[MAX_OPEN][ATTR_SIZE];
+	static OpenRelTableMetaInfo tableMetaInfo[MAX_OPEN];
 public:
 	static void initializeOpenRelationTable();
 	static int getRelationId(char relationName[ATTR_SIZE]);

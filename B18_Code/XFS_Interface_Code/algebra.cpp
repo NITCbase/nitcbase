@@ -27,7 +27,7 @@ int constructRecordFromAttrsArray(int numAttrs, Attribute record[], char recordA
 int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, char tar_attrs[][ATTR_SIZE]) {
     int ret;
     /* Check source relation is open */
-    int srcrelid = OpenRelations::getRelationId(srcrel);
+    int srcrelid = OpenRelTable::getRelationId(srcrel);
     if (srcrelid == E_RELNOTOPEN) {
         // src relation not open
         return E_RELNOTOPEN;
@@ -104,7 +104,7 @@ int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, c
 
 int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char val_str[ATTR_SIZE]) {
     /* Check source relation is open */
-    int srcrelid = OpenRelations::getRelationId(srcrel);
+    int srcrelid = OpenRelTable::getRelationId(srcrel);
     if (srcrelid == E_RELNOTOPEN) {
         // src relation not open
         return E_RELNOTOPEN;
@@ -197,7 +197,7 @@ int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZ
 int insert(std::vector<std::string> attributeTokens, char *table_name) {
 
     // check if relation is open
-    int relId = OpenRelations::getRelationId(table_name);
+    int relId = OpenRelTable::getRelationId(table_name);
     if (relId == E_RELNOTOPEN) {
         return relId;
     }
@@ -244,7 +244,7 @@ int insert(char relName[ATTR_SIZE], char *fileName) {
 	char currentCharacter;
 
 	// check if relation is open
-	int relId = OpenRelations::getRelationId(relName);
+	int relId = OpenRelTable::getRelationId(relName);
 	if (relId == E_RELNOTOPEN) {
 		return relId;
 	}
@@ -355,10 +355,10 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
          char attr2[ATTR_SIZE]) {
 
     // IF ANY SOURCE RELATION IS NOT OPEN, return E_RELNOTOPEN
-    int srcRelId1 = OpenRelations::getRelationId(srcrel1);
+    int srcRelId1 = OpenRelTable::getRelationId(srcrel1);
     if (srcRelId1 == E_RELNOTOPEN)
         return srcRelId1;
-    int srcRelId2 = OpenRelations::getRelationId(srcrel2);
+    int srcRelId2 = OpenRelTable::getRelationId(srcrel2);
     if (srcRelId2 == E_RELNOTOPEN)
         return srcRelId2;
 
@@ -402,7 +402,7 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
     std::unordered_set<std::string> targetRelAttributesSet;
 
     char srcRelation1[ATTR_SIZE];
-    OpenRelations::getRelationName(srcRelId1, srcRelation1);
+    OpenRelTable::getRelationName(srcRelId1, srcRelation1);
     for (int iter = 0; iter < nAttrs1; iter++) {
         Attribute attrCatalogEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
         getAttrCatEntry(srcRelId1, iter, attrCatalogEntry);
@@ -413,7 +413,7 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
     int attrIndex = nAttrs1;
 
     char srcRelation2[ATTR_SIZE];
-    OpenRelations::getRelationName(srcRelId2, srcRelation2);
+    OpenRelTable::getRelationName(srcRelId2, srcRelation2);
     for (int iter = 0; iter < nAttrs2; iter++) {
         Attribute attrCatalogEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
         getAttrCatEntry(srcRelId2, iter, attrCatalogEntry);
@@ -436,7 +436,7 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
     if (flag != SUCCESS) {
         return flag;
     }
-    int targetRelId = OpenRelations::openRelation(targetRelation);
+    int targetRelId = OpenRelTable::openRelation(targetRelation);
     if (targetRelId == E_CACHEFULL) {
         deleteRel(targetRelation);
         return E_CACHEFULL;
@@ -475,7 +475,7 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
             flag = ba_insert(targetRelId, targetRecord);
 
             if (flag != SUCCESS) {
-                OpenRelations::closeRelation(targetRelId);
+                OpenRelTable::closeRelation(targetRelId);
                 deleteRel(targetRelation);
                 return flag;
             }
@@ -483,7 +483,7 @@ int join(char srcrel1[ATTR_SIZE], char srcrel2[ATTR_SIZE], char targetRelation[A
         }
     }
 
-    OpenRelations::closeRelation(targetRelId);
+    OpenRelTable::closeRelation(targetRelId);
     return SUCCESS;
 }
 

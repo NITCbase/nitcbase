@@ -302,7 +302,7 @@ int importRelation(char *fileName) {
 	}
 
 	// OPEN RELATION
-	int relId = OpenRelations::openRelation(relationName);
+	int relId = OpenRelTable::openRelation(relationName);
 	if (relId == E_CACHEFULL || relId == E_RELNOTEXIST) {
 		cout << "Import not possible as openRel failed\n";
 		return FAILURE;
@@ -336,7 +336,7 @@ int importRelation(char *fileName) {
 			if (currentCharacter == ',')
 				numOfFieldsInLine++;
 			if (currentCharacter == previousCharacter && currentCharacter == ',') {
-				OpenRelations::closeRelation(relId);
+				OpenRelTable::closeRelation(relId);
 				ba_delete(relationName);
 				cout << "Null values are not allowed in attribute fields\n";
 				return FAILURE;
@@ -351,14 +351,14 @@ int importRelation(char *fileName) {
 		}
 
 		if (previousCharacter == ',') {
-			OpenRelations::closeRelation(relId);
+			OpenRelTable::closeRelation(relId);
 			ba_delete(relationName);
 
 			cout << "Null values are not allowed in attribute fields\n";
 			return FAILURE;
 		}
 		if (numOfAttributes != numOfFieldsInLine + 1) {
-			OpenRelations::closeRelation(relId);
+			OpenRelTable::closeRelation(relId);
 			ba_delete(relationName);
 			cout << "Mismatch in number of attributes\n";
 			return FAILURE;
@@ -388,12 +388,12 @@ int importRelation(char *fileName) {
 		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, attributesCharArray, attrTypes);
 
 		if (retValue == E_ATTRTYPEMISMATCH) {
-			OpenRelations::closeRelation(relId);
+			OpenRelTable::closeRelation(relId);
 			ba_delete(relationName);
 			return E_ATTRTYPEMISMATCH;
 		}
 		else if (retValue == E_INVALID) {
-			OpenRelations::closeRelation(relId);
+			OpenRelTable::closeRelation(relId);
 			ba_delete(relationName);
 			cout << "Invalid character at line " << lineNumber << " in file \n";
 			return FAILURE;
@@ -402,7 +402,7 @@ int importRelation(char *fileName) {
 		int retVal = ba_insert(relId, record);
 
 		if (retVal != SUCCESS) {
-			OpenRelations::closeRelation(relId);
+			OpenRelTable::closeRelation(relId);
 			ba_delete(relationName);
 			cout << "Insert failed" << endl;
 			return retVal;
@@ -412,7 +412,7 @@ int importRelation(char *fileName) {
 
 		lineNumber++;
 	}
-	OpenRelations::closeRelation(relId);
+	OpenRelTable::closeRelation(relId);
 	fclose(file);
 	return SUCCESS;
 }

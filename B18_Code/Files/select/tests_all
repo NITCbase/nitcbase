@@ -1,4 +1,6 @@
 fdisk
 run select/t1
 run select/t2
+run select/err_t1
+run select/err_t2
 exit
