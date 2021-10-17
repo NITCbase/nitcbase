@@ -25,9 +25,9 @@
 #define SLOT_OCCUPIED '1'
 #define SLOT_UNOCCUPIED '0'
 
-#define USED 1
-#define UNUSED 0
-#define ALLOTED 2
+#define OCCUPIED 1
+#define FREE 0
+
 
 // TODO : use enum here
 

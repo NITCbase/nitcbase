@@ -12,18 +12,24 @@ OpenRelTableMetaInfo OpenRelTable::tableMetaInfo[MAX_OPEN];;
 
 void OpenRelTable::initializeOpenRelationTable() {
 	for (int i = 0; i < MAX_OPEN; i++) {
-		if (i == RELCAT_RELID)
+		if (i == RELCAT_RELID) {
+			tableMetaInfo[i].free = OCCUPIED;
 			strcpy(tableMetaInfo[i].relName, "RELATIONCAT");
-		else if (i == ATTRCAT_RELID)
+		}
+		else if (i == ATTRCAT_RELID) {
+			tableMetaInfo[i].free = OCCUPIED;
 			strcpy(tableMetaInfo[i].relName, "ATTRIBUTECAT");
-		else
+		}
+		else {
+			tableMetaInfo[i].free = FREE;
 			strcpy(tableMetaInfo[i].relName, "NULL");
+		}
 	}
 }
 
 int OpenRelTable::getRelationId(char relationName[ATTR_SIZE]) {
 	for (int i = 0; i < MAX_OPEN; i++)
-		if (strcmp(tableMetaInfo[i].relName, relationName) == 0)
+		if (tableMetaInfo[i].free == OCCUPIED && strcmp(tableMetaInfo[i].relName, relationName) == 0)
 			return i;
 	return E_RELNOTOPEN;
 }
@@ -60,13 +66,13 @@ int OpenRelTable::openRelation(char relationName[ATTR_SIZE]) {
 	 *  otherwise search for a free slot in open relation table
 	 */
 	for (i = 0; i < MAX_OPEN; i++) {
-		if (strcmp(relationName, tableMetaInfo[i].relName) == 0) {
+		if (tableMetaInfo[i].free == OCCUPIED && strcmp(relationName, tableMetaInfo[i].relName) == 0) {
 			return i;
 		}
 	}
 
 	for (i = 0; i < MAX_OPEN; i++) {
-		if (strcmp(tableMetaInfo[i].relName, "NULL") == 0) {
+		if (tableMetaInfo[i].free == FREE) {
 			strcpy(tableMetaInfo[i].relName, relationName);
 			return i;
 		}
@@ -85,16 +91,17 @@ int OpenRelTable::closeRelation(int relationId) {
     if (relationId == RELCAT_RELID || relationId == ATTRCAT_RELID) {
         return E_INVALID;
     }
-	if (strcmp(tableMetaInfo[relationId].relName, "NULL") == 0) {
+	if (tableMetaInfo[relationId].free == FREE) {
 		return E_RELNOTOPEN;
 	}
+	tableMetaInfo[relationId].free = FREE;
 	strcpy(tableMetaInfo[relationId].relName, "NULL");
 	return SUCCESS;
 }
 
 int OpenRelTable::checkIfRelationOpen(char relationName[ATTR_SIZE]) {
 	for (auto relationIterator: tableMetaInfo) {
-		if (strcmp(relationIterator.relName, relationName) == 0) {
+		if (relationIterator.free == OCCUPIED && strcmp(relationIterator.relName, relationName) == 0) {
 			return SUCCESS;
 		}
 	}
@@ -105,7 +112,7 @@ int OpenRelTable::checkIfRelationOpen(int relationId) {
 	if (relationId < 0 || relationId >= MAX_OPEN) {
 		return E_OUTOFBOUND;
 	}
-	if (strcmp(tableMetaInfo[relationId].relName, "NULL") == 0) {
+	if (tableMetaInfo[relationId].free == FREE) {
 		return FAILURE;
 	}
 	else {
