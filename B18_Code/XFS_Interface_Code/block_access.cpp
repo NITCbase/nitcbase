@@ -811,6 +811,18 @@ int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCat
 }
 
 /*
+ * 20 = leftChildPointerSize + ATTR_SIZE
+ */
+struct InternalEntry getEntry(int block, int entry_number) {
+	InternalEntry rec;
+	FILE *disk = fopen("disk", "rb");
+	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entry_number * 20, SEEK_SET);
+	fread(&rec, sizeof(rec), 1, disk);
+	fclose(disk);
+	return rec;
+}
+
+/*
  * Deletes the given block from the disk
  *      - Clears the Block Data
  *      - Marks the Block UNUSED_BLK in Block Allocation Map

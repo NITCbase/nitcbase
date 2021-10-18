@@ -62,5 +62,17 @@ typedef union Attribute {
 	char sval[ATTR_SIZE];
 } Attribute;
 
+typedef struct InternalEntry{
+	int32_t lChild;
+	union Attribute attrVal;
+	int32_t rChild;
+} InternalEntry;
+
+typedef struct Index{
+	union Attribute attrVal;
+	int32_t block;
+	int32_t slot;
+	unsigned char unused[8];
+} Index;
 
 #endif //B18_CODE_DISK_STRUCTURES_H
