@@ -136,8 +136,8 @@ int dropIndex(char *relationName, char *attrName){
 	int relId = OpenRelTable::getRelationId(relationName);
 
 	// if source opened in open relation table, return E_RELOPEN
-	if(relId == E_RELNOTOPEN) {
-		return E_RELNOTOPEN;
+	if(relId != E_RELNOTOPEN) {
+		return E_RELOPEN;
 	}
 
 	Attribute attrCatEntry[6];
