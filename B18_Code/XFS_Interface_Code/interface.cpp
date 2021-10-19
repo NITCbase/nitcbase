@@ -250,23 +250,21 @@ int regexMatchAndExecute(const string input_command) {
 			return FAILURE;
 		}
 
-//		BPlusTree bPlusTree = BPlusTree(relId, attr_name);
-//		int ret = bPlusTree.getRootBlock();
-//		if (ret == SUCCESS)
-//			cout << "Index created successfully\n";
-//		else {
-//			printErrorMsg(ret);
-//			return FAILURE;
-//		}
+		int ret = createIndex(relname, attr_name);
+		if (ret == SUCCESS)
+			cout << "Index created successfully\n";
+		else {
+			printErrorMsg(ret);
+			return FAILURE;
+		}
 
 	} else if (regex_match(input_command, drop_index)) {
-		////cout<<"Matched"<<endl;
 		regex_search(input_command, m, drop_index);
 		string tablename = m[4];
 		string attrname = m[5];
-		char relname[16], attr_name[16];
-		string_to_char_array(tablename, relname, 15);
-		string_to_char_array(attrname, attr_name, 15);
+		char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
+		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 		int relationId = OpenRelTable::getRelationId(relname);
 		if (relationId == E_RELNOTOPEN) {
 			printErrorMsg(relationId);

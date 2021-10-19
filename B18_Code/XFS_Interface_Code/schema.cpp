@@ -4,6 +4,8 @@
 #include "schema.h"
 #include "block_access.h"
 #include "OpenRelTable.h"
+#include "BPlusTree.h"
+
 #include <string>
 #include <cstring>
 #include <cstdlib>
@@ -115,6 +117,31 @@ int closeRel(int relid) {
 	return OpenRelTable::closeRelation(relid);
 }
 
+
+int createIndex(char *relationName, char *attrName){
+	// get the src relation's open relation id, using getRelId() method of Openreltable.
+	int relId = OpenRelTable::getRelationId(relationName);
+
+	// if source not opened in open relation table, return E_RELNOTOPEN
+	if(relId == E_RELNOTOPEN) {
+		return E_RELNOTOPEN;
+	}
+	BPlusTree bPlusTree = BPlusTree(relId, attrName);
+	int rootBlock = bPlusTree.getRootBlock();
+	return rootBlock;
+}
+
+int dropIndex(char *relationName, char *attr){
+	// get the src relation's open relation id, using getRelId() method of Openreltable.
+	int relId = OpenRelTable::getRelationId(relationName);
+
+	// if source opened in open relation table, return E_RELOPEN
+	if(relId != E_RELNOTOPEN) {
+		return E_RELOPEN;
+	}
+
+}
+
 /*gokul
  * Creates and returns a Relation Catalog Record Entry with the parameters provided as argument
  */
@@ -162,3 +189,4 @@ int check_duplicate_attributes(int nAttrs, char attrs[][ATTR_SIZE]) {
 	}
 	return 0;
 }
+

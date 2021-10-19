@@ -10,39 +10,13 @@
 #include "schema.h"
 #include "OpenRelTable.h"
 
-int getBlockType(int blocknum);
-
-HeadInfo getHeader(int blockNum);
-
-void setHeader(struct HeadInfo *header, int blockNum);
-
-void getSlotmap(unsigned char *SlotMap, int blockNum);
-
-void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum);
-
 int getFreeRecBlock();
 
 recId getFreeSlot(int block_num);
 
-int getRecord(Attribute *rec, int blockNum, int slotNum);
-
-int setRecord(Attribute *rec, int blockNum, int slotNum);
-
-int getRelCatEntry(int relationId, Attribute *relcat_entry);
-
-int setRelCatEntry(int relationId, Attribute *relcat_entry);
-
-int getAttrCatEntry(int relationId, char attrname[16], union Attribute *attrcat_entry);
-
-int deleteBlock(int blockNum);
-
 int deleteRelCatEntry(recId relcat_recid, Attribute relcat_rec[6]);
 
 int deleteAttrCatEntry(recId attrcat_recid);
-
-recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
-
-int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType);
 
 /*
  *  Inserts the Record into the given Relation
@@ -810,17 +784,17 @@ int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCat
 	return E_ATTRNOTEXIST;
 }
 
-/*
- * 20 = leftChildPointerSize + ATTR_SIZE
- */
-struct InternalEntry getEntry(int block, int entry_number) {
-	InternalEntry rec;
-	FILE *disk = fopen("disk", "rb");
-	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entry_number * 20, SEEK_SET);
-	fread(&rec, sizeof(rec), 1, disk);
-	fclose(disk);
-	return rec;
-}
+///*
+// * 20 = leftChildPointerSize + ATTR_SIZE
+// */
+//struct InternalEntry getEntry(int block, int entry_number) {
+//	InternalEntry rec;
+//	FILE *disk = fopen("disk", "rb");
+//	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entry_number * 20, SEEK_SET);
+//	fread(&rec, sizeof(rec), 1, disk);
+//	fclose(disk);
+//	return rec;
+//}
 
 /*
  * Deletes the given block from the disk

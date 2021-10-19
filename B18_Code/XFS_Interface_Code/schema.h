@@ -11,6 +11,9 @@ int openRel(char relationName[ATTR_SIZE]);
 int closeRel(char rel_name[ATTR_SIZE]);
 int closeRel(int relid);
 
+int createIndex(char *relationName, char *attrName);
+int dropIndex(char *relname, char *attr);
+
 Attribute *make_relcatrec(char relname[16], int nAttrs, int nRecords, int firstBlock, int lastBlock);
 Attribute* make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], int attrtype, int rootBlock, int offset);
 
