@@ -73,6 +73,7 @@ int OpenRelTable::openRelation(char relationName[ATTR_SIZE]) {
 
 	for (i = 0; i < MAX_OPEN; i++) {
 		if (tableMetaInfo[i].free == FREE) {
+			tableMetaInfo[i].free = OCCUPIED;
 			strcpy(tableMetaInfo[i].relName, relationName);
 			return i;
 		}
