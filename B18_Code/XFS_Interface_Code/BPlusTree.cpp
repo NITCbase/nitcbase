@@ -11,52 +11,51 @@
 #include "disk_structures.h"
 #include "block_access.h"
 
-//InternalEntry getEntry(int block, int iNo) {
-//	InternalEntry rec;
-//	FILE *disk = fopen("disk", "rb");
-//	fseek(disk, block * BLOCK_SIZE + 32 + iNo * 20, SEEK_SET);
-//	fread(&rec, sizeof(rec), 1, disk);
-//	fclose(disk);
-//	return rec;
-//}
-//
-//int setEntry(InternalEntry internalentry, int block, int offset) {
-//	if ((internalentry.lChild == block) || (internalentry.rChild == block)) {
-//		InternalEntry entry;
-//		entry = getEntry(block, offset);
-//		if (internalentry.attrVal.ival == entry.attrVal.ival)
-//			return SUCCESS;
-//		if (internalentry.lChild == block)
-//			internalentry.lChild = entry.lChild;
-//		else
-//			internalentry.rChild = entry.rChild;
-//	}
-//
-//	FILE *disk = fopen("disk", "rb+");
-//	fseek(disk, block * BLOCK_SIZE + 32 + offset * 20, SEEK_SET);
-//	fwrite(&internalentry, sizeof(internalentry), 1, disk);
-//	fclose(disk);
-//	return SUCCESS;
-//}
-//
-//struct Index getLeafEntry(int leaf, int offset) {
-//	struct Index rec;
-//	FILE *disk = fopen("disk", "rb");
-//	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
-//	fread(&rec, sizeof(rec), 1, disk);
-//	fclose(disk);
-//	return rec;
-//}
-//
-//int setLeafEntry(struct Index rec, int leaf, int offset) {
-//	//cout<<"Leaf Node:\n";
-//	//cout<<"Value:"<<rec.attrVal.ival<<" "<<rec.block<<" "<<rec.slot<<"\nLeaf Block:"<<leaf<<" "<<offset<<"\n\n";
-//	FILE *disk = fopen("disk", "rb+");
-//	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
-//	fwrite(&rec, sizeof(rec), 1, disk);
-//	fclose(disk);
-//	return SUCCESS;
-//}
+// TODO : review
+InternalEntry getEntry(int block, int iNo) {
+	InternalEntry rec;
+	FILE *disk = fopen("disk", "rb");
+	fseek(disk, block * BLOCK_SIZE + 32 + iNo * 20, SEEK_SET);
+	fread(&rec, sizeof(rec), 1, disk);
+	fclose(disk);
+	return rec;
+}
+
+int setEntry(InternalEntry internalEntry, int block, int offset) {
+	if ((internalEntry.lChild == block) || (internalEntry.rChild == block)) {
+		InternalEntry entry;
+		entry = getEntry(block, offset);
+		if (internalEntry.attrVal.ival == entry.attrVal.ival)
+			return SUCCESS;
+		if (internalEntry.lChild == block)
+			internalEntry.lChild = entry.lChild;
+		else
+			internalEntry.rChild = entry.rChild;
+	}
+
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, block * BLOCK_SIZE + 32 + offset * 20, SEEK_SET);
+	fwrite(&internalEntry, sizeof(internalEntry), 1, disk);
+	fclose(disk);
+	return SUCCESS;
+}
+
+Index getLeafEntry(int leaf, int offset) {
+	Index rec;
+	FILE *disk = fopen("disk", "rb");
+	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
+	fread(&rec, sizeof(rec), 1, disk);
+	fclose(disk);
+	return rec;
+}
+
+int setLeafEntry(Index rec, int leaf, int offset) {
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
+	fwrite(&rec, sizeof(rec), 1, disk);
+	fclose(disk);
+	return SUCCESS;
+}
 
 
 
@@ -425,9 +424,9 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					if(newchild == FAILURE) {
 						// TODO :
 						// destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
-						bplus_destroy(newRightBlkNum);
+						bPlusDestroy(newRightBlkNum);
 						// destroy the existing B+ tree by passing rootBlock member field
-						bplus_destroy(this->rootBlock);
+						bPlusDestroy(this->rootBlock);
 						// update the rootBlock of attribute catalog entry to -1
 						attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
 						setAttrCatEntry(relId, attrName, attrCatEntry);
@@ -490,9 +489,9 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 				if(new_root_block == FAILURE) {
 					// TODO :
 					// destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
-					bplus_destroy(newRightBlkNum);
+					bPlusDestroy(newRightBlkNum);
 					// destroy the existing B+ tree by passing rootBlock member field
-					bplus_destroy(this->rootBlock);
+					bPlusDestroy(this->rootBlock);
 					// update the rootBlock of attribute catalog entry to -1
 					attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
 					setAttrCatEntry(relId, attrName, attrCatEntry);
@@ -548,4 +547,41 @@ int BPlusTree::getRootBlock() const {
 
 int BPlusTree::bPlusDestroy(int blockNum) {
 	// TODO
+	HeadInfo header;
+
+	// if the block_num lies outside valid range
+	if (blockNum < 0 || blockNum >= DISK_BLOCKS) {
+		return E_OUTOFBOUND;
+	}
+	header = getHeader(blockNum);
+	int block_type = getBlockType(blockNum);
+
+	if (block_type == IND_INTERNAL) {
+		// if block is internal node remove all children before removing it
+		int num_entries;
+		num_entries = header.numEntries;
+
+		/*
+		 * iterate through all the entries of the internalBlk and
+		 * destroy the lChild of the first entry and
+		 * rChild of all entries using BPlusTree::bPlusDestroy().
+		 * (take care not to delete overlapping children more than once)
+		 */
+		int iter = 0;
+		InternalEntry internal_entry = getEntry(blockNum, iter);;
+		bPlusDestroy(internal_entry.lChild);
+		for (iter = 0; iter < num_entries; iter++) {
+			// get the internal index block entries
+			internal_entry = getEntry(blockNum, iter);
+			bPlusDestroy(internal_entry.rChild);
+		}
+		deleteBlock(blockNum);
+	} else if (block_type == IND_LEAF) {
+		deleteBlock(blockNum);
+	}
+	else {
+		//if the block is not index block
+		return E_INVALIDBLOCK;
+	}
+	return SUCCESS;
 }
