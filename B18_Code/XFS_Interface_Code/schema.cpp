@@ -131,15 +131,33 @@ int createIndex(char *relationName, char *attrName){
 	return rootBlock;
 }
 
-int dropIndex(char *relationName, char *attr){
+int dropIndex(char *relationName, char *attrName){
 	// get the src relation's open relation id, using getRelId() method of Openreltable.
 	int relId = OpenRelTable::getRelationId(relationName);
 
 	// if source opened in open relation table, return E_RELOPEN
-	if(relId != E_RELNOTOPEN) {
-		return E_RELOPEN;
+	if(relId == E_RELNOTOPEN) {
+		return E_RELNOTOPEN;
 	}
 
+	Attribute attrCatEntry[6];
+	int flag = getAttrCatEntry(relId, attrName, attrCatEntry);
+	// in case attribute does not exist
+	if (flag != SUCCESS) {
+		return E_ATTRNOTEXIST;
+	}
+	int rootBlock = (int) attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+	if (rootBlock == -1) {
+		return E_NOINDEX;
+	}
+	int retVal =  BPlusTree::bPlusDestroy(rootBlock);
+
+	if (retVal == SUCCESS) {
+		attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
+		setAttrCatEntry(relId, attrName, attrCatEntry);
+	}
+
+	return retVal;
 }
 
 /*gokul

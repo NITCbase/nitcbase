@@ -64,7 +64,7 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 	strcpy(this->attrName, attrName);
 
 	// get the attribute catalog entry of target attribute
-	union Attribute attrCatEntry[6];
+	Attribute attrCatEntry[6];
 	int flag = getAttrCatEntry(relId, attrName, attrCatEntry);
 	// in case attribute does not exist
 	if (flag != SUCCESS) {
@@ -152,11 +152,9 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 			rec_id.block = dataBlock;
 			rec_id.slot = iter;
 
-			int res;
-			// TODO : int res = bplus_insert(relId, attrName, attrval, recid);
-
+			int res = bPlusInsert(attrval, rec_id);
 			if (res != SUCCESS) {
-				// TODO : bplus_destroy(root_block);
+				bPlusDestroy(root_block);
 				this->rootBlock = FAILURE;
 				return;
 			}
@@ -280,7 +278,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 			//failed to obtain an empty leaf index becauase the disk is full
 
 			//destroy the existing B+ tree by passing rootBlock member field to bPlusDestroy().
-			// TODO : bplus_destroy(this->rootBlock);
+			bPlusDestroy(this->rootBlock);
 
 			//update the rootBlock of attribute catalog entry to -1
 			attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
@@ -318,13 +316,11 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		// set the first 32 entries of leftBlk as the first 32 entries of indices array
 		int indices_iter;
 		for (indices_iter = 0; indices_iter < 32; indices_iter++) {
-			if (setLeafEntry(indices[indices_iter], leftBlkNum, indices_iter) != SUCCESS)
-				return FAILURE;
+			setLeafEntry(indices[indices_iter], leftBlkNum, indices_iter);
 		}
 		// set the first 32 entries of newRightBlk as the next 32 entries of indices array
 		for (int rBlockIndexIter = 0; rBlockIndexIter < 32; rBlockIndexIter++) {
-			if (setLeafEntry(indices[indices_iter], newRightBlkNum, rBlockIndexIter) != SUCCESS)
-				return FAILURE;
+			setLeafEntry(indices[indices_iter], newRightBlkNum, rBlockIndexIter);
 			indices_iter++;
 		}
 
@@ -332,8 +328,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		indices[0].block = 0;
 		indices[0].slot = 0;
 		for (indices_iter = 32; indices_iter < 63; indices_iter++) {
-			if (setLeafEntry(indices[0], leftBlkNum, indices_iter) != SUCCESS)
-				return FAILURE;
+			setLeafEntry(indices[0], leftBlkNum, indices_iter);
 		}
 
 		/*
@@ -410,8 +405,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
 					// iterate through all entries in internalEntries array and populate the entries of parentBlock with them
 					for (indices_iter = 0; indices_iter < (parentHeader.numEntries + 1); ++indices_iter) {
-						if (setEntry(internal_entries[indices_iter], parentBlock, indices_iter) != 0)
-							return FAILURE;
+						setEntry(internal_entries[indices_iter], parentBlock, indices_iter);
 					}
 
 					done = true;
@@ -421,7 +415,6 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
 					// disk full
 					if(newchild == FAILURE) {
-						// TODO :
 						// destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
 						bPlusDestroy(newRightBlkNum);
 						// destroy the existing B+ tree by passing rootBlock member field
@@ -468,15 +461,13 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 //							else
 //								internal_entries[indices_iter].rChild = entry.rChild;
 //						}
-//						if (setEntry(internal_entries[indices_iter], parentBlock, indices_iter) != SUCCESS)
-//							return FAILURE;
+//						setEntry(internal_entries[indices_iter], parentBlock, indices_iter);
 //					}
 //
 //					indices_iter = 51;
 //					// set the first 50 entries of newRightBlk as the entries from 51 to 100 of internalEntries array
 //					for (int j = 0; j < 50; ++j) {
-//						if (setEntry(internal_entries[indices_iter], newchild, j) != SUCCESS)
-//							return FAILURE;
+//						setEntry(internal_entries[indices_iter], newchild, j);
 //						indices_iter++;
 //					}
 
@@ -486,7 +477,6 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 				int new_root_block = getFreeBlock(IND_INTERNAL);//get new internal block
 				// disk full
 				if(new_root_block == FAILURE) {
-					// TODO :
 					// destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
 					bPlusDestroy(newRightBlkNum);
 					// destroy the existing B+ tree by passing rootBlock member field
@@ -509,8 +499,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					strcpy(rootEntry.attrVal.sval, newAttrVal.sval);
 				rootEntry.lChild = blockNum;
 				rootEntry.rChild = newchild;
-				if (setEntry(rootEntry, new_root_block, 0) != SUCCESS)
-					return FAILURE;
+				setEntry(rootEntry, new_root_block, 0);
 
 				//update number of entries in newRootBlk as 1
 				HeadInfo newRootHeader;
@@ -545,7 +534,6 @@ int BPlusTree::getRootBlock() const {
 }
 
 int BPlusTree::bPlusDestroy(int blockNum) {
-	// TODO
 	HeadInfo header;
 
 	// if the block_num lies outside valid range
@@ -567,7 +555,7 @@ int BPlusTree::bPlusDestroy(int blockNum) {
 		 * (take care not to delete overlapping children more than once)
 		 */
 		int iter = 0;
-		InternalEntry internal_entry = getEntry(blockNum, iter);;
+		InternalEntry internal_entry = getEntry(blockNum, iter);
 		bPlusDestroy(internal_entry.lChild);
 		for (iter = 0; iter < num_entries; iter++) {
 			// get the internal index block entries

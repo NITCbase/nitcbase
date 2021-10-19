@@ -265,18 +265,14 @@ int regexMatchAndExecute(const string input_command) {
 		char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
-		int relationId = OpenRelTable::getRelationId(relname);
-		if (relationId == E_RELNOTOPEN) {
-			printErrorMsg(relationId);
+
+		int ret = dropIndex(relname, attr_name);
+		if (ret == SUCCESS)
+			cout << "Index deleted successfully\n";
+		else {
+			printErrorMsg(ret);
 			return FAILURE;
 		}
-//		int ret = dropindex(relationId, attr_name);
-//		if (ret == SUCCESS)
-//			cout << "Index deleted successfully\n";
-//		else {
-//			printErrorMsg(ret);
-//			return FAILURE;
-//		}
 	} else if (regex_match(input_command, rename_table)) {
 
 		regex_search(input_command, m, rename_table);
