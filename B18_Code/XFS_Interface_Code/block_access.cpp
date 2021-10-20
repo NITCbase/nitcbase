@@ -924,3 +924,46 @@ int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType
 			return 1;
 	}
 }
+
+InternalEntry getEntry(int block, int iNo) {
+	InternalEntry rec;
+	FILE *disk = fopen("disk", "rb");
+	fseek(disk, block * BLOCK_SIZE + 32 + iNo * 20, SEEK_SET);
+	fread(&rec, sizeof(rec), 1, disk);
+	fclose(disk);
+	return rec;
+}
+
+void setEntry(InternalEntry internalEntry, int block, int offset) {
+	if ((internalEntry.lChild == block) || (internalEntry.rChild == block)) {
+		InternalEntry entry;
+		entry = getEntry(block, offset);
+		if (internalEntry.attrVal.nval == entry.attrVal.nval)
+			return;
+		if (internalEntry.lChild == block)
+			internalEntry.lChild = entry.lChild;
+		else
+			internalEntry.rChild = entry.rChild;
+	}
+
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, block * BLOCK_SIZE + 32 + offset * 20, SEEK_SET);
+	fwrite(&internalEntry, sizeof(internalEntry), 1, disk);
+	fclose(disk);
+}
+
+Index getLeafEntry(int leaf, int offset) {
+	Index rec;
+	FILE *disk = fopen("disk", "rb");
+	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
+	fread(&rec, sizeof(rec), 1, disk);
+	fclose(disk);
+	return rec;
+}
+
+void setLeafEntry(Index rec, int leaf, int offset) {
+	FILE *disk = fopen("disk", "rb+");
+	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
+	fwrite(&rec, sizeof(rec), 1, disk);
+	fclose(disk);
+}

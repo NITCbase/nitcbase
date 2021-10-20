@@ -31,4 +31,9 @@ int getBlockType(int blocknum);
 int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType);
 int deleteBlock(int blockNum);
 
+InternalEntry getEntry(int block, int iNo);
+void setEntry(InternalEntry internalEntry, int block, int offset);
+Index getLeafEntry(int leaf, int offset);
+void setLeafEntry(Index rec, int leaf, int offset);
+
 #endif //B18_CODE_BLOCK_ACCESS_H

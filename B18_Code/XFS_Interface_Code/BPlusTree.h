@@ -10,7 +10,8 @@
 
 class BPlusTree{
 private :
-	int rootBlock, relId;
+	int rootBlock;
+	int relId;
 	char attrName[ATTR_SIZE];
 
 public:

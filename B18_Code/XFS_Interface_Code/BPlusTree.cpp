@@ -10,54 +10,6 @@
 #include "disk_structures.h"
 #include "block_access.h"
 
-// TODO : review
-InternalEntry getEntry(int block, int iNo) {
-	InternalEntry rec;
-	FILE *disk = fopen("disk", "rb");
-	fseek(disk, block * BLOCK_SIZE + 32 + iNo * 20, SEEK_SET);
-	fread(&rec, sizeof(rec), 1, disk);
-	fclose(disk);
-	return rec;
-}
-
-int setEntry(InternalEntry internalEntry, int block, int offset) {
-	if ((internalEntry.lChild == block) || (internalEntry.rChild == block)) {
-		InternalEntry entry;
-		entry = getEntry(block, offset);
-		if (internalEntry.attrVal.nval == entry.attrVal.nval)
-			return SUCCESS;
-		if (internalEntry.lChild == block)
-			internalEntry.lChild = entry.lChild;
-		else
-			internalEntry.rChild = entry.rChild;
-	}
-
-	FILE *disk = fopen("disk", "rb+");
-	fseek(disk, block * BLOCK_SIZE + 32 + offset * 20, SEEK_SET);
-	fwrite(&internalEntry, sizeof(internalEntry), 1, disk);
-	fclose(disk);
-	return SUCCESS;
-}
-
-Index getLeafEntry(int leaf, int offset) {
-	Index rec;
-	FILE *disk = fopen("disk", "rb");
-	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
-	fread(&rec, sizeof(rec), 1, disk);
-	fclose(disk);
-	return rec;
-}
-
-int setLeafEntry(Index rec, int leaf, int offset) {
-	FILE *disk = fopen("disk", "rb+");
-	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
-	fwrite(&rec, sizeof(rec), 1, disk);
-	fclose(disk);
-	return SUCCESS;
-}
-
-
-
 BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 	// initialise object instance member fields
 	this->relId = relId;
@@ -183,13 +135,13 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 	int attrType = (int) attrCatEntry[ATTRCAT_ATTR_TYPE_INDEX].nval;
 
 	int blockType = getBlockType(blockNum);
-	HeadInfo header;
+	HeadInfo blockHeader;
 	int num_of_entries, current_entryNumber;
 
 	/******Traverse the B+ Tree to reach the appropriate leaf where insertion can be done******/
 	while (blockType != IND_LEAF) {
-		header = getHeader(blockNum);
-		num_of_entries = header.numEntries;
+		blockHeader = getHeader(blockNum);
+		num_of_entries = blockHeader.numEntries;
 		InternalEntry internalEntry;
 		for (current_entryNumber = 0; current_entryNumber < num_of_entries; ++current_entryNumber) {
 			internalEntry = getEntry(blockNum, current_entryNumber);
@@ -208,8 +160,8 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 	// NOTE : blockNum is the leaf index block to which insertion of val is to be done
 
 	/******Insertion of entry in the appropriate leaf block******/
-	header = getHeader(blockNum);
-	num_of_entries = header.numEntries;
+	blockHeader = getHeader(blockNum);
+	num_of_entries = blockHeader.numEntries;
 
 	Index indices[num_of_entries + 1];
 	Index current_leafEntry;
@@ -258,8 +210,8 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 	if (num_of_entries != 63) {
 
 		// increment blockHeader.numEntries and set this as header of block
-		header.numEntries = header.numEntries + 1;
-		setHeader(&header, blockNum);
+		blockHeader.numEntries = blockHeader.numEntries + 1;
+		setHeader(&blockHeader, blockNum);
 
 		// iterate through all the entries of indices array and populate the entries of block with them
 		for (int i = 0; i < current_leafEntryIndex; ++i) {
@@ -288,30 +240,37 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 			return E_DISKFULL;
 		}
 
-		//store right sibling of leftBlk, this will be right sibling of newRightBlkNum
-		int prevRblock = header.rblock;
+		// let leftBlkHeader be the header of the left block(which is presently stored in blockHeader)
+		struct HeadInfo leftBlkHeader = blockHeader;
+
+		//store the block after leftBlk that appears in the linked list in prevRblock
+		int prevRblock = leftBlkHeader.rblock;
 
 		/* Update left block header
 		 * - number of entries = 32
-		 * - right sibling = newRightBlkNum
+		 * - right block = newRightBlkNum
 		 */
-		header.numEntries = 32;
-		header.rblock = newRightBlkNum;
-		setHeader(&header, blockNum);
+		leftBlkHeader.numEntries = 32;
+		leftBlkHeader.rblock = newRightBlkNum;
+		setHeader(&leftBlkHeader, leftBlkNum);
 
+		//load the header of newRightBlk in newRightBlkHeader using BlockBuffer::getHeader()
+		HeadInfo newRightBlkHeader = getHeader(newRightBlkNum);
 		/* Update right block header
 		 * - number of entries = 32
-		 * - left sibling = leftBlkNum
-		 * - right sibling = prevRblock
+		 * - left block = leftBlkNum
+		 * - right block = prevRblock
 		 * - parent block = parent block of leftBlkNum
 		 */
-		HeadInfo newRightBlkHeader;
+
 		newRightBlkHeader.numEntries = 32;
 		newRightBlkHeader.lblock = leftBlkNum;
-		int parentBlock = header.pblock;
-		newRightBlkHeader.pblock = parentBlock;
+		newRightBlkHeader.pblock = leftBlkHeader.pblock;
 		newRightBlkHeader.rblock = prevRblock;
 		setHeader(&newRightBlkHeader, newRightBlkNum);
+
+		//store pblock of leftBlk in parBlkNum.
+		int parentBlock = leftBlkHeader.pblock;
 
 		// set the first 32 entries of leftBlk as the first 32 entries of indices array
 		int indices_iter;
@@ -345,7 +304,6 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 			strcpy(newAttrVal.sval, leafentry.attrVal.sval);
 
 		bool done = false;
-		int newchild = newRightBlkNum;
 
 		/******Traverse the internal index blocks of the B+ Tree bottom up making insertions wherever required******/
 		//let done indicate whether the insertion is complete or not
@@ -372,15 +330,19 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 							} else if (attrType == STRING) {
 								strcpy(internal_entries[current_entryNumber].attrVal.sval, newAttrVal.sval);
 							}
-							internal_entries[current_entryNumber].lChild = internalEntry.lChild;
-							internal_entries[current_entryNumber].rChild = newchild;
+							internal_entries[current_entryNumber].lChild = leftBlkNum;
+							internal_entries[current_entryNumber].rChild = newRightBlkNum;
 							flag = 1;
 							current_entryNumber++;
 						}
 					}
 
 					// copy entries of the parentBlock to the array internal_entries
-					internal_entries[current_entryNumber].attrVal = internalEntry.attrVal;
+					if (attrType == NUMBER) {
+						internal_entries[current_entryNumber].attrVal.nval = internalEntry.attrVal.nval;
+					} else if (attrType == STRING) {
+						strcpy(internal_entries[current_entryNumber].attrVal.sval, internalEntry.attrVal.sval);
+					}
 					if (current_entryNumber - 1 >= 0) {
 						internal_entries[current_entryNumber].lChild = internal_entries[current_entryNumber - 1].rChild;
 					} else {
@@ -389,11 +351,12 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					internal_entries[current_entryNumber].rChild = internalEntry.rChild;
 					current_entryNumber++;
 				}
-				if (flag == 0)//when newattrval is greater than all parentblock enries
+				// TODO : review
+				if (flag == 0) //when newattrval is greater than all parentblock enries
 				{
 					internal_entries[current_entryNumber].attrVal = newAttrVal;
-					internal_entries[current_entryNumber].lChild = internal_entries[current_entryNumber - 1].rChild;
-					internal_entries[current_entryNumber].rChild = newchild;
+					internal_entries[current_entryNumber].lChild = leftBlkNum;
+					internal_entries[current_entryNumber].rChild = newRightBlkNum;
 					flag = 1;
 				}
 
@@ -411,10 +374,10 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					done = true;
 				} else //if parent block is full
 				{
-					newchild = getFreeBlock(IND_INTERNAL); // to get a new internalblock
+					int newBlock = getFreeBlock(IND_INTERNAL); // to get a new internalblock
 
 					// disk full
-					if(newchild == FAILURE) {
+					if(newBlock == FAILURE) {
 						// destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
 						bPlusDestroy(newRightBlkNum);
 						// destroy the existing B+ tree by passing rootBlock member field
@@ -427,30 +390,32 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					}
 
 					//assign new block as the right block in the splitting.
-					newRightBlkNum = newchild;
+					newRightBlkNum = newBlock;
 					//assign parentBlock as the left block in the splitting.
 					leftBlkNum = parentBlock;
+
+					//update leftBlkHeader with parheader.
+					leftBlkHeader = parentHeader;
 
 					/* Update left block header
 		            * - number of entries = 50
 		            */
-					parentHeader.numEntries = 50;
-					setHeader(&parentHeader, parentBlock);
+					leftBlkHeader.numEntries = 50;
+					setHeader(&leftBlkHeader, leftBlkNum);
+
+					//load newRightBlkHeader
+					newRightBlkHeader = getHeader(newRightBlkNum);
 
 					/* Update right block header
 		            * - number of entries = 50
 		            * - parent block = parent block of leftBlkNum
 		            */
 					newRightBlkHeader.numEntries = 50;
-					blockNum = parentBlock;
-					parentBlock = parentHeader.pblock;
-					newRightBlkHeader.pblock = parentHeader.pblock;
-					setHeader(&parentHeader, newchild);
+					newRightBlkHeader.pblock = leftBlkHeader.pblock;
+					setHeader(&newRightBlkHeader, newRightBlkNum);
 
-//					newAttrVal = internal_entries[50].attrVal;
-//
-//					// set the first 50 entries of leftBlk as the first 50 entries of internalEntries array
-//					for (indices_iter = 0; indices_iter < 50; ++indices_iter) {
+					// set the first 50 entries of leftBlk as the first 50 entries of internalEntries array
+					for (indices_iter = 0; indices_iter < 50; ++indices_iter) {
 //						if ((internal_entries[indices_iter].lChild == parentBlock) || (internal_entries[indices_iter].rChild == parentBlock)) {
 //							InternalEntry entry;
 //							entry = getEntry(parentBlock, indices_iter);
@@ -461,15 +426,35 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 //							else
 //								internal_entries[indices_iter].rChild = entry.rChild;
 //						}
-//						setEntry(internal_entries[indices_iter], parentBlock, indices_iter);
-//					}
-//
-//					indices_iter = 51;
-//					// set the first 50 entries of newRightBlk as the entries from 51 to 100 of internalEntries array
-//					for (int j = 0; j < 50; ++j) {
-//						setEntry(internal_entries[indices_iter], newchild, j);
-//						indices_iter++;
-//					}
+						setEntry(internal_entries[indices_iter], leftBlkNum, indices_iter);
+					}
+
+					indices_iter = 51;
+					// set the first 50 entries of newRightBlk as the entries from 51 to 100 of internalEntries array
+					for (int j = 0; j < 50; ++j) {
+						setEntry(internal_entries[indices_iter], newRightBlkNum, j);
+						indices_iter++;
+					}
+
+					int childNum;
+					//iterate from 50 to 100:
+					for (int k = 50; k < 100; ++k) {
+						//assign the rchild block of ith index in internalEntries to childNum
+						childNum = internal_entries[k].rChild;
+
+						// update pblock of the child block to newRightBlkNum
+						HeadInfo childHeader = getHeader(childNum);
+						childHeader.pblock = newRightBlkNum;
+						setHeader(&childHeader, childNum);
+					}
+
+					//update parBlkNum as the pblock of leftBlk.
+					parentBlock = leftBlkHeader.pblock;
+
+					/* update newAttrval to the attribute value of 50th entry in the internalEntries array;
+					 * this is attribute value which needs to be inserted in the parent block.
+					 */
+					newAttrVal = internal_entries[49].attrVal;
 
 				}
 			} else //if headparblock == -1 i.e root is split now

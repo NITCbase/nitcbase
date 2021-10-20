@@ -952,15 +952,33 @@ void string_to_char_array(string x, char *a, int size) {
 	}
 }
 
-bool checkValidCsvFile(const string filename) {
-	int pos_dot = filename.rfind('.');
-	if (filename.substr(pos_dot + 1, filename.length()) == "csv") {
-		string file_name = filename.substr(0, pos_dot);
-		if (file_name.length() > ATTR_SIZE - 1) {
-			cout << "File name is more than 15 characters, trimming to get relation name\n";
-			return true;
-		} else
-			return true;
-	} else
-		return false;
+int level = 0;
+void printBPlusTree(int rootBlock) {
+	HeadInfo header = getHeader(rootBlock);
+	int block_type = getBlockType(rootBlock);
+
+	if (block_type == IND_INTERNAL) {
+		int num_entries = header.numEntries;
+		int iter = 0;
+		InternalEntry internal_entry = getEntry(rootBlock, iter);
+		printBPlusTree(internal_entry.lChild);
+		for (iter = 0; iter < num_entries; iter++) {
+			internal_entry = getEntry(rootBlock, iter);
+			cout << internal_entry.attrVal.nval, " ";
+		}
+		level++;
+		for (iter = 0; iter < num_entries; iter++) {
+			internal_entry = getEntry(rootBlock, iter);
+			printBPlusTree(internal_entry.rChild);
+		}
+
+	} else if (block_type == IND_LEAF) {
+
+		int num_entries = header.numEntries;
+
+		for (int iter = 0; iter < num_entries; iter++) {
+			Index index = getLeafEntry(rootBlock, iter);
+			cout << index.attrVal.nval, " ";
+		}
+	}
 }
