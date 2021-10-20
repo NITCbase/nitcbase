@@ -15,10 +15,10 @@ private :
 
 public:
 	BPlusTree(int relid, char attrName[ATTR_SIZE]);
-	int getRootBlock() const;
+	int getRootBlock();
 	int bPlusInsert(union Attribute val, struct recId recordId);
 	struct recId BPlusSearch(union Attribute attrVal, int op);
-	static int bPlusDestroy(int blockNum);
+	int bPlusDestroy(int blockNum);
 };
 
 #endif //B18_CODE_BPLUSTREE_H

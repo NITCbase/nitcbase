@@ -529,7 +529,7 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op) {
 	// TODO
 }
 
-int BPlusTree::getRootBlock() const {
+int BPlusTree::getRootBlock() {
 	return this->rootBlock;
 }
 

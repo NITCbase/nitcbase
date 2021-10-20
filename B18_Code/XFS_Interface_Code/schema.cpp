@@ -117,7 +117,6 @@ int closeRel(int relid) {
 	return OpenRelTable::closeRelation(relid);
 }
 
-
 int createIndex(char *relationName, char *attrName){
 	// get the src relation's open relation id, using getRelId() method of Openreltable.
 	int relId = OpenRelTable::getRelationId(relationName);
@@ -150,7 +149,9 @@ int dropIndex(char *relationName, char *attrName){
 	if (rootBlock == -1) {
 		return E_NOINDEX;
 	}
-	int retVal =  BPlusTree::bPlusDestroy(rootBlock);
+
+	BPlusTree bPlusTree = BPlusTree(relId, attrName);
+	int retVal =  bPlusTree.bPlusDestroy(rootBlock);
 
 	if (retVal == SUCCESS) {
 		attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
