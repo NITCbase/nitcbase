@@ -7,6 +7,7 @@
 
 #include "../define/constants.h"
 #include "../define/errors.h"
+#include "disk_structures.h"
 
 class BPlusTree{
 private :
@@ -17,9 +18,9 @@ private :
 public:
 	BPlusTree(int relid, char attrName[ATTR_SIZE]);
 	int getRootBlock();
-	int bPlusInsert(union Attribute val, struct recId recordId);
-	struct recId BPlusSearch(union Attribute attrVal, int op);
-	int bPlusDestroy(int blockNum);
+	int bPlusInsert(union Attribute attrVal, recId recordId);
+	recId BPlusSearch(union Attribute attrVal, int op, indexId *prev_indexId);
+	static int bPlusDestroy(int blockNum);
 };
 
 #endif //B18_CODE_BPLUSTREE_H

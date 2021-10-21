@@ -925,19 +925,19 @@ int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType
 	}
 }
 
-InternalEntry getEntry(int block, int iNo) {
+InternalEntry getInternalEntry(int block, int entryNum) {
 	InternalEntry rec;
 	FILE *disk = fopen("disk", "rb");
-	fseek(disk, block * BLOCK_SIZE + 32 + iNo * 20, SEEK_SET);
+	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entryNum * INTERNAL_ENTRY_SIZE, SEEK_SET);
 	fread(&rec, sizeof(rec), 1, disk);
 	fclose(disk);
 	return rec;
 }
 
-void setEntry(InternalEntry internalEntry, int block, int offset) {
+void setInternalEntry(InternalEntry internalEntry, int block, int offset) {
 	if ((internalEntry.lChild == block) || (internalEntry.rChild == block)) {
 		InternalEntry entry;
-		entry = getEntry(block, offset);
+		entry = getInternalEntry(block, offset);
 		if (internalEntry.attrVal.nval == entry.attrVal.nval)
 			return;
 		if (internalEntry.lChild == block)
@@ -947,7 +947,7 @@ void setEntry(InternalEntry internalEntry, int block, int offset) {
 	}
 
 	FILE *disk = fopen("disk", "rb+");
-	fseek(disk, block * BLOCK_SIZE + 32 + offset * 20, SEEK_SET);
+	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + offset * INTERNAL_ENTRY_SIZE, SEEK_SET);
 	fwrite(&internalEntry, sizeof(internalEntry), 1, disk);
 	fclose(disk);
 }
@@ -955,7 +955,7 @@ void setEntry(InternalEntry internalEntry, int block, int offset) {
 Index getLeafEntry(int leaf, int offset) {
 	Index rec;
 	FILE *disk = fopen("disk", "rb");
-	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
+	fseek(disk, leaf * BLOCK_SIZE + HEADER_SIZE + offset * LEAF_ENTRY_SIZE, SEEK_SET);
 	fread(&rec, sizeof(rec), 1, disk);
 	fclose(disk);
 	return rec;
@@ -963,7 +963,7 @@ Index getLeafEntry(int leaf, int offset) {
 
 void setLeafEntry(Index rec, int leaf, int offset) {
 	FILE *disk = fopen("disk", "rb+");
-	fseek(disk, leaf * BLOCK_SIZE + 32 + offset * 32, SEEK_SET);
+	fseek(disk, leaf * BLOCK_SIZE + HEADER_SIZE + offset * LEAF_ENTRY_SIZE, SEEK_SET);
 	fwrite(&rec, sizeof(rec), 1, disk);
 	fclose(disk);
 }

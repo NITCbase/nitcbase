@@ -960,15 +960,15 @@ void printBPlusTree(int rootBlock) {
 	if (block_type == IND_INTERNAL) {
 		int num_entries = header.numEntries;
 		int iter = 0;
-		InternalEntry internal_entry = getEntry(rootBlock, iter);
+		InternalEntry internal_entry = getInternalEntry(rootBlock, iter);
 		printBPlusTree(internal_entry.lChild);
 		for (iter = 0; iter < num_entries; iter++) {
-			internal_entry = getEntry(rootBlock, iter);
+			internal_entry = getInternalEntry(rootBlock, iter);
 			cout << internal_entry.attrVal.nval, " ";
 		}
 		level++;
 		for (iter = 0; iter < num_entries; iter++) {
-			internal_entry = getEntry(rootBlock, iter);
+			internal_entry = getInternalEntry(rootBlock, iter);
 			printBPlusTree(internal_entry.rChild);
 		}
 
