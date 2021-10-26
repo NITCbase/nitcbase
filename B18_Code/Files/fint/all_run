@@ -1,15 +1,40 @@
 echo Hello World, this is a test
 OPEN TABLE testTable
+echo ----------------------
 CLOSE TABLE testTable
+echo ----------------------
+echo CREATE TABLE
 CREATE TABLE Student(Name STR, Age NUM)
+echo ----------------------
+echo DROP TABLE
 DROP TABLE Student
+echo ----------------------
+echo CREATE INDEX
 CREATE INDEX ON sample.Rollno
+echo ----------------------
+echo DROP INDEX
 DROP INDEX ON sample.Rollno
+echo ----------------------
+echo ALTER TABLE RENAME
 ALTER TABLE RENAME sample TO Students
+echo ----------------------
+echo ALTER TABLE RENAME COLUMN
 ALTER TABLE RENAME sample COLUMN CGPA TO SGPA
+echo ----------------------
+echo INSERT INTO VALUES
 INSERT INTO Student_Grades VALUES (1, Isa, S);
+echo ----------------------
+echo INSERT VALUES FROM FILE
 INSERT INTO color VALUES FROM color_values.csv;
+echo ----------------------
+echo SELECT * FROM
 SELECT * FROM Students INTO Target_Students;
+echo ----------------------
+echo SELECT ATTRLIST FROM
 SELECT Name, CGPA FROM Students INTO Target_Students;
+echo ----------------------
+echo SELECT * FROM WHERE
 SELECT * FROM Students INTO Target_Students WHERE CGPA > 8;
+echo ----------------------
+echo SELECT * FROM JOIN WHERE
 SELECT * FROM Students1 JOIN Students2 INTO Students WHERE Students1.Rollno = Students2.Rollno;

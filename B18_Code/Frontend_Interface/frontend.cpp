@@ -476,6 +476,14 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(m[11], joinAttributeOne, ATTR_SIZE - 1);
         string_to_char_array(m[13], joinAttributeTwo, ATTR_SIZE - 1);
 
+        // LOGGING DEBUG //
+        print16(sourceRelOneName);
+        print16(sourceRelTwoName);
+        print16(targetRelName);
+        print16(joinAttributeOne);
+        print16(joinAttributeTwo);
+        /**********/
+
 //        int ret = join(sourceRelOneName, sourceRelTwoName, targetRelName, joinAttributeOne, joinAttributeTwo);
         int ret = SUCCESS;
         if (ret == SUCCESS) {
