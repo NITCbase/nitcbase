@@ -55,7 +55,7 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
 //        int ret = openRel(relname);
-        int ret;
+        int ret = SUCCESS;
         if (ret >= 0 && ret <= MAX_OPEN - 1) {
             cout << "Relation ";
             print16(relname, false);
@@ -73,7 +73,7 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
 //        int ret = closeRel(relname);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
@@ -113,7 +113,7 @@ int regexMatchAndExecute(const string input_command) {
         }
 
 //        int ret = createRel(relname, no_attrs, attribute, type_attr);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
@@ -134,7 +134,7 @@ int regexMatchAndExecute(const string input_command) {
         }
 
 //        int ret = deleteRel(relname);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
@@ -162,7 +162,7 @@ int regexMatchAndExecute(const string input_command) {
 //        }
 
 //        int ret = createIndex(relname, attr_name);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS)
             cout << "Index created successfully\n";
         else {
@@ -179,7 +179,7 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
 //        int ret = dropIndex(relname, attr_name);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS)
             cout << "Index deleted successfully\n";
         else {
@@ -198,7 +198,7 @@ int regexMatchAndExecute(const string input_command) {
 
 //        int ret = renameRel(old_relation_name, new_relation_name);
 
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Renamed Relation Successfully" << endl;
         } else {
@@ -220,7 +220,7 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(newcolumnname, new_col, ATTR_SIZE - 1);
 
 //        int ret = renameAtrribute(relname, old_col, new_col);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Renamed Attribute Successfully" << endl;
         } else {
@@ -240,7 +240,7 @@ int regexMatchAndExecute(const string input_command) {
 
 //        int ret = insert(words, rel_name);
 
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Inserted successfully" << endl;
         } else {
@@ -265,7 +265,7 @@ int regexMatchAndExecute(const string input_command) {
         }
         fclose(file);
 //        int ret = insert(relname, Filepath);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Inserted successfully" << endl;
         } else {
@@ -287,7 +287,7 @@ int regexMatchAndExecute(const string input_command) {
 
 
 //        return select_from_handler(sourceRelName, targetRelName);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Selected successfully" << endl;
         } else {
@@ -317,7 +317,7 @@ int regexMatchAndExecute(const string input_command) {
 
 //        return select_from_where_handler(sourceRelName, targetRelName, attribute, op, value);
 
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Selected successfully" << endl;
         } else {
@@ -351,7 +351,7 @@ int regexMatchAndExecute(const string input_command) {
         }
 
         //        return select_attr_from_handler(sourceRelName, targetRelName, attr_count, attr_list);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Selected successfully" << endl;
         } else {
@@ -409,7 +409,7 @@ int regexMatchAndExecute(const string input_command) {
 
 //        return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, attribute, op,
 //                                              value);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Selected successfully" << endl;
         } else {
@@ -440,7 +440,7 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(m[13], joinAttributeTwo, ATTR_SIZE - 1);
 
 //        int ret = join(sourceRelOneName, sourceRelTwoName, targetRelName, joinAttributeOne, joinAttributeTwo);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Join successful" << endl;
         } else {
@@ -494,7 +494,7 @@ int regexMatchAndExecute(const string input_command) {
 
 //        return select_attr_from_join_handler(sourceRelOneName, sourceRelTwoName, targetRelName, attrCount,
 //                                             joinAttributeOne, joinAttributeTwo, attributeList);
-        int ret;
+        int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Selected successfully" << endl;
         } else {
