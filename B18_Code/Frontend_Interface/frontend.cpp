@@ -42,7 +42,6 @@ int regexMatchAndExecute(const string input_command) {
     } else if (regex_match(input_command, echo)) {
         regex_search(input_command, m, echo);
         string message = m[2];
-        /* TODO: add bmap, relcat, attrcat check */
         cout << message << endl;
     } else if (regex_match(input_command, run)) {
         regex_search(input_command, m, run);
@@ -298,14 +297,6 @@ int regexMatchAndExecute(const string input_command) {
 
         int op = getOperator(op_str);
 
-        // LOGGING DEBUG //
-//        print16(sourceRelName);
-//        print16(targetRelName);
-//        print16(attribute);
-//        print16(value);
-//        cout << op_str << endl;
-        /**********/
-
         return select_from_where_handler(sourceRelName, targetRelName, attribute, op, value);
 
     } else if (regex_match(input_command, select_attr_from)) {
@@ -333,15 +324,6 @@ int regexMatchAndExecute(const string input_command) {
             string_to_char_array(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
         }
 
-        // LOGGING DEBUG //
-//        print16(sourceRelName);
-//        print16(targetRelName);
-//        cout << attr_count << endl;
-//        cout << "DEBUG | attrlist:" << endl;
-//        for (auto i = 0; i < attr_count; i++) {
-//            print16(attr_list[i]);
-//        }
-        /**********/
 
         return select_attr_from_handler(sourceRelName, targetRelName, attr_count, attr_list);
 
