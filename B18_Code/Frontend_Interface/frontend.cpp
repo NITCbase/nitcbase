@@ -264,11 +264,12 @@ int regexMatchAndExecute(const string input_command) {
             return FAILURE;
         }
         fclose(file);
-        int retValue = insert(relname, Filepath);
-        if (retValue == SUCCESS) {
+//        int ret = insert(relname, Filepath);
+        int ret;
+        if (ret == SUCCESS) {
             cout << "Inserted successfully" << endl;
         } else {
-            printErrorMsg(retValue);
+            printErrorMsg(ret);
             return FAILURE;
         }
 
@@ -283,7 +284,17 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(sourceRelName_str, sourceRelName, ATTR_SIZE - 1);
         string_to_char_array(targetRelName_str, targetRelName, ATTR_SIZE - 1);
 
-        return select_from_handler(sourceRelName, targetRelName);
+
+
+//        return select_from_handler(sourceRelName, targetRelName);
+        int ret;
+        if (ret == SUCCESS) {
+            cout << "Selected successfully" << endl;
+        } else {
+            printErrorMsg(ret);
+            return FAILURE;
+        }
+
 
     } else if (regex_match(input_command, select_from_where)) {
         regex_search(input_command, m, select_from_where);
@@ -304,7 +315,15 @@ int regexMatchAndExecute(const string input_command) {
 
         int op = getOperator(op_str);
 
-        return select_from_where_handler(sourceRelName, targetRelName, attribute, op, value);
+//        return select_from_where_handler(sourceRelName, targetRelName, attribute, op, value);
+
+        int ret;
+        if (ret == SUCCESS) {
+            cout << "Selected successfully" << endl;
+        } else {
+            printErrorMsg(ret);
+            return FAILURE;
+        }
 
     } else if (regex_match(input_command, select_attr_from)) {
         regex_search(input_command, m, select_attr_from);
@@ -331,8 +350,14 @@ int regexMatchAndExecute(const string input_command) {
             string_to_char_array(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
         }
 
-
-        return select_attr_from_handler(sourceRelName, targetRelName, attr_count, attr_list);
+        //        return select_attr_from_handler(sourceRelName, targetRelName, attr_count, attr_list);
+        int ret;
+        if (ret == SUCCESS) {
+            cout << "Selected successfully" << endl;
+        } else {
+            printErrorMsg(ret);
+            return FAILURE;
+        }
 
     } else if ((regex_match(input_command, select_attr_from_where))) {
         regex_search(input_command, m, select_attr_from_where);
@@ -382,8 +407,15 @@ int regexMatchAndExecute(const string input_command) {
 //        }
         /**********/
 
-        return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, attribute, op,
-                                              value);
+//        return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, attribute, op,
+//                                              value);
+        int ret;
+        if (ret == SUCCESS) {
+            cout << "Selected successfully" << endl;
+        } else {
+            printErrorMsg(ret);
+            return FAILURE;
+        }
 
     } else if (regex_match(input_command, select_from_join)) {
 
@@ -407,7 +439,8 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(m[11], joinAttributeOne, ATTR_SIZE - 1);
         string_to_char_array(m[13], joinAttributeTwo, ATTR_SIZE - 1);
 
-        int ret = join(sourceRelOneName, sourceRelTwoName, targetRelName, joinAttributeOne, joinAttributeTwo);
+//        int ret = join(sourceRelOneName, sourceRelTwoName, targetRelName, joinAttributeOne, joinAttributeTwo);
+        int ret;
         if (ret == SUCCESS) {
             cout << "Join successful" << endl;
         } else {
@@ -459,8 +492,15 @@ int regexMatchAndExecute(const string input_command) {
             string_to_char_array(attributesListAsWords[i], attributeList[i], ATTR_SIZE - 1);
         }
 
-        return select_attr_from_join_handler(sourceRelOneName, sourceRelTwoName, targetRelName, attrCount,
-                                             joinAttributeOne, joinAttributeTwo, attributeList);
+//        return select_attr_from_join_handler(sourceRelOneName, sourceRelTwoName, targetRelName, attrCount,
+//                                             joinAttributeOne, joinAttributeTwo, attributeList);
+        int ret;
+        if (ret == SUCCESS) {
+            cout << "Selected successfully" << endl;
+        } else {
+            printErrorMsg(ret);
+            return FAILURE;
+        }
 
     } else {
         cout << "Syntax Error" << endl;
