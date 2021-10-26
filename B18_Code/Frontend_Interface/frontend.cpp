@@ -111,6 +111,15 @@ int regexMatchAndExecute(const string input_command) {
                 type_attr[i] = NUMBER;
         }
 
+        // LOGGING DEBUG //
+        print16(relname);
+        for (auto i = 0; i < no_attrs; i++) {
+            print16(attribute[i], false);
+            cout << " type = ";
+            cout << type_attr[i] << endl;
+        }
+        /**********/
+
 //        int ret = createRel(relname, no_attrs, attribute, type_attr);
         int ret = SUCCESS;
         if (ret == SUCCESS) {
@@ -153,6 +162,12 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
         string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
+        // LOGGING DEBUG //
+        print16(relname);
+        print16(attr_name);
+        /**********/
+
+
         // Do Check of Relation Open
 //        int relId = OpenRelTable::getRelationId(relname);
 //        if (relId == E_RELNOTOPEN) {
@@ -176,6 +191,11 @@ int regexMatchAndExecute(const string input_command) {
         char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
         string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
+
+        // LOGGING DEBUG //
+        print16(relname);
+        print16(attr_name);
+        /**********/
 
 //        int ret = dropIndex(relname, attr_name);
         int ret = SUCCESS;
@@ -237,6 +257,13 @@ int regexMatchAndExecute(const string input_command) {
         string attrs = m[0];
         vector<string> words = extract_tokens(attrs);
 
+        // LOGGING DEBUG //
+        print16(rel_name);
+        for (const auto word: words) {
+            cout << word;
+        }
+        /**********/
+
 //        int ret = insert(words, rel_name);
 
         int ret = SUCCESS;
@@ -283,7 +310,10 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(sourceRelName_str, sourceRelName, ATTR_SIZE - 1);
         string_to_char_array(targetRelName_str, targetRelName, ATTR_SIZE - 1);
 
-
+        // LOGGING DEBUG //
+        print16(sourceRelName);
+        print16(targetRelName);
+        /**********/
 
 //        return select_from_handler(sourceRelName, targetRelName);
         int ret = SUCCESS;
@@ -313,6 +343,14 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(value_str, value, ATTR_SIZE - 1);
 
         int op = getOperator(op_str);
+
+        // LOGGING DEBUG //
+        print16(sourceRelName);
+        print16(targetRelName);
+        print16(attribute);
+        print16(value);
+        cout << "Operator is " << op_str << endl;
+        /**********/
 
 //        return select_from_where_handler(sourceRelName, targetRelName, attribute, op, value);
 
@@ -394,16 +432,16 @@ int regexMatchAndExecute(const string input_command) {
         }
 
         // LOGGING DEBUG //
-//        print16(sourceRelName);
-//        print16(targetRelName);
-//        print16(attribute);
-//        print16(value);
-//        cout << op_str << endl;
-//        cout << attr_count << endl;
-//        cout << "DEBUG | attrlist:" << endl;
-//        for (auto i = 0; i < attr_count; i++) {
-//            print16(attr_list[i]);
-//        }
+        print16(sourceRelName);
+        print16(targetRelName);
+        print16(attribute);
+        print16(value);
+        cout << op_str << endl;
+        cout << attr_count << endl;
+        cout << "DEBUG | attrlist:" << endl;
+        for (auto i = 0; i < attr_count; i++) {
+            print16(attr_list[i]);
+        }
         /**********/
 
 //        return select_attr_from_where_handler(sourceRelName, targetRelName, attr_count, attr_list, attribute, op,

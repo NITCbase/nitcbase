@@ -8,6 +8,7 @@ DROP INDEX ON sample.Rollno
 ALTER TABLE RENAME sample TO Students
 ALTER TABLE RENAME sample COLUMN CGPA TO SGPA
 INSERT INTO Student_Grades VALUES (1, Isa, S);
+INSERT INTO color VALUES FROM color_values.csv;
 SELECT * FROM Students INTO Target_Students;
 SELECT Name, CGPA FROM Students INTO Target_Students;
 SELECT * FROM Students INTO Target_Students WHERE CGPA > 8;
