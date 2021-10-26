@@ -196,8 +196,9 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(oldTableName, old_relation_name, ATTR_SIZE - 1);
         string_to_char_array(newTableName, new_relation_name, ATTR_SIZE - 1);
 
-        int ret = renameRel(old_relation_name, new_relation_name);
+//        int ret = renameRel(old_relation_name, new_relation_name);
 
+        int ret;
         if (ret == SUCCESS) {
             cout << "Renamed Relation Successfully" << endl;
         } else {
@@ -218,8 +219,8 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(oldcolumnname, old_col, ATTR_SIZE - 1);
         string_to_char_array(newcolumnname, new_col, ATTR_SIZE - 1);
 
-        int ret = renameAtrribute(relname, old_col, new_col);
-
+//        int ret = renameAtrribute(relname, old_col, new_col);
+        int ret;
         if (ret == SUCCESS) {
             cout << "Renamed Attribute Successfully" << endl;
         } else {
@@ -237,12 +238,13 @@ int regexMatchAndExecute(const string input_command) {
         string attrs = m[0];
         vector<string> words = extract_tokens(attrs);
 
-        int retValue = insert(words, rel_name);
+//        int ret = insert(words, rel_name);
 
-        if (retValue == SUCCESS) {
+        int ret;
+        if (ret == SUCCESS) {
             cout << "Inserted successfully" << endl;
         } else {
-            printErrorMsg(retValue);
+            printErrorMsg(ret);
             return FAILURE;
         }
     } else if (regex_match(input_command, insert_multiple)) {
