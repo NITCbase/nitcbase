@@ -1,7 +1,6 @@
 //
 // Created by gokul on 26-10-2021.
 //
-
 #include "frontend.h"
 #include <iostream>
 #include <fstream>
@@ -19,13 +18,13 @@ void printErrorMsg(int ret);
 
 vector<string> extract_tokens(string input_command);
 
-int executeCommandsFromFile(const string fileName);
+int executeCommandsFromFile(string fileName);
 
 int getIndexOfFromToken(vector<string> command_tokens);
 
 int getIndexOfWhereToken(vector<string> command_tokens);
 
-string getAttrListStringFromCommand(const string input_command, smatch m);
+string getAttrListStringFromCommand(string input_command, smatch m);
 
 void print16(char char_string_thing[ATTR_SIZE], bool newline);
 
@@ -50,13 +49,13 @@ int regexMatchAndExecute(const string input_command) {
             return EXIT;
         }
     }  else if (regex_match(input_command, open_table)) {
-
         regex_search(input_command, m, open_table);
         string tablename = m[3];
         char relname[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
-        int ret = openRel(relname);
+//        int ret = openRel(relname);
+        int ret;
         if (ret >= 0 && ret <= MAX_OPEN - 1) {
             cout << "Relation ";
             print16(relname, false);
@@ -73,7 +72,8 @@ int regexMatchAndExecute(const string input_command) {
         char relname[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
-        int ret = closeRel(relname);
+//        int ret = closeRel(relname);
+        int ret;
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
@@ -112,7 +112,8 @@ int regexMatchAndExecute(const string input_command) {
                 type_attr[i] = NUMBER;
         }
 
-        int ret = createRel(relname, no_attrs, attribute, type_attr);
+//        int ret = createRel(relname, no_attrs, attribute, type_attr);
+        int ret;
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
@@ -132,7 +133,8 @@ int regexMatchAndExecute(const string input_command) {
             return FAILURE;
         }
 
-        int ret = deleteRel(relname);
+//        int ret = deleteRel(relname);
+        int ret;
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
@@ -152,13 +154,15 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
         string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
-        int relId = OpenRelTable::getRelationId(relname);
-        if (relId == E_RELNOTOPEN) {
-            printErrorMsg(E_RELNOTOPEN);
-            return FAILURE;
-        }
+        // Do Check of Relation Open
+//        int relId = OpenRelTable::getRelationId(relname);
+//        if (relId == E_RELNOTOPEN) {
+//            printErrorMsg(E_RELNOTOPEN);
+//            return FAILURE;
+//        }
 
-        int ret = createIndex(relname, attr_name);
+//        int ret = createIndex(relname, attr_name);
+        int ret;
         if (ret == SUCCESS)
             cout << "Index created successfully\n";
         else {
@@ -174,7 +178,8 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
         string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
-        int ret = dropIndex(relname, attr_name);
+//        int ret = dropIndex(relname, attr_name);
+        int ret;
         if (ret == SUCCESS)
             cout << "Index deleted successfully\n";
         else {
@@ -463,9 +468,6 @@ int regexMatchAndExecute(const string input_command) {
 }
 
 int main() {
-    // Initializing Open Relation Table
-    OpenRelTable::initializeOpenRelationTable();
-
     while (true) {
         cout << "# ";
         string input_command;
