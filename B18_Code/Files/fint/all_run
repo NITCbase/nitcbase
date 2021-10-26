@@ -1,0 +1,14 @@
+echo Hello World, this is a test
+OPEN TABLE testTable
+CLOSE TABLE testTable
+CREATE TABLE Student(Name STR, Age NUM)
+DROP TABLE Student
+CREATE INDEX ON sample.Rollno
+DROP INDEX ON sample.Rollno
+ALTER TABLE RENAME sample TO Students
+ALTER TABLE RENAME sample COLUMN CGPA TO SGPA
+INSERT INTO Student_Grades VALUES (1, Isa, S);
+SELECT * FROM Students INTO Target_Students;
+SELECT Name, CGPA FROM Students INTO Target_Students;
+SELECT * FROM Students INTO Target_Students WHERE CGPA > 8;
+SELECT * FROM Students1 JOIN Students2 INTO Students WHERE Students1.Rollno = Students2.Rollno;

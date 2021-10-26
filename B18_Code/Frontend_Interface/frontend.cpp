@@ -66,7 +66,6 @@ int regexMatchAndExecute(const string input_command) {
         }
 
     } else if (regex_match(input_command, close_table)) {
-
         regex_search(input_command, m, close_table);
         string tablename = m[3];
         char relname[ATTR_SIZE];
