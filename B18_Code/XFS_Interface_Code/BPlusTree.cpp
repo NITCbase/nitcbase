@@ -378,7 +378,8 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
                     // disk full
                     if(newBlock == FAILURE) {
-                        // destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
+                        // destroy the right subtree, given by newRightBlkNum, build up till now that
+                        // has not yet been connected to the existing B+ Tree
                         bPlusDestroy(newRightBlkNum);
                         // destroy the existing B+ tree by passing rootBlock member field
                         bPlusDestroy(this->rootBlock);
