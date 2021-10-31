@@ -2,6 +2,7 @@
 #define B18_CODE_CONSTANTS_H
 
 #define DISK_PATH "../Disk/disk"
+#define DISK_RUN_COPY_PATH "../Disk/disk_run_copy"
 #define FILES_PATH "../Files/"
 
 #define BLOCK_SIZE 2048
