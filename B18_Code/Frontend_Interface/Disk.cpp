@@ -3,11 +3,39 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "Disk.h"
 
+using namespace std;
 
+/*
+ * Used to make a temporary copy of the disk contents before the starting of a new session.
+ * This ensures that if the system has a forced shutdown during the course of the session,
+ * the previous state of the disk is not lost.
+ */
+Disk::Disk() {
+    FILE *disk = fopen(DISK_PATH, "rb");
+    FILE *disk_run_copy = fopen(DISK_RUN_COPY_PATH, "wb");
+
+//    bool copy_file(const std::filesystem::path& from, const std::filesystem::path& to);
+
+//    fseek(disk, 0, SEEK_SET);
+//
+//    ifstream source(DISK_PATH, ios::binary);
+//    ofstream dest(DISK_RUN_COPY_PATH, ios::binary);
+//
+//    // file size
+//    source.seekg(0, ios::end);
+//    ifstream::pos_type size = source.tellg();
+//    source.seekg(0);
+//
+//    // allocate memory for buffer
+//    void* buffer = new char[size];
+//
+
+}
 
 /*
  * Used to Read a specified block from disk
