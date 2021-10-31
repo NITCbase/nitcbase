@@ -19,22 +19,13 @@ Disk::Disk() {
     FILE *disk = fopen(DISK_PATH, "rb");
     FILE *disk_run_copy = fopen(DISK_RUN_COPY_PATH, "wb");
 
-//    bool copy_file(const std::filesystem::path& from, const std::filesystem::path& to);
+    /* An efficient method to copy files */
+    std::ifstream  src(DISK_PATH, std::ios::binary);
+    std::ofstream  dst(DISK_RUN_COPY_PATH,   std::ios::binary);
 
-//    fseek(disk, 0, SEEK_SET);
-//
-//    ifstream source(DISK_PATH, ios::binary);
-//    ofstream dest(DISK_RUN_COPY_PATH, ios::binary);
-//
-//    // file size
-//    source.seekg(0, ios::end);
-//    ifstream::pos_type size = source.tellg();
-//    source.seekg(0);
-//
-//    // allocate memory for buffer
-//    void* buffer = new char[size];
-//
-
+    dst << src.rdbuf();
+    src.close();
+    dst.close();
 }
 
 /*
