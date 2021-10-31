@@ -3,4 +3,4 @@ project(Frontend-Interface)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(Frontend-Interface frontend.cpp)
+add_executable(Frontend-Interface frontend.cpp Disk.cpp)
