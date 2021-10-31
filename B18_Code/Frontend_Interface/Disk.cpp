@@ -7,6 +7,12 @@
 #include "../define/errors.h"
 #include "Disk.h"
 
+/*
+ * Used to Read a specified block from disk
+ * block - Memory pointer of the buffer to which the block contents is to be loaded/read.
+ *         (MUST be Allocated by caller)
+ * blockNum - Block number of the disk block to be read.
+ */
 int Disk::readBlock(unsigned char *block, int blockNum) {
     FILE *disk = fopen(DISK_PATH, "rb");
     if (blockNum < 0 || blockNum > 8191) {
@@ -19,6 +25,12 @@ int Disk::readBlock(unsigned char *block, int blockNum) {
     return SUCCESS;
 }
 
+/*
+ * Used to Write a specified block from disk
+ * block - Memory pointer of the buffer to which contain the contents to be written.
+ *         (MUST be Allocated by caller)
+ * blockNum - Block number of the disk block to be written into.
+ */
 int Disk::writeBlock(unsigned char *block, int blockNum) {
     FILE *disk = fopen(DISK_PATH, "wb");
     int offset = blockNum * BLOCK_SIZE;
