@@ -16,12 +16,25 @@ using namespace std;
  * the previous state of the disk is not lost.
  */
 Disk::Disk() {
-    FILE *disk = fopen(DISK_PATH, "rb");
-    FILE *disk_run_copy = fopen(DISK_RUN_COPY_PATH, "wb");
-
     /* An efficient method to copy files */
+    /* Copy Disk to Disk Run Copy */
     std::ifstream  src(DISK_PATH, std::ios::binary);
     std::ofstream  dst(DISK_RUN_COPY_PATH,   std::ios::binary);
+
+    dst << src.rdbuf();
+    src.close();
+    dst.close();
+}
+
+/*
+ * Used to update the changes made to the disk on graceful termination of the latest session.
+ * This ensures that these changes are visible in future sessions.
+ */
+Disk::~Disk() {
+    /* An efficient method to copy files */
+    /* Copy Disk Run Copy to Disk */
+    std::ifstream  src(DISK_RUN_COPY_PATH, std::ios::binary);
+    std::ofstream  dst(DISK_PATH,   std::ios::binary);
 
     dst << src.rdbuf();
     src.close();
