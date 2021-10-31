@@ -1,12 +1,13 @@
 //
 // Created by gokul on 26-10-2021.
 //
-#include "frontend.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include "../define/constants.h"
 #include "../define/errors.h"
+#include "frontend.h"
+#include "Disk.h"
 
 using namespace std;
 
@@ -555,6 +556,8 @@ int regexMatchAndExecute(const string input_command) {
 }
 
 int main() {
+    /* Initialize the Run Copy of Disk */
+    Disk disk_run;
     while (true) {
         cout << "# ";
         string input_command;
