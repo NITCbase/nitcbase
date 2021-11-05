@@ -9,6 +9,7 @@
 #include "disk_structures.h"
 #include "schema.h"
 #include "OpenRelTable.h"
+#include "BPlusTree.h"
 
 int getFreeRecBlock();
 
@@ -21,13 +22,13 @@ int deleteAttrCatEntry(recId attrcat_recid);
 /*
  *  Inserts the Record into the given Relation
  */
-int ba_insert(int relid, Attribute *rec) {
-	Attribute relcat_entry[6];
-	getRelCatEntry(relid, relcat_entry);
+int ba_insert(int relId, Attribute *rec) {
+	Attribute relCatEntry[6];
+	getRelCatEntry(relId, relCatEntry);
 
-	int num_attrs = relcat_entry[1].nval;
-	int first_block = relcat_entry[3].nval;
-	int num_slots = relcat_entry[5].nval;
+	int num_attrs = (int)relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
+	int first_block = (int)relCatEntry[RELCAT_FIRST_BLOCK_INDEX].nval;
+	int num_slots = (int)relCatEntry[RELCAT_NO_SLOTS_PER_BLOCK_INDEX].nval;
 
 	HeadInfo header;
 
@@ -36,18 +37,18 @@ int ba_insert(int relid, Attribute *rec) {
 
 	if (first_block == -1) {
 		blockNum = getFreeRecBlock();
-		relcat_entry[3].nval = blockNum;
+		relCatEntry[RELCAT_FIRST_BLOCK_INDEX].nval = blockNum;
 
 		// TODO: Take make_headerInfo() function out
-		HeadInfo *H = (HeadInfo *) malloc(sizeof(HeadInfo));
-		H->blockType = REC;
-		H->pblock = -1;
-		H->lblock = -1;
-		H->rblock = -1;
-		H->numEntries = 0;
-		H->numAttrs = num_attrs;
-		H->numSlots = num_slots;
-		setHeader(H, blockNum);
+		HeadInfo *headInfo = (HeadInfo *) malloc(sizeof(HeadInfo));
+		headInfo->blockType = REC;
+		headInfo->pblock = -1;
+		headInfo->lblock = -1;
+		headInfo->rblock = -1;
+		headInfo->numEntries = 0;
+		headInfo->numAttrs = num_attrs;
+		headInfo->numSlots = num_slots;
+		setHeader(headInfo, blockNum);
 		getSlotmap(slotmap, blockNum);
 
 		// set all slots as free
@@ -55,28 +56,46 @@ int ba_insert(int relid, Attribute *rec) {
 		setSlotmap(slotmap, num_slots, blockNum);
 	}
 
-	recId recid = getFreeSlot(blockNum);
+	recId rec_id = getFreeSlot(blockNum);
 
 	// no free slot found
-	if (recid.block == -1 && recid.slot == -1) {
+	if (rec_id.block == -1 && rec_id.slot == -1) {
 		return FAILURE;
-	} else if (recid.block == E_MAXRELATIONS && recid.slot == E_MAXRELATIONS) {
+	} else if (rec_id.block == E_MAXRELATIONS && rec_id.slot == E_MAXRELATIONS) {
 		// only one block allowed for RELCAT
 		return E_MAXRELATIONS;
 	}
 
-	setRecord(rec, recid.block, recid.slot);
+	setRecord(rec, rec_id.block, rec_id.slot);
 
 	// increment #entries in header (as record is inserted)
-	header = getHeader(recid.block);
+	header = getHeader(rec_id.block);
 	header.numEntries = header.numEntries + 1;
-	setHeader(&header, recid.block);
+	setHeader(&header, rec_id.block);
 
 	// increment #entries in relation catalog entry
-	relcat_entry[2].nval = relcat_entry[2].nval + 1;
+	relCatEntry[RELCAT_NO_RECORDS_INDEX].nval = relCatEntry[RELCAT_NO_RECORDS_INDEX].nval + 1;
 	// update last block in relation catalogue entry
-	relcat_entry[4].nval = recid.block;
-	setRelCatEntry(relid, relcat_entry);
+	relCatEntry[RELCAT_LAST_BLOCK_INDEX].nval = rec_id.block;
+	setRelCatEntry(relId, relCatEntry);
+
+	char attrName[ATTR_SIZE];
+	/*
+	 * B+ TREE MODIFICATIONS
+	 */
+	// iterate through all attributes
+	for (int i = 0; i < num_attrs; i++) {
+		Attribute attrCatEntry[6];
+		getAttrCatEntry(relId, i, attrCatEntry);
+		strcpy(attrName, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval);
+
+		// if index exists for the attribute, insert record into b plus tree
+		int rootBlock = (int) attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+		if (rootBlock != -1) {
+			BPlusTree bPlusTree = BPlusTree(relId, attrName);
+			bPlusTree.bPlusInsert(rec[i], rec_id);
+		}
+	}
 
 	return SUCCESS;
 }
@@ -218,39 +237,21 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
  *      - Clears the Relation Catalog entry for this relation
  */
 // I have changed the order in which Relation Catalog and Open Relation table is searched respectively for the given relation
-// REMOVE ONCE JEZZY SEES - ITS A NOTE TO CHECK
-int ba_delete(char relName[ATTR_SIZE]) {
+int ba_delete(int relId) {
 	// TODO: There was some issue with deletion earlier, we can check it later, I have added and cleaned the code now (A LOOOT of cleaning)
-	Attribute relName_Attr;
-	strcpy(relName_Attr.sval, relName);
-
-	/* Check if a relation with the given name exists in Relation Catalog and retrieve the relcat_recid */
-	recId prev_recid, relcat_recid;
-	prev_recid.block = -1;
-	prev_recid.slot = -1;
-
-	relcat_recid = linear_search(RELCAT_RELID, "RelName", relName_Attr, EQ, &prev_recid);
-	if ((relcat_recid.block == -1) && (relcat_recid.slot == -1)) {
-		return E_RELNOTEXIST;
-	}
-
-	/* Check if a relation with the given name exists in Open Relation Table */
-	if (OpenRelTable::checkIfRelationOpen(relName) == SUCCESS) {
-		return FAILURE;
-	}
 
 	/* Get the Relation Catalog Entry */
-	Attribute relcat_rec[6];
-	getRecord(relcat_rec, relcat_recid.block, relcat_recid.slot);
+	Attribute relCatEntry[6];
+	getRelCatEntry(relId, relCatEntry);
 
 	/* Get first record block corresponding to the given relation */
-	int curr_block = relcat_rec[3].nval;
-	int no_of_attrs = relcat_rec[1].nval;
-	int next_block = -1;
+	int curr_block = (int)relCatEntry[RELCAT_FIRST_BLOCK_INDEX].nval;
+	int no_of_attrs = (int)relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
+	int next_block;
 
 	/*
 	 * Delete the Relation Block-by-Block starting from the first block
-	 * Get the Next Block by using headerInfo of the Current Block
+	 * Get the Next Block by using headerInfo.rblock of the Current Block
 	 * deleteBlock() will erase the block and mark UNUSED_BLK in the Block Allocation Map
 	 */
 	while (curr_block != -1) {
@@ -260,24 +261,49 @@ int ba_delete(char relName[ATTR_SIZE]) {
 		curr_block = next_block;
 	}
 
-	recId attrcat_recid;
+	recId attrcat_recid, prev_recid;
 	prev_recid.block = -1;
 	prev_recid.slot = -1;
+	char attrName[ATTR_SIZE];
+	char relName[ATTR_SIZE];
+	OpenRelTable::getRelationName(relId, relName);
+	Attribute relNameAsAttribute;
+	strcpy(relNameAsAttribute.sval, relName);
 	for (int i = 0; i < no_of_attrs; i++) {
-		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relName_Attr, EQ, &prev_recid);
+
+		Attribute attrCatEntry[6];
+		getAttrCatEntry(relId, i, attrCatEntry);
+		strcpy(attrName, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval);
+
+		// Delete B+ tree blocks, if it exists for any of the attributes
+		int rootBlock = (int) attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+		if (rootBlock != -1) {
+			BPlusTree bPlusTree = BPlusTree(relId, attrName);
+			bPlusTree.bPlusDestroy(rootBlock);
+			attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
+			setAttrCatEntry(relId, attrName, attrCatEntry);
+		}
+
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
 		prev_recid.block = -1;
 		prev_recid.slot = -1;
-		/* Updating the Attribute Catalog for the current Attribute Deletion */
+		// Delete Attribute Catalog Entry
 		deleteAttrCatEntry(attrcat_recid);
 	}
 
 	/*
-	 * Updating the Relation Catalog for the Relation Deletion
+	 * Delete Relation Catalog Entry
 	 */
-	deleteRelCatEntry(relcat_recid, relcat_rec);
+	recId relcat_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+
+	relcat_recid = linear_search(RELCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
+	deleteRelCatEntry(relcat_recid, relCatEntry);
+
+	closeRel(relId);
 
 	return SUCCESS;
-
 }
 
 int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE]) {
@@ -705,7 +731,7 @@ int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry)
 	int curr_block = 5;
 	int next_block = -1;
 	while (curr_block != -1) {
-		struct HeadInfo header;
+		HeadInfo header;
 		header = getHeader(curr_block);
 		next_block = header.rblock;
 		for (int i = 0; i < 20; i++) {
