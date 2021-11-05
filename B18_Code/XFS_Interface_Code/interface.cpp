@@ -219,10 +219,6 @@ int regexMatchAndExecute(const string input_command) {
 		string tablename = m[3];
 		char relname[ATTR_SIZE];
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
-		if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0) {
-			cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
-			return FAILURE;
-		}
 
 		int ret = deleteRel(relname);
 		if (ret == SUCCESS) {

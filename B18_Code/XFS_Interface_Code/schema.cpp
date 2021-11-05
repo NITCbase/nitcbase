@@ -16,10 +16,16 @@ Attribute *make_relcatrec(char relname[16], int nAttrs, int nRecords, int firstB
 
 Attribute *make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], int attrtype, int rootBlock, int offset);
 
-/*gokul
+/*
  * Schema Layer function for Creating a Relation/Table from the given name and attributes
  */
-int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtypes[]) {
+// TODO : review whether relation should be opened after creation
+int createRel(char relname[ATTR_SIZE], int nAttrs, char attrs[][ATTR_SIZE], int attrtypes[]) {
+
+	int status = OpenRelTable::checkIfOpenRelTableHasFreeEntry();
+	if (status == FAILURE)
+		return E_CACHEFULL;
+
 	Attribute attrval;
 	strcpy(attrval.sval, relname);
 	/*
@@ -40,12 +46,14 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 		return E_DUPLICATEATTR;
 	}
 
-	Attribute *relcatrec = make_relcatrec(relname, nAttrs, 0, -1,
-	                                      -1);   // Relcat Entry: relname, #attrs, #records, first_blk, #slots_per_blk
-	flag = ba_insert(RELCAT_RELID, relcatrec);
+	int relId = OpenRelTable::openRelation(relname);
 
+	Attribute *relcatrec = make_relcatrec(relname, nAttrs, 0, -1,
+	                                      -1);
+	// Relcat Entry: relname, #attrs, #records, first_blk, #slots_per_blkflag
+	flag = ba_insert(RELCAT_RELID, relcatrec);
 	if (flag != SUCCESS) {
-		ba_delete(relname);
+		ba_delete(relId);
 		return flag;
 	}
 
@@ -55,7 +63,7 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 		flag = ba_insert(ATTRCAT_RELID, attrcatrec);
 
 		if (flag != SUCCESS) {
-			ba_delete(relname);
+			ba_delete(relId);
 			return flag;
 		}
 	}
@@ -64,12 +72,17 @@ int createRel(char relname[16], int nAttrs, char attrs[][ATTR_SIZE], int attrtyp
 
 int deleteRel(char relname[ATTR_SIZE]) {
 	// get the relation's open relation id
-	int relid = OpenRelTable::getRelationId(relname);
+	int relId = OpenRelTable::getRelationId(relname);
 
-	// if relation is open return E_RELOPEN - cannot be deleted
-	if (relid != E_RELNOTOPEN)
-		return E_RELOPEN;
-	int retval = ba_delete(relname);
+	if (relId == RELCAT_RELID || relId == ATTRCAT_RELID) {
+		return E_INVALID;
+	}
+
+	// if relation is not open return E_RELNOTOPEN - cannot be deleted
+	if (relId == E_RELNOTOPEN)
+		return E_RELNOTOPEN;
+
+	int retval = ba_delete(relId);
 
 	return retval;
 }

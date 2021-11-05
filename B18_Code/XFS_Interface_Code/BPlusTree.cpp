@@ -427,308 +427,308 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 //                   else
 //                      internal_entries[indices_iter].rChild = entry.rChild;
 //                }
-                        setInternalEntry(internal_entries[indices_iter], leftBlkNum, indices_iter);
-                    }
+						setInternalEntry(internal_entries[indices_iter], leftBlkNum, indices_iter);
+					}
 
-                    indices_iter = 51;
-                    // set the first 50 entries of newRightBlk as the entries from 51 to 100 of internalEntries array
-                    for (int j = 0; j < 50; ++j) {
-                        setInternalEntry(internal_entries[indices_iter], newRightBlkNum, j);
-                        indices_iter++;
-                    }
+					indices_iter = 51;
+					// set the first 50 entries of newRightBlk as the entries from 51 to 100 of internalEntries array
+					for (int j = 0; j < 50; ++j) {
+						setInternalEntry(internal_entries[indices_iter], newRightBlkNum, j);
+						indices_iter++;
+					}
 
-                    int childNum;
-                    //iterate from 50 to 100:
-                    for (int k = 50; k < 100; ++k) {
-                        //assign the rchild block of ith index in internalEntries to childNum
-                        childNum = internal_entries[k].rChild;
+					int childNum;
+					//iterate from 50 to 100:
+					for (int k = 50; k < 100; ++k) {
+						//assign the rchild block of ith index in internalEntries to childNum
+						childNum = internal_entries[k].rChild;
 
-                        // update pblock of the child block to newRightBlkNum
-                        HeadInfo childHeader = getHeader(childNum);
-                        childHeader.pblock = newRightBlkNum;
-                        setHeader(&childHeader, childNum);
-                    }
+						// update pblock of the child block to newRightBlkNum
+						HeadInfo childHeader = getHeader(childNum);
+						childHeader.pblock = newRightBlkNum;
+						setHeader(&childHeader, childNum);
+					}
 
-                    //update parBlkNum as the pblock of leftBlk.
-                    parentBlock = leftBlkHeader.pblock;
+					//update parBlkNum as the pblock of leftBlk.
+					parentBlock = leftBlkHeader.pblock;
 
-                    /* update newAttrval to the attribute value of 50th entry in the internalEntries array;
-                     * this is attribute value which needs to be inserted in the parent block.
-                     */
-                    newAttrVal = internal_entries[49].attrVal;
+					/* update newAttrval to the attribute value of 50th entry in the internalEntries array;
+					 * this is attribute value which needs to be inserted in the parent block.
+					 */
+					newAttrVal = internal_entries[49].attrVal;
 
-                }
-            } else //if headparblock == -1 i.e root is split now
-            {
-                int new_root_block = getFreeBlock(IND_INTERNAL);//get new internal block
-                // disk full
-                if(new_root_block == FAILURE) {
-                    // destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
-                    bPlusDestroy(newRightBlkNum);
-                    // destroy the existing B+ tree by passing rootBlock member field
-                    bPlusDestroy(this->rootBlock);
-                    // update the rootBlock of attribute catalog entry to -1
-                    attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
-                    setAttrCatEntry(relId, attrName, attrCatEntry);
-                    this->rootBlock = E_DISKFULL;
-                    return E_DISKFULL;
-                }
+				}
+			} else //if headparblock == -1 i.e root is split now
+			{
+				int new_root_block = getFreeBlock(IND_INTERNAL);//get new internal block
+				// disk full
+				if (new_root_block == FAILURE) {
+					// destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
+					bPlusDestroy(newRightBlkNum);
+					// destroy the existing B+ tree by passing rootBlock member field
+					bPlusDestroy(this->rootBlock);
+					// update the rootBlock of attribute catalog entry to -1
+					attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
+					setAttrCatEntry(relId, attrName, attrCatEntry);
+					this->rootBlock = E_DISKFULL;
+					return E_DISKFULL;
+				}
 
-                /* add the struct InternalEntry entry with
-                 *     lChild as leftBlkNum, attrVal as newAttrval, and rChild as newRightBlkNum
-                 * as the first entry to new_root_block
-                */
-                InternalEntry rootEntry;
-                if (attrType == NUMBER)
-                    rootEntry.attrVal.nval = newAttrVal.nval;
-                else if (attrType == STRING)
-                    strcpy(rootEntry.attrVal.sval, newAttrVal.sval);
-                rootEntry.lChild = leftBlkNum;
-                rootEntry.rChild = newRightBlkNum;
-                setInternalEntry(rootEntry, new_root_block, 0);
+				/* add the struct InternalEntry entry with
+				 *     lChild as leftBlkNum, attrVal as newAttrval, and rChild as newRightBlkNum
+				 * as the first entry to new_root_block
+				*/
+				InternalEntry rootEntry;
+				if (attrType == NUMBER)
+					rootEntry.attrVal.nval = newAttrVal.nval;
+				else if (attrType == STRING)
+					strcpy(rootEntry.attrVal.sval, newAttrVal.sval);
+				rootEntry.lChild = leftBlkNum;
+				rootEntry.rChild = newRightBlkNum;
+				setInternalEntry(rootEntry, new_root_block, 0);
 
-                //update number of entries in newRootBlk as 1
-                HeadInfo newRootHeader;
-                HeadInfo header1 = getHeader(leftBlkNum);
-                HeadInfo header2 = getHeader(newRightBlkNum);
-                newRootHeader.numEntries = 1;
-                newRootHeader.blockType = IND_INTERNAL;
-                newRootHeader.pblock = -1;
-                header1.pblock = new_root_block;
-                header2.pblock = new_root_block;
-                setHeader(&newRootHeader, new_root_block);
-                setHeader(&header1, leftBlkNum);
-                setHeader(&header2, newRightBlkNum);
-                attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = new_root_block;
+				//update number of entries in newRootBlk as 1
+				HeadInfo newRootHeader;
+				HeadInfo header1 = getHeader(leftBlkNum);
+				HeadInfo header2 = getHeader(newRightBlkNum);
+				newRootHeader.numEntries = 1;
+				newRootHeader.blockType = IND_INTERNAL;
+				newRootHeader.pblock = -1;
+				header1.pblock = new_root_block;
+				header2.pblock = new_root_block;
+				setHeader(&newRootHeader, new_root_block);
+				setHeader(&header1, leftBlkNum);
+				setHeader(&header2, newRightBlkNum);
+				attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = new_root_block;
 
-                if (setAttrCatEntry(relId, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrCatEntry) != SUCCESS) {
-                    return FAILURE;
-                }
-                done = true;
-            }
-        }
-    }
-    return SUCCESS;
+				if (setAttrCatEntry(relId, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrCatEntry) != SUCCESS) {
+					return FAILURE;
+				}
+				done = true;
+			}
+		}
+	}
+	return SUCCESS;
 }
 
 recId BPlusTree::BPlusSearch(Attribute attrVal, int op, indexId *prev_indexId) {
-    // Used to store search index for attrName
-    indexId searchIndex;
-    searchIndex.block = prev_indexId->block;
-    searchIndex.index = prev_indexId->index;
+	// Used to store search index for attrName
+	indexId searchIndex;
+	searchIndex.block = prev_indexId->block;
+	searchIndex.index = prev_indexId->index;
 
-    // Get attribute catalog entry of target attribute
-    Attribute attrCatEntry[6];
-    int flag = getAttrCatEntry(relId, attrName, attrCatEntry);
+	// Get attribute catalog entry of target attribute
+	Attribute attrCatEntry[6];
+	int flag = getAttrCatEntry(relId, attrName, attrCatEntry);
 
-    if (flag != SUCCESS) {
-        return {-1, -1};
-    }
+	if (flag != SUCCESS) {
+		return {-1, -1};
+	}
 
-    // Store root block num and attribute type of the B+ Tree in rootBlock and attrType respectively.
-    int rootBlock = this->rootBlock;
-    int attrType = (int) attrCatEntry[2].nval;
+	// Store root block num and attribute type of the B+ Tree in rootBlock and attrType respectively.
+	int rootBlock = this->rootBlock;
+	int attrType = (int) attrCatEntry[2].nval;
 
-    // Block and index variables are used to locate the leaf index to be searched.
-    int block, index;
-    if (searchIndex.block == -1 && searchIndex.index == -1) {
-        // Search is done for the first time
-        block = rootBlock;      // start from root
-        index = 0;              // start from the first index when searching
+	// Block and index variables are used to locate the leaf index to be searched.
+	int block, index;
+	if (searchIndex.block == -1 && searchIndex.index == -1) {
+		// Search is done for the first time
+		block = rootBlock;      // start from root
+		index = 0;              // start from the first index when searching
 
-        if (block == -1) {
-            // B+ tree has not yet been created
-            return {-1, -1};
-        }
-    } else {
-        // Search starts from record next to the previous hit
-        block = searchIndex.block;
-        index = searchIndex.index + 1;
+		if (block == -1) {
+			// B+ tree has not yet been created
+			return {-1, -1};
+		}
+	} else {
+		// Search starts from record next to the previous hit
+		block = searchIndex.block;
+		index = searchIndex.index + 1;
 
-        // Load the header of leaf block
-        HeadInfo leafHead;
-        leafHead = getHeader(block);
+		// Load the header of leaf block
+		HeadInfo leafHead;
+		leafHead = getHeader(block);
 
-        // Load the leaf block
-        int numEntries = leafHead.numEntries;
+		// Load the leaf block
+		int numEntries = leafHead.numEntries;
 
-        // Check if index exceeds maximum number of entries in the current block
-        if (index >= numEntries) {
-            // All the entries in the block has been searched
-            // search from the beginning of the next leaf index block
-            block = leafHead.rblock;
-            index = 0;
+		// Check if index exceeds maximum number of entries in the current block
+		if (index >= numEntries) {
+			// All the entries in the block has been searched
+			// search from the beginning of the next leaf index block
+			block = leafHead.rblock;
+			index = 0;
 
-            if (block == -1) {
-                // End of Linked list of Leafs
-                return {-1, -1};
-            }
-        }
-    }
+			if (block == -1) {
+				// End of Linked list of Leafs
+				return {-1, -1};
+			}
+		}
+	}
 
-    /* Incase of Search for first time, traverse the B+ tree and reach appropriate leaf entry */
-    // Used to store the header of the internal block
-    HeadInfo intHead;
-    // Used to store an internal entry of the internal block
-    InternalEntry internalEntry;
-    /* cond =>
-     * if 1 move to left child
-     * else move to right child after going through all the internal entries
-     */
-    int cond;
-    while (getBlockType(block) == IND_INTERNAL) {
-        intHead = getHeader(block);
-        int numOfEntries = intHead.numEntries;
-        int currEntryNum;
-        cond = 0;
-        // Iterate over all
-        for (currEntryNum = 0; currEntryNum < numOfEntries; currEntryNum++) {
-            internalEntry = getInternalEntry(block, currEntryNum);
-            int flag = compareAttributes(attrVal, internalEntry.attrVal, attrType);
-            switch (op) {
-                case EQ:
-                    if (flag >= 0) {
-                        // move to the left child of the first entry that is greater than or equal to attrVal.
-                        cond = 1;
-                    }
-                    break;
-                case LE:
-                    // Since indexing is in ascending order, for lesser values always move left
-                    cond = 1;
-                    break;
-                case LT:
-                    // Since indexing is in ascending order, for lesser values always move left
-                    cond = 1;
-                    break;
-                case GE:
-                    if(flag >=0) {
-                        // move to the left child of the first entry that is greater than or equal to attrVal.
-                        cond = 1;
-                    }
-                    break;
-                case GT:
-                    if(flag >=0) {
-                        // move to the left child of the first entry that is greater than or equal to attrVal.
-                        cond = 1;
-                    }
-                    break;
-                case NE:
-                    // Need to search the entire linked list of index
-                    // So go to the leftmost entry (move left always)
-                    cond = 1;
-                    break;
-            }
+	/* Incase of Search for first time, traverse the B+ tree and reach appropriate leaf entry */
+	// Used to store the header of the internal block
+	HeadInfo intHead;
+	// Used to store an internal entry of the internal block
+	InternalEntry internalEntry;
+	/* cond =>
+	 * if 1 move to left child
+	 * else move to right child after going through all the internal entries
+	 */
+	int cond;
+	while (getBlockType(block) == IND_INTERNAL) {
+		intHead = getHeader(block);
+		int numOfEntries = intHead.numEntries;
+		int currEntryNum;
+		cond = 0;
+		// Iterate over all
+		for (currEntryNum = 0; currEntryNum < numOfEntries; currEntryNum++) {
+			internalEntry = getInternalEntry(block, currEntryNum);
+			int flag = compareAttributes(attrVal, internalEntry.attrVal, attrType);
+			switch (op) {
+				case EQ:
+					if (flag >= 0) {
+						// move to the left child of the first entry that is greater than or equal to attrVal.
+						cond = 1;
+					}
+					break;
+				case LE:
+					// Since indexing is in ascending order, for lesser values always move left
+					cond = 1;
+					break;
+				case LT:
+					// Since indexing is in ascending order, for lesser values always move left
+					cond = 1;
+					break;
+				case GE:
+					if (flag >= 0) {
+						// move to the left child of the first entry that is greater than or equal to attrVal.
+						cond = 1;
+					}
+					break;
+				case GT:
+					if (flag >= 0) {
+						// move to the left child of the first entry that is greater than or equal to attrVal.
+						cond = 1;
+					}
+					break;
+				case NE:
+					// Need to search the entire linked list of index
+					// So go to the leftmost entry (move left always)
+					cond = 1;
+					break;
+			}
 
-            if (cond == 1) {
-                // Condition Met in this Internal Block
-                // Now, Search in the Left Child
-                block = intHead.lblock;
-                break;
-            } else {
-                // Continue iterating this Internal index block
-                continue;
-            }
-        }
-        if (cond == 0) {
-            // traversed all the entries of internalBlk without satisfying op condition
-            // proceed to search the right child
-            block = intHead.rblock;
-        }
-    }
-    /* Traversing of B+ tree has been done and Appropriate Leaf Block has been reached */
+			if (cond == 1) {
+				// Condition Met in this Internal Block
+				// Now, Search in the Left Child
+				block = intHead.lblock;
+				break;
+			} else {
+				// Continue iterating this Internal index block
+				continue;
+			}
+		}
+		if (cond == 0) {
+			// traversed all the entries of internalBlk without satisfying op condition
+			// proceed to search the right child
+			block = intHead.rblock;
+		}
+	}
+	/* Traversing of B+ tree has been done and Appropriate Leaf Block has been reached */
 
-    // Used to store the header of the leaf block.
-    HeadInfo leafHead;
-    // Used to store an index entry of the leaf block.
-    Index leafEntry;
-    /* cond =>
-     * cond = 0: not found but need to search more
-     * cond = 1: found a record satisfying the search condition
-     * cond = -1 : stop searching
-     */
-    cond = 0;
-    /* Traverse through index entries in the leaf index block starting from the index entry - index */
-    while (block != -1) {
-        leafHead = getHeader(block);
-        while (index < leafHead.numEntries) {
-            leafEntry = getLeafEntry(block, index);
-            int flag = compareAttributes(attrVal, leafEntry.attrVal, attrType);
-            switch (op) {
-                case EQ:
-                    if (flag == 0) {
-                        // Entry satisfies EQ condition.
-                        cond = 1;
-                    } else if (flag > 0) {
-                        // Indexes are in Ascending order, so further traversal will NOT give EQ condition
-                        cond = -1;
-                    }
-                    break;
-                case LE:
-                    if (flag <= 0) {
-                        // Entry satisfies LE condition.
-                        cond = 1;
-                    } else {
-                        // Indexes are in Ascending order, so further traversal will NOT give LE condition
-                        cond = -1;
-                    }
-                    break;
-                case LT:
-                    if (flag < 0) {
-                        // Entry satisfies LT condition
-                        cond = 1;
-                    } else {
-                        // Indexes are in Ascending order, so further traversal will NOT give LT condition
-                        cond = -1;
-                    }
-                    break;
-                case GE:
-                    if (flag >= 0) {
-                        // Entry satisfies GE condition
-                        cond = 1;
-                    }
-                    break;
-                case GT:
-                    if (flag > 0) {
-                        // Entry satisfies GT condition
-                        cond = 1;
-                    }
-                    break;
-                case NE:
-                    if (flag != 0) {
-                        // Entry satisfies NE condition
-                        cond = 1;
-                    }
-                    break;
-            }
-            if(cond == 1) {
-                // Update prev_indexId to reflect this new search hit
-                (*prev_indexId).block = block;
-                (*prev_indexId).index = index;
+	// Used to store the header of the leaf block.
+	HeadInfo leafHead;
+	// Used to store an index entry of the leaf block.
+	Index leafEntry;
+	/* cond =>
+	 * cond = 0: not found but need to search more
+	 * cond = 1: found a record satisfying the search condition
+	 * cond = -1 : stop searching
+	 */
+	cond = 0;
+	/* Traverse through index entries in the leaf index block starting from the index entry - index */
+	while (block != -1) {
+		leafHead = getHeader(block);
+		while (index < leafHead.numEntries) {
+			leafEntry = getLeafEntry(block, index);
+			int flag = compareAttributes(attrVal, leafEntry.attrVal, attrType);
+			switch (op) {
+				case EQ:
+					if (flag == 0) {
+						// Entry satisfies EQ condition.
+						cond = 1;
+					} else if (flag > 0) {
+						// Indexes are in Ascending order, so further traversal will NOT give EQ condition
+						cond = -1;
+					}
+					break;
+				case LE:
+					if (flag <= 0) {
+						// Entry satisfies LE condition.
+						cond = 1;
+					} else {
+						// Indexes are in Ascending order, so further traversal will NOT give LE condition
+						cond = -1;
+					}
+					break;
+				case LT:
+					if (flag < 0) {
+						// Entry satisfies LT condition
+						cond = 1;
+					} else {
+						// Indexes are in Ascending order, so further traversal will NOT give LT condition
+						cond = -1;
+					}
+					break;
+				case GE:
+					if (flag >= 0) {
+						// Entry satisfies GE condition
+						cond = 1;
+					}
+					break;
+				case GT:
+					if (flag > 0) {
+						// Entry satisfies GT condition
+						cond = 1;
+					}
+					break;
+				case NE:
+					if (flag != 0) {
+						// Entry satisfies NE condition
+						cond = 1;
+					}
+					break;
+			}
+			if (cond == 1) {
+				// Update prev_indexId to reflect this new search hit
+				(*prev_indexId).block = block;
+				(*prev_indexId).index = index;
 
-                return {leafEntry.block, leafEntry.slot};
-            } else if(cond == -1) {
-                // No Record matches the given search condition
-                return {-1,-1};
-            } else {
-                // Keep on searching
-                index++;
-            }
-        }
-        if (op != NE) {
-            /* For all ops other than NE,
-             * it is gauranteed that
-             *  - the block being searched will have the required record, if it exists
-             *  - And that next blocks will NOT have the required records matching the search condition
-             *  So exit from search loop
-             */
-            break;
-        } else {
-            // Case for NE
-            block = leafHead.rblock;
-            index = 0; // reset
-        }
-    }
-    return {-1, -1};
+				return {leafEntry.block, leafEntry.slot};
+			} else if (cond == -1) {
+				// No Record matches the given search condition
+				return {-1, -1};
+			} else {
+				// Keep on searching
+				index++;
+			}
+		}
+		if (op != NE) {
+			/* For all ops other than NE,
+			 * it is gauranteed that
+			 *  - the block being searched will have the required record, if it exists
+			 *  - And that next blocks will NOT have the required records matching the search condition
+			 *  So exit from search loop
+			 */
+			break;
+		} else {
+			// Case for NE
+			block = leafHead.rblock;
+			index = 0; // reset
+		}
+	}
+	return {-1, -1};
 }
 
 int BPlusTree::getRootBlock() {
@@ -767,8 +767,7 @@ int BPlusTree::bPlusDestroy(int blockNum) {
 		deleteBlock(blockNum);
 	} else if (block_type == IND_LEAF) {
 		deleteBlock(blockNum);
-	}
-	else {
+	} else {
 		//if the block is not index block
 		return E_INVALIDBLOCK;
 	}

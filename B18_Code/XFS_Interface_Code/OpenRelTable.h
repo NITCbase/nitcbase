@@ -24,6 +24,7 @@ public:
 	static int closeRelation(int relationId);
 	static int checkIfRelationOpen(char relationName[ATTR_SIZE]);
 	static int checkIfRelationOpen(int relationId);
+	static int checkIfOpenRelTableHasFreeEntry();
 };
 
 #endif //B18_CODE_OPENRELTABLE_H
