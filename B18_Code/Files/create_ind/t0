@@ -23,6 +23,4 @@ INSERT INTO numbers VALUES (45);
 INSERT INTO numbers VALUES (25);
 INSERT INTO numbers VALUES (40);
 
-
-
-
+run create_ind/t0
