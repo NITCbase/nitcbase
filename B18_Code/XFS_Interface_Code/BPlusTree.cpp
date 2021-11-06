@@ -4,11 +4,71 @@
 
 #include <cstring>
 #include <cstdio>
+#include <queue>
+#include <iostream>
 #include "BPlusTree.h"
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "disk_structures.h"
 #include "block_access.h"
+
+using namespace std;
+
+void BFS(int rootBlock) {
+	queue<int> blocks;
+	blocks.push(rootBlock);
+	blocks.push(INT_MAX);
+	while (!blocks.empty()) {
+		int current_block = blocks.front();
+
+		if (current_block == INT_MAX) {
+			// keys.push(current_block);
+//			cout << endl;
+			cout << " - ";
+			blocks.pop();
+			continue;
+		}
+		blocks.pop();
+
+		HeadInfo header = getHeader(current_block);
+		int block_type = getBlockType(current_block);
+		int num_entries = header.numEntries;
+
+		if (block_type == IND_INTERNAL) {
+			InternalEntry internal_entry;
+			for (int iter = 0; iter < num_entries; iter++) {
+				internal_entry = getInternalEntry(current_block, iter);
+				// keys.push((int) internal_entry.attrVal.nval);
+				cout << (int) internal_entry.attrVal.nval << ", ";
+			}
+			cout  << " - ";
+		} else if (block_type == IND_LEAF) {
+			for (int iter = 0; iter < num_entries; iter++) {
+				Index index = getLeafEntry(current_block, iter);
+				// keys.push((int) index.attrVal.nval);
+				cout << (int) index.attrVal.nval << ",";
+			}
+			cout  << " - ";
+		}
+
+		if (block_type == IND_INTERNAL) {
+			InternalEntry internal_entry;
+
+			int entry_num = 0;
+			internal_entry = getInternalEntry(current_block, entry_num);
+			blocks.push(internal_entry.lChild);
+//			blocks.push(INT_MIN);
+
+			for (entry_num = 0; entry_num < num_entries; entry_num++) {
+				internal_entry = getInternalEntry(current_block, entry_num);
+				blocks.push(internal_entry.rChild);
+//				blocks.push(INT_MIN);
+			}
+			blocks.push(INT_MAX);
+		}
+	}
+}
+
 
 BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 	// initialise object instance member fields
@@ -45,8 +105,8 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 	HeadInfo headInfo;
 	headInfo.blockType = IND_LEAF;
 	headInfo.pblock = -1;
-	headInfo.lblock = 0;
-	headInfo.rblock = 0;
+	headInfo.lblock = -1;
+	headInfo.rblock = -1;
 	headInfo.numEntries = 0;
 	setHeader(&headInfo, root_block);
 
@@ -79,15 +139,13 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 		HeadInfo header;
 		header = getHeader(dataBlock);
 
-		int num_slots;
-		num_slots = header.numSlots;
+		int num_records = header.numEntries;
+		int num_slots = header.numSlots;
 		unsigned char slotmap[num_slots];
 		getSlotmap(slotmap, dataBlock);
 
 		int iter;
-		for (iter = 0; iter < num_slots; iter++) {
-			if (slotmap[iter] == SLOT_UNOCCUPIED)
-				break;
+		for (iter = 0; iter < num_records; iter++) {
 
 			// get iter th number record from data block
 			getRecord(record, dataBlock, iter);
@@ -105,6 +163,13 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 			rec_id.slot = iter;
 
 			int res = bPlusInsert(attrval, rec_id);
+
+			/*
+			 * DEBUGING----------------
+			 */
+			BFS(this->rootBlock);
+			// -----------------
+			break;
 			if (res != SUCCESS) {
 				bPlusDestroy(root_block);
 				this->rootBlock = FAILURE;
@@ -250,7 +315,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		 * - number of entries = 32
 		 * - right block = newRightBlkNum
 		 */
-		leftBlkHeader.numEntries = MIDDLE_INDEX_LEAF;
+		leftBlkHeader.numEntries = MIDDLE_INDEX_LEAF + 1;
 		leftBlkHeader.rblock = newRightBlkNum;
 		setHeader(&leftBlkHeader, leftBlkNum);
 
@@ -262,8 +327,8 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		 * - right block = prevRblock
 		 * - parent block = parent block of leftBlkNum
 		 */
-
-		newRightBlkHeader.numEntries = MIDDLE_INDEX_LEAF;
+		newRightBlkHeader.blockType = IND_LEAF;
+		newRightBlkHeader.numEntries = MIDDLE_INDEX_LEAF + 1;
 		newRightBlkHeader.lblock = leftBlkNum;
 		newRightBlkHeader.pblock = leftBlkHeader.pblock;
 		newRightBlkHeader.rblock = prevRblock;
@@ -274,7 +339,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
 		// set the first 32 entries of leftBlk as the first 32 entries of indices array
 		int indices_iter;
-		for (indices_iter = 0; indices_iter < MIDDLE_INDEX_LEAF; indices_iter++) {
+		for (indices_iter = 0; indices_iter <= MIDDLE_INDEX_LEAF; indices_iter++) {
 			setLeafEntry(indices[indices_iter], leftBlkNum, indices_iter);
 		}
 		// set the first 32 entries of newRightBlk as the next 32 entries of indices array
@@ -282,11 +347,11 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 			setLeafEntry(indices[indices_iter], newRightBlkNum, rBlockIndexIter);
 			indices_iter++;
 		}
-
+		//********REPLACE
 		indices[0].attrVal.nval = 0;
 		indices[0].block = 0;
 		indices[0].slot = 0;
-		for (indices_iter = MIDDLE_INDEX_LEAF; indices_iter < MAX_KEYS_LEAF; indices_iter++) {
+		for (indices_iter = MIDDLE_INDEX_LEAF + 1; indices_iter < MAX_KEYS_LEAF; indices_iter++) {
 			setLeafEntry(indices[0], leftBlkNum, indices_iter);
 		}
 
@@ -295,7 +360,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		 * this is attribute value which needs to be inserted in the parent block
 		 */
 		Index leafentry;
-		leafentry = getLeafEntry(leftBlkNum, MIDDLE_INDEX_LEAF - 1);
+		leafentry = getLeafEntry(leftBlkNum, MIDDLE_INDEX_LEAF);
 		Attribute newAttrVal;
 
 		if (attrType == NUMBER)
@@ -354,10 +419,13 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 				// TODO : review
 				if (flag == 0) //when newattrval is greater than all parentblock enries
 				{
-					internal_entries[current_entryNumber].attrVal = newAttrVal;
+					if (attrType == NUMBER) {
+						internal_entries[current_entryNumber].attrVal.nval = newAttrVal.nval;
+					} else if (attrType == STRING) {
+						strcpy(internal_entries[current_entryNumber].attrVal.sval, newAttrVal.sval);
+					}
 					internal_entries[current_entryNumber].lChild = leftBlkNum;
 					internal_entries[current_entryNumber].rChild = newRightBlkNum;
-					flag = 1;
 				}
 
 				// parentBlock has not reached max limit.
@@ -416,16 +484,19 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
 					// set the first 50 entries of leftBlk as the first 50 entries of internalEntries array
 					for (indices_iter = 0; indices_iter < MIDDLE_INDEX_INTERNAL; ++indices_iter) {
-//                if ((internal_entries[indices_iter].lChild == parentBlock) || (internal_entries[indices_iter].rChild == parentBlock)) {
-//                   InternalEntry entry;
-//                   entry = getEntry(parentBlock, indices_iter);
-//                   if (internalEntry.attrVal.ival == entry.attrVal.ival)
-//                      continue;
-//                   if (internal_entries[indices_iter].lChild == parentBlock)
-//                      internal_entries[indices_iter].lChild = entry.lChild;
-//                   else
-//                      internal_entries[indices_iter].rChild = entry.rChild;
-//                }
+						// TODO ::: REVIEW ::::
+//						if ((internal_entries[indices_iter].lChild == parentBlock) ||
+//						    (internal_entries[indices_iter].rChild == parentBlock)) {
+//							InternalEntry entry;
+//							entry = getInternalEntry(parentBlock, indices_iter);
+//							if (internalEntry.attrVal.nval == entry.attrVal.nval)
+//								continue;
+//							if (internal_entries[indices_iter].lChild == parentBlock)
+//								internal_entries[indices_iter].lChild = entry.lChild;
+//							else
+//								internal_entries[indices_iter].rChild = entry.rChild;
+//						}
+						// ---------
 						setInternalEntry(internal_entries[indices_iter], leftBlkNum, indices_iter);
 					}
 
@@ -498,11 +569,11 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 				setHeader(&newRootHeader, new_root_block);
 				setHeader(&header1, leftBlkNum);
 				setHeader(&header2, newRightBlkNum);
-				attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = new_root_block;
 
-				if (setAttrCatEntry(relId, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrCatEntry) != SUCCESS) {
-					return FAILURE;
-				}
+				attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = new_root_block;
+				setAttrCatEntry(relId, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrCatEntry);
+
+				this->rootBlock = new_root_block;
 				done = true;
 			}
 		}
