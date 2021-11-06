@@ -22,14 +22,12 @@ void writeHeaderToFile(FILE *fp_export, HeadInfo h);
 
 void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineFlag);
 
-bool checkIfInvalidCharacter(char character);
-
 
 void dump_relcat() {
-    string relation_catalog = "relation_catalog";
-    string filePath = FILES_PATH + relation_catalog;
-    char fileName[filePath.length() + 1];
-    string_to_char_array(filePath, fileName, filePath.length() + 1);
+	string relation_catalog = "relation_catalog";
+	string filePath = FILES_PATH + relation_catalog;
+	char fileName[filePath.length() + 1];
+	string_to_char_array(filePath, fileName, filePath.length() + 1);
 
 	FILE *fp_export = fopen(fileName, "w");
 	Attribute relCatRecord[ATTR_SIZE];
@@ -73,12 +71,12 @@ void dump_relcat() {
 }
 
 void dump_attrcat() {
-    string attribute_catalog = "attribute_catalog";
-    string filePath = FILES_PATH + attribute_catalog;
-    char fileName[filePath.length() + 1];
-    string_to_char_array(filePath, fileName, filePath.length() + 1);
+	string attribute_catalog = "attribute_catalog";
+	string filePath = FILES_PATH + attribute_catalog;
+	char fileName[filePath.length() + 1];
+	string_to_char_array(filePath, fileName, filePath.length() + 1);
 
-    FILE *fp_export = fopen(fileName, "w");
+	FILE *fp_export = fopen(fileName, "w");
 
 	Attribute attrCatRecord[ATTR_SIZE];
 	int attrCatBlock = ATTRCAT_BLOCK;
@@ -133,13 +131,13 @@ void dumpBlockAllocationMap() {
 	int blockNum;
 	char s[ATTR_SIZE];
 
-    string block_allocation_map = "block_allocation_map";
-    string filePath = FILES_PATH + block_allocation_map;
+	string block_allocation_map = "block_allocation_map";
+	string filePath = FILES_PATH + block_allocation_map;
 
-    char fileName[filePath.length() + 1];
-    string_to_char_array(filePath, fileName, filePath.length() + 1);
+	char fileName[filePath.length() + 1];
+	string_to_char_array(filePath, fileName, filePath.length() + 1);
 
-    FILE *fp_export = fopen(fileName, "w");
+	FILE *fp_export = fopen(fileName, "w");
 
 	for (blockNum = 0; blockNum < 4; blockNum++) {
 		fputs("Block ", fp_export);
@@ -171,7 +169,7 @@ void dumpBlockAllocationMap() {
 void ls() {
 	Attribute relCatRecord[6];
 	int attr_blk = 4;
-	struct HeadInfo headInfo;
+	HeadInfo headInfo;
 	headInfo = getHeader(attr_blk);
 	unsigned char slotmap[headInfo.numSlots];
 	getSlotmap(slotmap, attr_blk);
@@ -227,9 +225,10 @@ int importRelation(char *fileName) {
 	attrOffsetIterator = 0;
 	while (attrOffsetIterator < numOfAttributes) {
 		attributeIndexIterator = 0;
-		while (((firstLine[currentCharIndexInLine] != ',') && (firstLine[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < ATTR_SIZE - 1)) {
+		while (((firstLine[currentCharIndexInLine] != ',') && (firstLine[currentCharIndexInLine] != '\0')) &&
+		       (attributeIndexIterator < ATTR_SIZE - 1)) {
 			if (checkIfInvalidCharacter(firstLine[currentCharIndexInLine])) {
-				cout << "Invalid character : '" << firstLine[currentCharIndexInLine] <<  "' in attribute name\n";
+				cout << "Invalid character : '" << firstLine[currentCharIndexInLine] << "' in attribute name\n";
 				return FAILURE;
 			}
 			attributeNames[attrOffsetIterator][attributeIndexIterator++] = firstLine[currentCharIndexInLine++];
@@ -261,7 +260,8 @@ int importRelation(char *fileName) {
 	attrOffsetIterator = 0;
 	while (attrOffsetIterator < numOfAttributes) {
 		attributeIndexIterator = 0;
-		while (((secondLine[currentCharIndexInLine] != ',') && (secondLine[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < ATTR_SIZE - 1)) {
+		while (((secondLine[currentCharIndexInLine] != ',') && (secondLine[currentCharIndexInLine] != '\0')) &&
+		       (attributeIndexIterator < ATTR_SIZE - 1)) {
 			secondLineFields[attrOffsetIterator][attributeIndexIterator++] = secondLine[currentCharIndexInLine++];
 		}
 		secondLineFields[attrOffsetIterator][attributeIndexIterator] = '\0';
@@ -285,7 +285,8 @@ int importRelation(char *fileName) {
 	}
 	int start;
 	int relname_iter;
-	for (start = fileNameIterator + 1, relname_iter = 0; start <= end && relname_iter < ATTR_SIZE - 1; start++, relname_iter++) {
+	for (start = fileNameIterator + 1, relname_iter = 0;
+	     start <= end && relname_iter < ATTR_SIZE - 1; start++, relname_iter++) {
 		relationName[relname_iter] = fileName[start];
 	}
 	if (relname_iter == ATTR_SIZE - 1) {
@@ -303,7 +304,7 @@ int importRelation(char *fileName) {
 
 	// OPEN RELATION
 	int relId = OpenRelTable::openRelation(relationName);
-	if (relId == E_CACHEFULL || relId == E_RELNOTEXIST) {
+	if (relId == E_CACHEFULL) {
 		cout << "Import not possible as openRel failed\n";
 		return FAILURE;
 	}
@@ -336,8 +337,7 @@ int importRelation(char *fileName) {
 			if (currentCharacter == ',')
 				numOfFieldsInLine++;
 			if (currentCharacter == previousCharacter && currentCharacter == ',') {
-				OpenRelTable::closeRelation(relId);
-				ba_delete(relationName);
+				ba_delete(relId);
 				cout << "Null values are not allowed in attribute fields\n";
 				return FAILURE;
 			}
@@ -351,15 +351,13 @@ int importRelation(char *fileName) {
 		}
 
 		if (previousCharacter == ',') {
-			OpenRelTable::closeRelation(relId);
-			ba_delete(relationName);
+			ba_delete(relId);
 
 			cout << "Null values are not allowed in attribute fields\n";
 			return FAILURE;
 		}
 		if (numOfAttributes != numOfFieldsInLine + 1) {
-			OpenRelTable::closeRelation(relId);
-			ba_delete(relationName);
+			ba_delete(relId);
 			cout << "Mismatch in number of attributes\n";
 			return FAILURE;
 		}
@@ -371,7 +369,9 @@ int importRelation(char *fileName) {
 		while (attrOffsetIterator < numOfAttributes) {
 			attributeIndexIterator = 0;
 
-			while (((currentLineAsCharArray[currentCharIndexInLine] != ',') && (currentLineAsCharArray[currentCharIndexInLine] != '\0')) && (attributeIndexIterator < ATTR_SIZE - 1)) {
+			while (((currentLineAsCharArray[currentCharIndexInLine] != ',') &&
+			        (currentLineAsCharArray[currentCharIndexInLine] != '\0')) &&
+			       (attributeIndexIterator < ATTR_SIZE - 1)) {
 				attributesCharArray[attrOffsetIterator][attributeIndexIterator++] = currentLineAsCharArray[currentCharIndexInLine++];
 			}
 			if (attributeIndexIterator == ATTR_SIZE - 1) {
@@ -388,13 +388,10 @@ int importRelation(char *fileName) {
 		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, attributesCharArray, attrTypes);
 
 		if (retValue == E_ATTRTYPEMISMATCH) {
-			OpenRelTable::closeRelation(relId);
-			ba_delete(relationName);
+			ba_delete(relId);
 			return E_ATTRTYPEMISMATCH;
-		}
-		else if (retValue == E_INVALID) {
-			OpenRelTable::closeRelation(relId);
-			ba_delete(relationName);
+		} else if (retValue == E_INVALID) {
+			ba_delete(relId);
 			cout << "Invalid character at line " << lineNumber << " in file \n";
 			return FAILURE;
 		}
@@ -402,8 +399,7 @@ int importRelation(char *fileName) {
 		int retVal = ba_insert(relId, record);
 
 		if (retVal != SUCCESS) {
-			OpenRelTable::closeRelation(relId);
-			ba_delete(relationName);
+			ba_delete(relId);
 			cout << "Insert failed" << endl;
 			return retVal;
 		}
@@ -462,9 +458,9 @@ int exportRelation(char *relname, char *filename) {
 	 * Searching the Attribute Catalog Disk Blocks
 	 * for finding and storing all the attributes of the given relation
 	 */
-	 while (recBlock_Attrcat != -1) {
+	while (recBlock_Attrcat != -1) {
 		headInfo = getHeader(recBlock_Attrcat);
-		 nextRecBlock_Attrcat = headInfo.rblock;
+		nextRecBlock_Attrcat = headInfo.rblock;
 		for (slotNum = 0; slotNum < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotNum++) {
 			getRecord(rec, recBlock_Attrcat, slotNum);
 			if (strcmp(rec[0].sval, relname) == 0) {
@@ -474,7 +470,7 @@ int exportRelation(char *relname, char *filename) {
 				attrNo++;
 			}
 		}
-		 recBlock_Attrcat = nextRecBlock_Attrcat;
+		recBlock_Attrcat = nextRecBlock_Attrcat;
 	}
 
 	// Write the Attribute names to o/p file
@@ -568,7 +564,8 @@ void writeAttributeToFile(FILE *fp, Attribute attribute, int type, int lastLineF
 }
 
 bool checkIfInvalidCharacter(char character) {
-	if (character >= 48 && character <= 57 || character >= 65 && character <= 90 || character >= 97 && character <= 122 || character == '-' || character == '_') {
+	if (character >= 48 && character <= 57 || character >= 65 && character <= 90 ||
+	    character >= 97 && character <= 122 || character == '-' || character == '_') {
 		return false;
 	}
 	return true;

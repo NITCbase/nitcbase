@@ -87,7 +87,7 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 		int iter;
 		for (iter = 0; iter < num_slots; iter++) {
 			if (slotmap[iter] == SLOT_UNOCCUPIED)
-				continue;
+				break;
 
 			// get iter th number record from data block
 			getRecord(record, dataBlock, iter);
@@ -117,306 +117,305 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 
 int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
-    // get attribute catalog entry of target attribute
-    Attribute attrCatEntry[6];
-    int flag = getAttrCatEntry(relId, attrName, attrCatEntry);
-    if (flag != SUCCESS) {
-        this->rootBlock = flag;
-        return flag;
-    }
+	// get attribute catalog entry of target attribute
+	Attribute attrCatEntry[6];
+	int flag = getAttrCatEntry(relId, attrName, attrCatEntry);
+	if (flag != SUCCESS) {
+		this->rootBlock = flag;
+		return flag;
+	}
 
-    //check if B+ Tree exists for attr
-    int blockNum = this->rootBlock;
-    if (blockNum == -1) {
-        this->rootBlock = E_NOINDEX;
-        return E_NOINDEX;
-    }
+	//check if B+ Tree exists for attr
+	int blockNum = this->rootBlock;
+	if (blockNum == -1) {
+		this->rootBlock = E_NOINDEX;
+		return E_NOINDEX;
+	}
 
-    int attrType = (int) attrCatEntry[ATTRCAT_ATTR_TYPE_INDEX].nval;
+	int attrType = (int) attrCatEntry[ATTRCAT_ATTR_TYPE_INDEX].nval;
 
-    int blockType = getBlockType(blockNum);
-    HeadInfo blockHeader;
-    int num_of_entries, current_entryNumber;
+	int blockType = getBlockType(blockNum);
+	HeadInfo blockHeader;
+	int num_of_entries, current_entryNumber;
 
-    /******Traverse the B+ Tree to reach the appropriate leaf where insertion can be done******/
-    while (blockType != IND_LEAF) {
-        blockHeader = getHeader(blockNum);
-        num_of_entries = blockHeader.numEntries;
-        InternalEntry internalEntry;
-        for (current_entryNumber = 0; current_entryNumber < num_of_entries; ++current_entryNumber) {
-            internalEntry = getInternalEntry(blockNum, current_entryNumber);
-            if (compareAttributes(val, internalEntry.attrVal, attrType) < 0)
-                break;
-        }
+	/******Traverse the B+ Tree to reach the appropriate leaf where insertion can be done******/
+	while (blockType != IND_LEAF) {
+		blockHeader = getHeader(blockNum);
+		num_of_entries = blockHeader.numEntries;
+		InternalEntry internalEntry;
+		for (current_entryNumber = 0; current_entryNumber < num_of_entries; ++current_entryNumber) {
+			internalEntry = getInternalEntry(blockNum, current_entryNumber);
+			if (compareAttributes(val, internalEntry.attrVal, attrType) < 0)
+				break;
+		}
 
-        if (current_entryNumber == num_of_entries) {
-            blockNum = internalEntry.rChild;
-        } else {
-            blockNum = internalEntry.lChild;
-        }
-        blockType = getBlockType(blockNum);
-    }
+		if (current_entryNumber == num_of_entries) {
+			blockNum = internalEntry.rChild;
+		} else {
+			blockNum = internalEntry.lChild;
+		}
+		blockType = getBlockType(blockNum);
+	}
 
-    // NOTE : blockNum is the leaf index block to which insertion of val is to be done
+	// NOTE : blockNum is the leaf index block to which insertion of val is to be done
 
-    /******Insertion of entry in the appropriate leaf block******/
-    blockHeader = getHeader(blockNum);
-    num_of_entries = blockHeader.numEntries;
+	/******Insertion of entry in the appropriate leaf block******/
+	blockHeader = getHeader(blockNum);
+	num_of_entries = blockHeader.numEntries;
 
-    Index indices[num_of_entries + 1];
-    Index current_leafEntry;
-    int current_leafEntryIndex = 0;
-    flag = 0;
-    /* iterate through all the entries in the block and copy them to the array indices
-     * Also insert val at appropriate position in the indices array
-    */
-    for (current_entryNumber = 0; current_entryNumber < num_of_entries; ++current_entryNumber) {
-        current_leafEntry = getLeafEntry(blockNum, current_entryNumber);
+	Index indices[num_of_entries + 1];
+	Index current_leafEntry;
+	int current_leafEntryIndex = 0;
+	flag = 0;
+	/* iterate through all the entries in the block and copy them to the array indices
+	 * Also insert val at appropriate position in the indices array
+	*/
+	for (current_entryNumber = 0; current_entryNumber < num_of_entries; ++current_entryNumber) {
+		current_leafEntry = getLeafEntry(blockNum, current_entryNumber);
 
-        if (flag == 0) {
-            if (compareAttributes(val, current_leafEntry.attrVal, attrType) < 0) {
-                if (attrType == NUMBER) {
-                    indices[current_leafEntryIndex].attrVal.nval = val.nval;
-                } else if (attrType == STRING) {
-                    strcpy(indices[current_leafEntryIndex].attrVal.sval, val.sval);
-                }
-                indices[current_leafEntryIndex].block = recordId.block;
-                indices[current_leafEntryIndex].slot = recordId.slot;
-                flag = 1;
-                current_leafEntryIndex++;
-            }
-        }
-        if (attrType == NUMBER) {
-            indices[current_leafEntryIndex].attrVal.nval = current_leafEntry.attrVal.nval;
-        } else if (attrType == STRING) {
-            strcpy(indices[current_leafEntryIndex].attrVal.sval, current_leafEntry.attrVal.sval);
-        }
-        indices[current_leafEntryIndex].block = current_leafEntry.block;
-        indices[current_leafEntryIndex].slot = current_leafEntry.slot;
-        current_leafEntryIndex++;
-    }
+		if (flag == 0) {
+			if (compareAttributes(val, current_leafEntry.attrVal, attrType) < 0) {
+				if (attrType == NUMBER) {
+					indices[current_leafEntryIndex].attrVal.nval = val.nval;
+				} else if (attrType == STRING) {
+					strcpy(indices[current_leafEntryIndex].attrVal.sval, val.sval);
+				}
+				indices[current_leafEntryIndex].block = recordId.block;
+				indices[current_leafEntryIndex].slot = recordId.slot;
+				flag = 1;
+				current_leafEntryIndex++;
+			}
+		}
+		if (attrType == NUMBER) {
+			indices[current_leafEntryIndex].attrVal.nval = current_leafEntry.attrVal.nval;
+		} else if (attrType == STRING) {
+			strcpy(indices[current_leafEntryIndex].attrVal.sval, current_leafEntry.attrVal.sval);
+		}
+		indices[current_leafEntryIndex].block = current_leafEntry.block;
+		indices[current_leafEntryIndex].slot = current_leafEntry.slot;
+		current_leafEntryIndex++;
+	}
 
-    if (num_of_entries == current_leafEntryIndex) {
-        if (attrType == NUMBER)
-            indices[current_leafEntryIndex].attrVal.nval = val.nval;
-        if (attrType == STRING)
-            strcpy(indices[current_leafEntryIndex].attrVal.sval, val.sval);
-        indices[current_leafEntryIndex].block = recordId.block;
-        indices[current_leafEntryIndex].slot = recordId.slot;
-        current_leafEntryIndex++;
-    }
+	if (num_of_entries == current_leafEntryIndex) {
+		if (attrType == NUMBER)
+			indices[current_leafEntryIndex].attrVal.nval = val.nval;
+		if (attrType == STRING)
+			strcpy(indices[current_leafEntryIndex].attrVal.sval, val.sval);
+		indices[current_leafEntryIndex].block = recordId.block;
+		indices[current_leafEntryIndex].slot = recordId.slot;
+		current_leafEntryIndex++;
+	}
 
-    //leaf block has not reached max limit
-    if (num_of_entries != 63) {
+	//leaf block has not reached max limit
+	if (num_of_entries != MAX_KEYS_LEAF) {
 
-        // increment blockHeader.numEntries and set this as header of block
-        blockHeader.numEntries = blockHeader.numEntries + 1;
-        setHeader(&blockHeader, blockNum);
+		// increment blockHeader.numEntries and set this as header of block
+		blockHeader.numEntries = blockHeader.numEntries + 1;
+		setHeader(&blockHeader, blockNum);
 
-        // iterate through all the entries of indices array and populate the entries of block with them
-        for (int i = 0; i < current_leafEntryIndex; ++i) {
-            setLeafEntry(indices[i], blockNum, i);
-        }
+		// iterate through all the entries of indices array and populate the entries of block with them
+		for (int i = 0; i < current_leafEntryIndex; ++i) {
+			setLeafEntry(indices[i], blockNum, i);
+		}
 
-        return SUCCESS;
-    } else { //leaf block is full- need a new leaf to make the entry; split the entries between the two blocks.
+		return SUCCESS;
+	} else { //leaf block is full- need a new leaf to make the entry; split the entries between the two blocks.
 
-        //assign the existing block as the left block in the splitting.
-        int leftBlkNum = blockNum;
-        // obtain new leaf index block to be used as the right block in the splitting
-        int newRightBlkNum = getFreeBlock(IND_LEAF);
+		//assign the existing block as the left block in the splitting.
+		int leftBlkNum = blockNum;
+		// obtain new leaf index block to be used as the right block in the splitting
+		int newRightBlkNum = getFreeBlock(IND_LEAF);
 
-        if (newRightBlkNum == FAILURE) {
-            //failed to obtain an empty leaf index becauase the disk is full
+		if (newRightBlkNum == FAILURE) {
+			//failed to obtain an empty leaf index becauase the disk is full
 
-            //destroy the existing B+ tree by passing rootBlock member field to bPlusDestroy().
-            bPlusDestroy(this->rootBlock);
+			//destroy the existing B+ tree by passing rootBlock member field to bPlusDestroy().
+			bPlusDestroy(this->rootBlock);
 
-            //update the rootBlock of attribute catalog entry to -1
-            attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
-            setAttrCatEntry(relId, attrName, attrCatEntry);
+			//update the rootBlock of attribute catalog entry to -1
+			attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
+			setAttrCatEntry(relId, attrName, attrCatEntry);
 
-            this->rootBlock = E_DISKFULL;
-            return E_DISKFULL;
-        }
+			this->rootBlock = E_DISKFULL;
+			return E_DISKFULL;
+		}
 
-        // let leftBlkHeader be the header of the left block(which is presently stored in blockHeader)
-        struct HeadInfo leftBlkHeader = blockHeader;
+		// let leftBlkHeader be the header of the left block(which is presently stored in blockHeader)
+		struct HeadInfo leftBlkHeader = blockHeader;
 
-        //store the block after leftBlk that appears in the linked list in prevRblock
-        int prevRblock = leftBlkHeader.rblock;
+		//store the block after leftBlk that appears in the linked list in prevRblock
+		int prevRblock = leftBlkHeader.rblock;
 
-        /* Update left block header
-         * - number of entries = 32
-         * - right block = newRightBlkNum
-         */
-        leftBlkHeader.numEntries = 32;
-        leftBlkHeader.rblock = newRightBlkNum;
-        setHeader(&leftBlkHeader, leftBlkNum);
+		/* Update left block header
+		 * - number of entries = 32
+		 * - right block = newRightBlkNum
+		 */
+		leftBlkHeader.numEntries = MIDDLE_INDEX_LEAF;
+		leftBlkHeader.rblock = newRightBlkNum;
+		setHeader(&leftBlkHeader, leftBlkNum);
 
-        //load the header of newRightBlk in newRightBlkHeader using BlockBuffer::getHeader()
-        HeadInfo newRightBlkHeader = getHeader(newRightBlkNum);
-        /* Update right block header
-         * - number of entries = 32
-         * - left block = leftBlkNum
-         * - right block = prevRblock
-         * - parent block = parent block of leftBlkNum
-         */
+		//load the header of newRightBlk in newRightBlkHeader using BlockBuffer::getHeader()
+		HeadInfo newRightBlkHeader = getHeader(newRightBlkNum);
+		/* Update right block header
+		 * - number of entries = 32
+		 * - left block = leftBlkNum
+		 * - right block = prevRblock
+		 * - parent block = parent block of leftBlkNum
+		 */
 
-        newRightBlkHeader.numEntries = 32;
-        newRightBlkHeader.lblock = leftBlkNum;
-        newRightBlkHeader.pblock = leftBlkHeader.pblock;
-        newRightBlkHeader.rblock = prevRblock;
-        setHeader(&newRightBlkHeader, newRightBlkNum);
+		newRightBlkHeader.numEntries = MIDDLE_INDEX_LEAF;
+		newRightBlkHeader.lblock = leftBlkNum;
+		newRightBlkHeader.pblock = leftBlkHeader.pblock;
+		newRightBlkHeader.rblock = prevRblock;
+		setHeader(&newRightBlkHeader, newRightBlkNum);
 
-        //store pblock of leftBlk in parBlkNum.
-        int parentBlock = leftBlkHeader.pblock;
+		//store pblock of leftBlk in parBlkNum.
+		int parentBlock = leftBlkHeader.pblock;
 
-        // set the first 32 entries of leftBlk as the first 32 entries of indices array
-        int indices_iter;
-        for (indices_iter = 0; indices_iter < 32; indices_iter++) {
-            setLeafEntry(indices[indices_iter], leftBlkNum, indices_iter);
-        }
-        // set the first 32 entries of newRightBlk as the next 32 entries of indices array
-        for (int rBlockIndexIter = 0; rBlockIndexIter < 32; rBlockIndexIter++) {
-            setLeafEntry(indices[indices_iter], newRightBlkNum, rBlockIndexIter);
-            indices_iter++;
-        }
+		// set the first 32 entries of leftBlk as the first 32 entries of indices array
+		int indices_iter;
+		for (indices_iter = 0; indices_iter < MIDDLE_INDEX_LEAF; indices_iter++) {
+			setLeafEntry(indices[indices_iter], leftBlkNum, indices_iter);
+		}
+		// set the first 32 entries of newRightBlk as the next 32 entries of indices array
+		for (int rBlockIndexIter = 0; rBlockIndexIter < MIDDLE_INDEX_LEAF; rBlockIndexIter++) {
+			setLeafEntry(indices[indices_iter], newRightBlkNum, rBlockIndexIter);
+			indices_iter++;
+		}
 
-        indices[0].attrVal.nval = 0;
-        indices[0].block = 0;
-        indices[0].slot = 0;
-        for (indices_iter = 32; indices_iter < 63; indices_iter++) {
-            setLeafEntry(indices[0], leftBlkNum, indices_iter);
-        }
+		indices[0].attrVal.nval = 0;
+		indices[0].block = 0;
+		indices[0].slot = 0;
+		for (indices_iter = MIDDLE_INDEX_LEAF; indices_iter < MAX_KEYS_LEAF; indices_iter++) {
+			setLeafEntry(indices[0], leftBlkNum, indices_iter);
+		}
 
-        /*
-         * store the attribute value of indices[31] in newAttrVal;
-         * this is attribute value which needs to be inserted in the parent block
-         */
-        Index leafentry;
-        leafentry = getLeafEntry(leftBlkNum, 31);
-        Attribute newAttrVal;
+		/*
+		 * store the attribute value of indices[31] in newAttrVal;
+		 * this is attribute value which needs to be inserted in the parent block
+		 */
+		Index leafentry;
+		leafentry = getLeafEntry(leftBlkNum, MIDDLE_INDEX_LEAF - 1);
+		Attribute newAttrVal;
 
-        if (attrType == NUMBER)
-            newAttrVal.nval = leafentry.attrVal.nval;
-        if (attrType == STRING)
-            strcpy(newAttrVal.sval, leafentry.attrVal.sval);
+		if (attrType == NUMBER)
+			newAttrVal.nval = leafentry.attrVal.nval;
+		if (attrType == STRING)
+			strcpy(newAttrVal.sval, leafentry.attrVal.sval);
 
-        bool done = false;
+		bool done = false;
 
-        /******Traverse the internal index blocks of the B+ Tree bottom up making insertions wherever required******/
-        //let done indicate whether the insertion is complete or not
-        while (!done) {
-            if (parentBlock != -1) {
-                HeadInfo parentHeader = getHeader(parentBlock);
-                InternalEntry internal_entries[parentHeader.numEntries + 1];
-                InternalEntry internalEntry;
-                flag = 0;
-                current_entryNumber = 0;
+		/******Traverse the internal index blocks of the B+ Tree bottom up making insertions wherever required******/
+		//let done indicate whether the insertion is complete or not
+		while (!done) {
+			if (parentBlock != -1) {
+				HeadInfo parentHeader = getHeader(parentBlock);
+				InternalEntry internal_entries[parentHeader.numEntries + 1];
+				InternalEntry internalEntry;
+				flag = 0;
+				current_entryNumber = 0;
 
-                /* iterate through all the entries of the parentBlock and copy them to the array internal_entries.
-                 * Also insert an InternalEntry entry with attrVal as newAttrval, lChild as leftBlkNum,
-                 * and rChild as newRightBlkNum at an appropriate position in the internalEntries array.
-                 */
-                for (indices_iter = 0; indices_iter < parentHeader.numEntries; ++indices_iter) {
-                    internalEntry = getInternalEntry(parentBlock, indices_iter);
+				/* iterate through all the entries of the parentBlock and copy them to the array internal_entries.
+				 * Also insert an InternalEntry entry with attrVal as newAttrval, lChild as leftBlkNum,
+				 * and rChild as newRightBlkNum at an appropriate position in the internalEntries array.
+				 */
+				for (indices_iter = 0; indices_iter < parentHeader.numEntries; ++indices_iter) {
+					internalEntry = getInternalEntry(parentBlock, indices_iter);
 
-                    // inserting newAttrVal at appropriate place
-                    if (flag == 0) {
-                        if (compareAttributes(newAttrVal, internalEntry.attrVal, attrType) < 0) {
-                            if (attrType == NUMBER) {
-                                internal_entries[current_entryNumber].attrVal.nval = newAttrVal.nval;
-                            } else if (attrType == STRING) {
-                                strcpy(internal_entries[current_entryNumber].attrVal.sval, newAttrVal.sval);
-                            }
-                            internal_entries[current_entryNumber].lChild = leftBlkNum;
-                            internal_entries[current_entryNumber].rChild = newRightBlkNum;
-                            flag = 1;
-                            current_entryNumber++;
-                        }
-                    }
+					// inserting newAttrVal at appropriate place
+					if (flag == 0) {
+						if (compareAttributes(newAttrVal, internalEntry.attrVal, attrType) < 0) {
+							if (attrType == NUMBER) {
+								internal_entries[current_entryNumber].attrVal.nval = newAttrVal.nval;
+							} else if (attrType == STRING) {
+								strcpy(internal_entries[current_entryNumber].attrVal.sval, newAttrVal.sval);
+							}
+							internal_entries[current_entryNumber].lChild = leftBlkNum;
+							internal_entries[current_entryNumber].rChild = newRightBlkNum;
+							flag = 1;
+							current_entryNumber++;
+						}
+					}
 
-                    // copy entries of the parentBlock to the array internal_entries
-                    if (attrType == NUMBER) {
-                        internal_entries[current_entryNumber].attrVal.nval = internalEntry.attrVal.nval;
-                    } else if (attrType == STRING) {
-                        strcpy(internal_entries[current_entryNumber].attrVal.sval, internalEntry.attrVal.sval);
-                    }
-                    if (current_entryNumber - 1 >= 0) {
-                        internal_entries[current_entryNumber].lChild = internal_entries[current_entryNumber - 1].rChild;
-                    } else {
-                        internal_entries[current_entryNumber].lChild = internalEntry.lChild;
-                    }
-                    internal_entries[current_entryNumber].rChild = internalEntry.rChild;
-                    current_entryNumber++;
-                }
-                // TODO : review
-                if (flag == 0) //when newattrval is greater than all parentblock enries
-                {
-                    internal_entries[current_entryNumber].attrVal = newAttrVal;
-                    internal_entries[current_entryNumber].lChild = leftBlkNum;
-                    internal_entries[current_entryNumber].rChild = newRightBlkNum;
-                    flag = 1;
-                }
+					// copy entries of the parentBlock to the array internal_entries
+					if (attrType == NUMBER) {
+						internal_entries[current_entryNumber].attrVal.nval = internalEntry.attrVal.nval;
+					} else if (attrType == STRING) {
+						strcpy(internal_entries[current_entryNumber].attrVal.sval, internalEntry.attrVal.sval);
+					}
+					if (current_entryNumber - 1 >= 0) {
+						internal_entries[current_entryNumber].lChild = internal_entries[current_entryNumber - 1].rChild;
+					} else {
+						internal_entries[current_entryNumber].lChild = internalEntry.lChild;
+					}
+					internal_entries[current_entryNumber].rChild = internalEntry.rChild;
+					current_entryNumber++;
+				}
+				// TODO : review
+				if (flag == 0) //when newattrval is greater than all parentblock enries
+				{
+					internal_entries[current_entryNumber].attrVal = newAttrVal;
+					internal_entries[current_entryNumber].lChild = leftBlkNum;
+					internal_entries[current_entryNumber].rChild = newRightBlkNum;
+					flag = 1;
+				}
 
-                // parentBlock has not reached max limit.
-                if (parentHeader.numEntries != 100) {
-                    // increment parheader.numEntries and update it as header of parblk
-                    parentHeader.numEntries = parentHeader.numEntries + 1;
-                    setHeader(&parentHeader, parentBlock);
+				// parentBlock has not reached max limit.
+				if (parentHeader.numEntries != MAX_KEYS_INTERNAL) {
+					// increment parheader.numEntries and update it as header of parblk
+					parentHeader.numEntries = parentHeader.numEntries + 1;
+					setHeader(&parentHeader, parentBlock);
 
-                    // iterate through all entries in internalEntries array and populate the entries of parentBlock with them
-                    for (indices_iter = 0; indices_iter < (parentHeader.numEntries + 1); ++indices_iter) {
-                        setInternalEntry(internal_entries[indices_iter], parentBlock, indices_iter);
-                    }
+					// iterate through all entries in internalEntries array and populate the entries of parentBlock with them
+					for (indices_iter = 0; indices_iter < (parentHeader.numEntries + 1); ++indices_iter) {
+						setInternalEntry(internal_entries[indices_iter], parentBlock, indices_iter);
+					}
 
-                    done = true;
-                } else //if parent block is full
-                {
-                    int newBlock = getFreeBlock(IND_INTERNAL); // to get a new internalblock
+					done = true;
+				} else //if parent block is full
+				{
+					int newBlock = getFreeBlock(IND_INTERNAL); // to get a new internalblock
 
-                    // disk full
-                    if(newBlock == FAILURE) {
-                        // destroy the right subtree, given by newRightBlkNum, build up till now that
-                        // has not yet been connected to the existing B+ Tree
-                        bPlusDestroy(newRightBlkNum);
-                        // destroy the existing B+ tree by passing rootBlock member field
-                        bPlusDestroy(this->rootBlock);
-                        // update the rootBlock of attribute catalog entry to -1
-                        attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
-                        setAttrCatEntry(relId, attrName, attrCatEntry);
-                        this->rootBlock = E_DISKFULL;
-                        return E_DISKFULL;
-                    }
+					// disk full
+					if (newBlock == FAILURE) {
+						// destroy the right subtree, given by newRightBlkNum, build up till now that has not yet been connected to the existing B+ Tree
+						bPlusDestroy(newRightBlkNum);
+						// destroy the existing B+ tree by passing rootBlock member field
+						bPlusDestroy(this->rootBlock);
+						// update the rootBlock of attribute catalog entry to -1
+						attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
+						setAttrCatEntry(relId, attrName, attrCatEntry);
+						this->rootBlock = E_DISKFULL;
+						return E_DISKFULL;
+					}
 
-                    //assign new block as the right block in the splitting.
-                    newRightBlkNum = newBlock;
-                    //assign parentBlock as the left block in the splitting.
-                    leftBlkNum = parentBlock;
+					//assign new block as the right block in the splitting.
+					newRightBlkNum = newBlock;
+					//assign parentBlock as the left block in the splitting.
+					leftBlkNum = parentBlock;
 
-                    //update leftBlkHeader with parheader.
-                    leftBlkHeader = parentHeader;
+					//update leftBlkHeader with parheader.
+					leftBlkHeader = parentHeader;
 
-                    /* Update left block header
-                       * - number of entries = 50
-                       */
-                    leftBlkHeader.numEntries = 50;
-                    setHeader(&leftBlkHeader, leftBlkNum);
+					/* Update left block header
+					   * - number of entries = 50
+					   */
+					leftBlkHeader.numEntries = MIDDLE_INDEX_INTERNAL;
+					setHeader(&leftBlkHeader, leftBlkNum);
 
-                    //load newRightBlkHeader
-                    newRightBlkHeader = getHeader(newRightBlkNum);
+					//load newRightBlkHeader
+					newRightBlkHeader = getHeader(newRightBlkNum);
 
-                    /* Update right block header
-                       * - number of entries = 50
-                       * - parent block = parent block of leftBlkNum
-                       */
-                    newRightBlkHeader.numEntries = 50;
-                    newRightBlkHeader.pblock = leftBlkHeader.pblock;
-                    setHeader(&newRightBlkHeader, newRightBlkNum);
+					/* Update right block header
+					   * - number of entries = 50
+					   * - parent block = parent block of leftBlkNum
+					   */
+					newRightBlkHeader.numEntries = MIDDLE_INDEX_INTERNAL;
+					newRightBlkHeader.pblock = leftBlkHeader.pblock;
+					setHeader(&newRightBlkHeader, newRightBlkNum);
 
-                    // set the first 50 entries of leftBlk as the first 50 entries of internalEntries array
-                    for (indices_iter = 0; indices_iter < 50; ++indices_iter) {
+					// set the first 50 entries of leftBlk as the first 50 entries of internalEntries array
+					for (indices_iter = 0; indices_iter < MIDDLE_INDEX_INTERNAL; ++indices_iter) {
 //                if ((internal_entries[indices_iter].lChild == parentBlock) || (internal_entries[indices_iter].rChild == parentBlock)) {
 //                   InternalEntry entry;
 //                   entry = getEntry(parentBlock, indices_iter);
@@ -430,16 +429,16 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 						setInternalEntry(internal_entries[indices_iter], leftBlkNum, indices_iter);
 					}
 
-					indices_iter = 51;
+					indices_iter = MIDDLE_INDEX_INTERNAL;
 					// set the first 50 entries of newRightBlk as the entries from 51 to 100 of internalEntries array
-					for (int j = 0; j < 50; ++j) {
+					for (int j = 0; j < MIDDLE_INDEX_INTERNAL; ++j) {
 						setInternalEntry(internal_entries[indices_iter], newRightBlkNum, j);
 						indices_iter++;
 					}
 
 					int childNum;
 					//iterate from 50 to 100:
-					for (int k = 50; k < 100; ++k) {
+					for (int k = MIDDLE_INDEX_INTERNAL; k < MAX_KEYS_INTERNAL; ++k) {
 						//assign the rchild block of ith index in internalEntries to childNum
 						childNum = internal_entries[k].rChild;
 
@@ -455,7 +454,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					/* update newAttrval to the attribute value of 50th entry in the internalEntries array;
 					 * this is attribute value which needs to be inserted in the parent block.
 					 */
-					newAttrVal = internal_entries[49].attrVal;
+					newAttrVal = internal_entries[MIDDLE_INDEX_INTERNAL - 1].attrVal;
 
 				}
 			} else //if headparblock == -1 i.e root is split now

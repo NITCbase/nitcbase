@@ -9,6 +9,7 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <iostream>
 
 int check_duplicate_attributes(int nAttrs, char attrs[][ATTR_SIZE]);
 
@@ -23,8 +24,10 @@ Attribute *make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], in
 int createRel(char relname[ATTR_SIZE], int nAttrs, char attrs[][ATTR_SIZE], int attrtypes[]) {
 
 	int status = OpenRelTable::checkIfOpenRelTableHasFreeEntry();
-	if (status == FAILURE)
+	if (status == FAILURE) {
+		std::cout << "createRel not possible as openRel failed\n";
 		return E_CACHEFULL;
+	}
 
 	Attribute attrval;
 	strcpy(attrval.sval, relname);
@@ -67,6 +70,7 @@ int createRel(char relname[ATTR_SIZE], int nAttrs, char attrs[][ATTR_SIZE], int 
 			return flag;
 		}
 	}
+	closeRel(relId);
 	return SUCCESS;
 }
 
@@ -140,7 +144,7 @@ int createIndex(char *relationName, char *attrName){
 	}
 	BPlusTree bPlusTree = BPlusTree(relId, attrName);
 	int rootBlock = bPlusTree.getRootBlock();
-	return rootBlock;
+	return SUCCESS;
 }
 
 int dropIndex(char *relationName, char *attrName){
