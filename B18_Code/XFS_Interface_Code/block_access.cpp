@@ -371,7 +371,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 	// CHECK IF ATTRIBUTE WITH THE NEW NAME ALREADY EXISTS
 	prev_recid.block = -1;
 	prev_recid.slot = -1;
-	while (1) {
+	while (true) {
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
 		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
 			getRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
@@ -386,7 +386,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 	 */
 	prev_recid.block = -1;
 	prev_recid.slot = -1;
-	while (1) {
+	while (true) {
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
 		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
 			getRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
@@ -402,7 +402,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 
 /*
  * Retrieves whether the block is occupied or not
- * If occupied returns the type of occupied block (REC: 0, IND_NUMBERERNAL: 1, IND_LEAF: 2)
+ * If occupied returns the type of occupied block (REC: 0, IND_INTERNAL: 1, IND_LEAF: 2)
  * If Not returns UNUSED_BLK: 3
  */
 int getBlockType(int blocknum) {
@@ -461,7 +461,7 @@ void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
 
 int getFreeBlock(int block_type) {
 
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, 0, SEEK_SET);
 	unsigned char blockAllocationMap[4 * BLOCK_SIZE];
 	fread(blockAllocationMap, 4 * BLOCK_SIZE, 1, disk);
@@ -815,7 +815,7 @@ int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCat
 // */
 //struct InternalEntry getEntry(int block, int entry_number) {
 //	InternalEntry rec;
-//	FILE *disk = fopen("disk", "rb");
+//	FILE *disk = fopen(DISK_PATH, "rb");
 //	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entry_number * 20, SEEK_SET);
 //	fread(&rec, sizeof(rec), 1, disk);
 //	fclose(disk);
@@ -953,7 +953,7 @@ int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType
 
 InternalEntry getInternalEntry(int block, int entryNum) {
 	InternalEntry rec;
-	FILE *disk = fopen("disk", "rb");
+	FILE *disk = fopen(DISK_PATH, "rb");
 	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entryNum * INTERNAL_ENTRY_SIZE, SEEK_SET);
 	fread(&rec, sizeof(rec), 1, disk);
 	fclose(disk);
@@ -972,7 +972,7 @@ void setInternalEntry(InternalEntry internalEntry, int block, int offset) {
 			internalEntry.rChild = entry.rChild;
 	}
 
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + offset * INTERNAL_ENTRY_SIZE, SEEK_SET);
 	fwrite(&internalEntry, sizeof(internalEntry), 1, disk);
 	fclose(disk);
@@ -980,7 +980,7 @@ void setInternalEntry(InternalEntry internalEntry, int block, int offset) {
 
 Index getLeafEntry(int leaf, int offset) {
 	Index rec;
-	FILE *disk = fopen("disk", "rb");
+	FILE *disk = fopen(DISK_PATH, "rb");
 	fseek(disk, leaf * BLOCK_SIZE + HEADER_SIZE + offset * LEAF_ENTRY_SIZE, SEEK_SET);
 	fread(&rec, sizeof(rec), 1, disk);
 	fclose(disk);
@@ -988,7 +988,7 @@ Index getLeafEntry(int leaf, int offset) {
 }
 
 void setLeafEntry(Index rec, int leaf, int offset) {
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, leaf * BLOCK_SIZE + HEADER_SIZE + offset * LEAF_ENTRY_SIZE, SEEK_SET);
 	fwrite(&rec, sizeof(rec), 1, disk);
 	fclose(disk);

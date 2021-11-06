@@ -87,7 +87,7 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 		int iter;
 		for (iter = 0; iter < num_slots; iter++) {
 			if (slotmap[iter] == SLOT_UNOCCUPIED)
-				continue;
+				break;
 
 			// get iter th number record from data block
 			getRecord(record, dataBlock, iter);
@@ -207,7 +207,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 	}
 
 	//leaf block has not reached max limit
-	if (num_of_entries != 63) {
+	if (num_of_entries != MAX_KEYS_LEAF) {
 
 		// increment blockHeader.numEntries and set this as header of block
 		blockHeader.numEntries = blockHeader.numEntries + 1;
@@ -250,7 +250,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		 * - number of entries = 32
 		 * - right block = newRightBlkNum
 		 */
-		leftBlkHeader.numEntries = 32;
+		leftBlkHeader.numEntries = MIDDLE_INDEX_LEAF;
 		leftBlkHeader.rblock = newRightBlkNum;
 		setHeader(&leftBlkHeader, leftBlkNum);
 
@@ -263,7 +263,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		 * - parent block = parent block of leftBlkNum
 		 */
 
-		newRightBlkHeader.numEntries = 32;
+		newRightBlkHeader.numEntries = MIDDLE_INDEX_LEAF;
 		newRightBlkHeader.lblock = leftBlkNum;
 		newRightBlkHeader.pblock = leftBlkHeader.pblock;
 		newRightBlkHeader.rblock = prevRblock;
@@ -274,11 +274,11 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
 		// set the first 32 entries of leftBlk as the first 32 entries of indices array
 		int indices_iter;
-		for (indices_iter = 0; indices_iter < 32; indices_iter++) {
+		for (indices_iter = 0; indices_iter < MIDDLE_INDEX_LEAF; indices_iter++) {
 			setLeafEntry(indices[indices_iter], leftBlkNum, indices_iter);
 		}
 		// set the first 32 entries of newRightBlk as the next 32 entries of indices array
-		for (int rBlockIndexIter = 0; rBlockIndexIter < 32; rBlockIndexIter++) {
+		for (int rBlockIndexIter = 0; rBlockIndexIter < MIDDLE_INDEX_LEAF; rBlockIndexIter++) {
 			setLeafEntry(indices[indices_iter], newRightBlkNum, rBlockIndexIter);
 			indices_iter++;
 		}
@@ -286,7 +286,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		indices[0].attrVal.nval = 0;
 		indices[0].block = 0;
 		indices[0].slot = 0;
-		for (indices_iter = 32; indices_iter < 63; indices_iter++) {
+		for (indices_iter = MIDDLE_INDEX_LEAF; indices_iter < MAX_KEYS_LEAF; indices_iter++) {
 			setLeafEntry(indices[0], leftBlkNum, indices_iter);
 		}
 
@@ -295,7 +295,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		 * this is attribute value which needs to be inserted in the parent block
 		 */
 		Index leafentry;
-		leafentry = getLeafEntry(leftBlkNum, 31);
+		leafentry = getLeafEntry(leftBlkNum, MIDDLE_INDEX_LEAF - 1);
 		Attribute newAttrVal;
 
 		if (attrType == NUMBER)
@@ -361,7 +361,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 				}
 
 				// parentBlock has not reached max limit.
-				if (parentHeader.numEntries != 100) {
+				if (parentHeader.numEntries != MAX_KEYS_INTERNAL) {
 					// increment parheader.numEntries and update it as header of parblk
 					parentHeader.numEntries = parentHeader.numEntries + 1;
 					setHeader(&parentHeader, parentBlock);
@@ -400,7 +400,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					/* Update left block header
 					   * - number of entries = 50
 					   */
-					leftBlkHeader.numEntries = 50;
+					leftBlkHeader.numEntries = MIDDLE_INDEX_INTERNAL;
 					setHeader(&leftBlkHeader, leftBlkNum);
 
 					//load newRightBlkHeader
@@ -410,12 +410,12 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					   * - number of entries = 50
 					   * - parent block = parent block of leftBlkNum
 					   */
-					newRightBlkHeader.numEntries = 50;
+					newRightBlkHeader.numEntries = MIDDLE_INDEX_INTERNAL;
 					newRightBlkHeader.pblock = leftBlkHeader.pblock;
 					setHeader(&newRightBlkHeader, newRightBlkNum);
 
 					// set the first 50 entries of leftBlk as the first 50 entries of internalEntries array
-					for (indices_iter = 0; indices_iter < 50; ++indices_iter) {
+					for (indices_iter = 0; indices_iter < MIDDLE_INDEX_INTERNAL; ++indices_iter) {
 //                if ((internal_entries[indices_iter].lChild == parentBlock) || (internal_entries[indices_iter].rChild == parentBlock)) {
 //                   InternalEntry entry;
 //                   entry = getEntry(parentBlock, indices_iter);
@@ -429,16 +429,16 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 						setInternalEntry(internal_entries[indices_iter], leftBlkNum, indices_iter);
 					}
 
-					indices_iter = 51;
+					indices_iter = MIDDLE_INDEX_INTERNAL;
 					// set the first 50 entries of newRightBlk as the entries from 51 to 100 of internalEntries array
-					for (int j = 0; j < 50; ++j) {
+					for (int j = 0; j < MIDDLE_INDEX_INTERNAL; ++j) {
 						setInternalEntry(internal_entries[indices_iter], newRightBlkNum, j);
 						indices_iter++;
 					}
 
 					int childNum;
 					//iterate from 50 to 100:
-					for (int k = 50; k < 100; ++k) {
+					for (int k = MIDDLE_INDEX_INTERNAL; k < MAX_KEYS_INTERNAL; ++k) {
 						//assign the rchild block of ith index in internalEntries to childNum
 						childNum = internal_entries[k].rChild;
 
@@ -454,7 +454,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					/* update newAttrval to the attribute value of 50th entry in the internalEntries array;
 					 * this is attribute value which needs to be inserted in the parent block.
 					 */
-					newAttrVal = internal_entries[49].attrVal;
+					newAttrVal = internal_entries[MIDDLE_INDEX_INTERNAL - 1].attrVal;
 
 				}
 			} else //if headparblock == -1 i.e root is split now
