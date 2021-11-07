@@ -1,0 +1,2 @@
+OPEN TABLE numbers
+INSERT INTO numbers VALUES (60);

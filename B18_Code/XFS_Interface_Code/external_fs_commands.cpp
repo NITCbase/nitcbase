@@ -249,6 +249,8 @@ int importRelation(char *fileName) {
 	char *secondLine = (char *) malloc(sizeof(char));
 	numOfCharactersInLine = 1;
 	while ((currentCharacter = fgetc(file)) != '\n') {
+		if (currentCharacter == EOF)
+			break;
 		secondLine[numOfCharactersInLine - 1] = currentCharacter;
 		numOfCharactersInLine++;
 		secondLine = (char *) realloc(secondLine, (numOfCharactersInLine) * sizeof(char));
