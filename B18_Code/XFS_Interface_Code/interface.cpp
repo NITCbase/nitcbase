@@ -247,6 +247,9 @@ int regexMatchAndExecute(const string input_command) {
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
+		cout << "size of internal entry : " << sizeof(InternalEntry) << endl;
+		cout << "size of int : " << sizeof(int32_t) << endl;
+		cout << "size of attrval : " << sizeof(Attribute) << endl;
 		int ret = createIndex(relname, attr_name);
 
 		/*
@@ -955,7 +958,7 @@ void string_to_char_array(string x, char *a, int size) {
 	}
 }
 
-void printBPlusTree(int rootBlock, queue<int> &keys) {
+void printBPlusTree(int rootBlock) {
 	queue<int> blocks;
 	blocks.push(rootBlock);
 	blocks.push(INT_MAX);
@@ -1010,7 +1013,7 @@ void printBPlusTree(int rootBlock, queue<int> &keys) {
 	}
 }
 
-void printBlock(int blockNum) {
+void printTree(int blockNum) {
 	HeadInfo header = getHeader(blockNum);
 	int block_type = getBlockType(blockNum);
 	int num_entries = header.numEntries;
@@ -1043,11 +1046,11 @@ void printBlock(int blockNum) {
 
 		int entry_num = 0;
 		internal_entry = getInternalEntry(blockNum, entry_num);
-		printBlock(internal_entry.lChild);
+		printTree(internal_entry.lChild);
 
 		for (entry_num = 0; entry_num < num_entries; entry_num++) {
 			internal_entry = getInternalEntry(blockNum, entry_num);
-			printBlock(internal_entry.rChild);
+			printTree(internal_entry.rChild);
 		}
 	}
 }
@@ -1056,38 +1059,10 @@ void testBPlusTree(char *rel_name, char *attr_name) {
 	int relId = OpenRelTable::getRelationId(rel_name);
 	Attribute attrCatEntry[6];
 
-//	getAttrCatEntry(relId, attr_name, attrCatEntry);
-//	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
-//	cout << "ATTR CAT ENTRY[Root Block] : " << rootBlock << endl;
-//
-//	BPlusTree bPlusTree = BPlusTree(relId, attr_name);
-//	rootBlock = bPlusTree.getRootBlock();
-//	attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = 8;
-//	setAttrCatEntry(relId, attr_name, attrCatEntry);
-//
-//	getAttrCatEntry(relId, attr_name, attrCatEntry);
-//	rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
-//	cout << "ATTR CAT ENTRY 2[Root Block] : " << rootBlock << endl;
-
-	Attribute rec[6];
-	strcpy(rec[ATTRCAT_REL_NAME_INDEX].sval, "numbers");
-	strcpy(rec[ATTRCAT_ATTR_NAME_INDEX].sval, "key");
-	rec[ATTRCAT_ATTR_TYPE_INDEX].nval = NUMBER;
-	rec[ATTRCAT_PRIMARY_FLAG_INDEX].nval = -1;
-	rec[ATTRCAT_ROOT_BLOCK_INDEX].nval = 8;
-	rec[ATTRCAT_OFFSET_INDEX].nval = 0;
-//	setRecord(rec, 5, 12);
-	setAttrCatEntry(relId, attr_name, rec);
-
 	getAttrCatEntry(relId, attr_name, attrCatEntry);
 	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
 	cout << "ATTR CAT ENTRY 3[Root Block] : " << rootBlock << endl;
 
-//	getRecord(attrCatEntry, 5, 12);
-//	rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
-//	cout << "ATTR CAT ENTRY 4[Root Block] : " << rootBlock << endl;
-
-//	printBPlusTree(rootBlock, keys);
-//	cout << endl;
-//	printBlock(rootBlock);
+	printTree(rootBlock);
+	printBPlusTree(rootBlock);
 }

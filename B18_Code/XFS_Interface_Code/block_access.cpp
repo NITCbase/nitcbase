@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <string>
 #include <cstring>
+#include <iostream>
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "disk_structures.h"
@@ -958,26 +959,45 @@ InternalEntry getInternalEntry(int block, int entryNum) {
 	InternalEntry rec;
 	FILE *disk = fopen(DISK_PATH, "rb");
 	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entryNum * INTERNAL_ENTRY_SIZE, SEEK_SET);
-	fread(&rec, sizeof(rec), 1, disk);
+
+	fread(&rec.lChild, 4, 1, disk);
+	fread(&rec.attrVal, 16, 1, disk);
+	fread(&rec.rChild, 4, 1, disk);
+
 	fclose(disk);
+//	std::cout << "DEBUG-GET\n";
+//	std::cout << "lchild: " << rec.lChild << ", ";
+//	std::cout << "key_val: " << (int) rec.attrVal.nval << ", ";
+//	std::cout << "rchild: " << rec.rChild << std::endl;
+//	std::cout << "block: " << block << std::endl;
+//	std::cout << "offset: " << entryNum << std::endl;
 	return rec;
 }
 
 void setInternalEntry(InternalEntry internalEntry, int block, int offset) {
-	if ((internalEntry.lChild == block) || (internalEntry.rChild == block)) {
-		InternalEntry entry;
-		entry = getInternalEntry(block, offset);
-		if (internalEntry.attrVal.nval == entry.attrVal.nval)
-			return;
-		if (internalEntry.lChild == block)
-			internalEntry.lChild = entry.lChild;
-		else
-			internalEntry.rChild = entry.rChild;
-	}
+//	std::cout << "DEBUG-SET\n";
+//	std::cout << "lchild: " << internalEntry.lChild << ", ";
+//	std::cout << "key_val: " << (int) internalEntry.attrVal.nval << ", ";
+//	std::cout << "rchild: " << internalEntry.rChild << std::endl;
+//	std::cout << "block: " << block << std::endl;
+//	std::cout << "offset: " << offset << std::endl;
+//	if ((internalEntry.lChild == block) || (internalEntry.rChild == block)) {
+//		InternalEntry entry;
+//		entry = getInternalEntry(block, offset);
+//
+//		if (internalEntry.attrVal.nval == entry.attrVal.nval)
+//			return;
+//		if (internalEntry.lChild == block)
+//			internalEntry.lChild = entry.lChild;
+//		else
+//			internalEntry.rChild = entry.rChild;
+//	}
 
 	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + offset * INTERNAL_ENTRY_SIZE, SEEK_SET);
-	fwrite(&internalEntry, sizeof(internalEntry), 1, disk);
+	fwrite(&internalEntry.lChild, 4, 1, disk);
+	fwrite(&internalEntry.attrVal, 16, 1, disk);
+	fwrite(&internalEntry.rChild, 4, 1, disk);
 	fclose(disk);
 }
 

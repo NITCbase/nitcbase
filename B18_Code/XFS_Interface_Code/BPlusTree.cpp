@@ -69,6 +69,50 @@ void BFS(int rootBlock) {
 	}
 }
 
+void printTreeBlocks(int blockNum) {
+	HeadInfo header = getHeader(blockNum);
+	int block_type = getBlockType(blockNum);
+	int num_entries = header.numEntries;
+
+	cout << "BLOCK " << blockNum << endl;
+	cout << "Block Type: " << block_type << endl;
+	cout << "Parent Block: " << header.pblock << endl;
+	cout << "No of entries: " <<  num_entries << endl;
+
+	if (block_type == IND_INTERNAL) {
+		InternalEntry internal_entry;
+		for (int iter = 0; iter < num_entries; iter++) {
+			internal_entry = getInternalEntry(blockNum, iter);
+//			cout << "***block, offset : " << blockNum << ", " << iter << endl;
+			cout << "No of entries: " <<  num_entries << endl;
+			cout << "lchild: " << internal_entry.lChild << ", ";
+			cout << "key_val: " << (int) internal_entry.attrVal.nval << ", ";
+			cout << "rchild: " << internal_entry.rChild << endl;
+		}
+	} else if (block_type == IND_LEAF) {
+		cout << "left node: " << header.lblock << ", ";
+		cout << "right node: " << header.rblock << endl;
+		for (int iter = 0; iter < num_entries; iter++) {
+			Index index = getLeafEntry(blockNum, iter);
+			cout << "key_val: " << (int) index.attrVal.nval << endl;
+		}
+	}
+	cout << " --------- " << endl;
+
+	if (block_type == IND_INTERNAL) {
+		InternalEntry internal_entry;
+
+		int entry_num = 0;
+		internal_entry = getInternalEntry(blockNum, entry_num);
+		printTreeBlocks(internal_entry.lChild);
+
+		for (entry_num = 0; entry_num < num_entries; entry_num++) {
+			internal_entry = getInternalEntry(blockNum, entry_num);
+			printTreeBlocks(internal_entry.rChild);
+		}
+	}
+}
+
 
 BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 	// initialise object instance member fields
@@ -163,6 +207,8 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 			rec_id.slot = iter;
 
 			int res = bPlusInsert(attrval, rec_id);
+//			printTreeBlocks(this->rootBlock);
+			cout << "***************";
 
 			/*
 			 * DEBUGING----------------
@@ -479,6 +525,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					   * - number of entries = 50
 					   * - parent block = parent block of leftBlkNum
 					   */
+					newRightBlkHeader.blockType = IND_LEAF;
 					newRightBlkHeader.numEntries = MIDDLE_INDEX_INTERNAL;
 					newRightBlkHeader.pblock = leftBlkHeader.pblock;
 					setHeader(&newRightBlkHeader, newRightBlkNum);
@@ -529,7 +576,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					newAttrVal = internal_entries[MIDDLE_INDEX_INTERNAL - 1].attrVal;
 
 				}
-			} else //if headparblock == -1 i.e root is split now
+			} else //if parent == -1 i.e root is split now
 			{
 				int new_root_block = getFreeBlock(IND_INTERNAL);//get new internal block
 				// disk full
