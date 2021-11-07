@@ -719,14 +719,15 @@ int setRelCatEntry(int relationId, Attribute *relcat_entry) {
 /*
  * Reads attribute catalogue entry from disk for the given attribute name of a given relation
  */
-int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry) {
+int getAttrCatEntry(int relationId, char attrname[ATTR_SIZE], Attribute *attrcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
 	if (OpenRelTable::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
-	char relName[16];
+	char relName[ATTR_SIZE];
+
 	OpenRelTable::getRelationName(relationId, relName);
 
 	int curr_block = 5;
@@ -737,8 +738,8 @@ int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry)
 		next_block = header.rblock;
 		for (int i = 0; i < 20; i++) {
 			getRecord(attrcat_entry, curr_block, i);
-			if (strcmp(attrcat_entry[0].sval, relName) == 0) {
-				if (strcmp(attrcat_entry[1].sval, attrname) == 0)
+			if (strcmp(attrcat_entry[ATTRCAT_REL_NAME_INDEX].sval, relName) == 0) {
+				if (strcmp(attrcat_entry[ATTRCAT_ATTR_NAME_INDEX].sval, attrname) == 0)
 					return SUCCESS;
 			}
 		}
@@ -779,7 +780,7 @@ int getAttrCatEntry(int relationId, int offset, Attribute *attrCatEntry) {
 }
 
 /*
- * Writes relation catalogue entry into disk
+ * Writes attribute catalogue entry into disk
  */
 int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCatEntry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
@@ -797,10 +798,11 @@ int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCat
 		HeadInfo header;
 		header = getHeader(curr_block);
 		next_block = header.rblock;
+		Attribute currentAttrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
 		for (int slotIter = 0; slotIter < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotIter++) {
-			getRecord(attrCatEntry, curr_block, slotIter);
-			if (strcmp(attrCatEntry[ATTRCAT_REL_NAME_INDEX].sval, relName) == 0) {
-				if (strcmp(attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrName) == 0) {
+			getRecord(currentAttrCatEntry, curr_block, slotIter);
+			if (strcmp(currentAttrCatEntry[ATTRCAT_REL_NAME_INDEX].sval, relName) == 0) {
+				if (strcmp(currentAttrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrName) == 0) {
 					setRecord(attrCatEntry, curr_block, slotIter);
 					return SUCCESS;
 				}

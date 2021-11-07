@@ -96,7 +96,7 @@ void Disk::add_disk_metainfo() {
     H->numEntries = 2;
     H->numAttrs = NO_OF_ATTRS_RELCAT_ATTRCAT;
     H->numSlots = SLOTMAP_SIZE_RELCAT_ATTRCAT;
-    setHeader(H, BLOCK_ALLOCATION_MAP_SIZE);
+    setHeader(H, RELCAT_BLOCK);
 
     /*
      * Set the slot allocation map for Block 4

@@ -254,7 +254,7 @@ int regexMatchAndExecute(const string input_command) {
 		 */
 		testBPlusTree(relname, attr_name);
 
-		if (ret == SUCCESS)
+		if (ret > 0)
 			cout << "Index created successfully\n";
 		else {
 			printErrorMsg(ret);
@@ -331,7 +331,6 @@ int regexMatchAndExecute(const string input_command) {
 
 		if (retValue == SUCCESS) {
 			cout << "Inserted successfully" << endl;
-			testBPlusTree("numbers", "key");
 		} else {
 			printErrorMsg(retValue);
 			return FAILURE;
@@ -1056,12 +1055,39 @@ void printBlock(int blockNum) {
 void testBPlusTree(char *rel_name, char *attr_name) {
 	int relId = OpenRelTable::getRelationId(rel_name);
 	Attribute attrCatEntry[6];
-	getAttrCatEntry(relId, attr_name, attrCatEntry);
 
+//	getAttrCatEntry(relId, attr_name, attrCatEntry);
+//	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+//	cout << "ATTR CAT ENTRY[Root Block] : " << rootBlock << endl;
+//
+//	BPlusTree bPlusTree = BPlusTree(relId, attr_name);
+//	rootBlock = bPlusTree.getRootBlock();
+//	attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = 8;
+//	setAttrCatEntry(relId, attr_name, attrCatEntry);
+//
+//	getAttrCatEntry(relId, attr_name, attrCatEntry);
+//	rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+//	cout << "ATTR CAT ENTRY 2[Root Block] : " << rootBlock << endl;
+
+	Attribute rec[6];
+	strcpy(rec[ATTRCAT_REL_NAME_INDEX].sval, "numbers");
+	strcpy(rec[ATTRCAT_ATTR_NAME_INDEX].sval, "key");
+	rec[ATTRCAT_ATTR_TYPE_INDEX].nval = NUMBER;
+	rec[ATTRCAT_PRIMARY_FLAG_INDEX].nval = -1;
+	rec[ATTRCAT_ROOT_BLOCK_INDEX].nval = 8;
+	rec[ATTRCAT_OFFSET_INDEX].nval = 0;
+//	setRecord(rec, 5, 12);
+	setAttrCatEntry(relId, attr_name, rec);
+
+	getAttrCatEntry(relId, attr_name, attrCatEntry);
 	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
-	queue<int> keys;
+	cout << "ATTR CAT ENTRY 3[Root Block] : " << rootBlock << endl;
+
+//	getRecord(attrCatEntry, 5, 12);
+//	rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+//	cout << "ATTR CAT ENTRY 4[Root Block] : " << rootBlock << endl;
 
 //	printBPlusTree(rootBlock, keys);
-	cout << endl;
-	printBlock(rootBlock);
+//	cout << endl;
+//	printBlock(rootBlock);
 }

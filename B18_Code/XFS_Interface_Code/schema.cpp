@@ -144,7 +144,7 @@ int createIndex(char *relationName, char *attrName){
 	}
 	BPlusTree bPlusTree = BPlusTree(relId, attrName);
 	int rootBlock = bPlusTree.getRootBlock();
-	return SUCCESS;
+	return rootBlock;
 }
 
 int dropIndex(char *relationName, char *attrName){
