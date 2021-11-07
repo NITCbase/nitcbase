@@ -257,7 +257,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		InternalEntry internalEntry;
 		for (current_entryNumber = 0; current_entryNumber < num_of_entries; ++current_entryNumber) {
 			internalEntry = getInternalEntry(blockNum, current_entryNumber);
-			if (compareAttributes(val, internalEntry.attrVal, attrType) < 0)
+			if (compareAttributes(val, internalEntry.attrVal, attrType) <= 0)
 				break;
 		}
 
@@ -380,6 +380,13 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		newRightBlkHeader.pblock = leftBlkHeader.pblock;
 		newRightBlkHeader.rblock = prevRblock;
 		setHeader(&newRightBlkHeader, newRightBlkNum);
+
+		// TODO ****** ADD IN ALGO
+		if (prevRblock != -1) {
+			HeadInfo prevRBlockHeader = getHeader(prevRblock);
+			prevRBlockHeader.lblock = newRightBlkNum;
+			setHeader(&prevRBlockHeader, prevRblock);
+		}
 
 		//store pblock of leftBlk in parBlkNum.
 		int parentBlock = leftBlkHeader.pblock;
@@ -525,7 +532,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					   * - number of entries = 50
 					   * - parent block = parent block of leftBlkNum
 					   */
-					newRightBlkHeader.blockType = IND_LEAF;
+					newRightBlkHeader.blockType = IND_INTERNAL;
 					newRightBlkHeader.numEntries = MIDDLE_INDEX_INTERNAL;
 					newRightBlkHeader.pblock = leftBlkHeader.pblock;
 					setHeader(&newRightBlkHeader, newRightBlkNum);
@@ -548,7 +555,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 						setInternalEntry(internal_entries[indices_iter], leftBlkNum, indices_iter);
 					}
 
-					indices_iter = MIDDLE_INDEX_INTERNAL;
+					indices_iter = MIDDLE_INDEX_INTERNAL + 1;
 					// set the first 50 entries of newRightBlk as the entries from 51 to 100 of internalEntries array
 					for (int j = 0; j < MIDDLE_INDEX_INTERNAL; ++j) {
 						setInternalEntry(internal_entries[indices_iter], newRightBlkNum, j);
@@ -557,7 +564,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
 					int childNum;
 					//iterate from 50 to 100:
-					for (int k = MIDDLE_INDEX_INTERNAL; k < MAX_KEYS_INTERNAL; ++k) {
+					for (int k = MIDDLE_INDEX_INTERNAL; k <= MAX_KEYS_INTERNAL; ++k) {
 						//assign the rchild block of ith index in internalEntries to childNum
 						childNum = internal_entries[k].rChild;
 
@@ -573,7 +580,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					/* update newAttrval to the attribute value of 50th entry in the internalEntries array;
 					 * this is attribute value which needs to be inserted in the parent block.
 					 */
-					newAttrVal = internal_entries[MIDDLE_INDEX_INTERNAL - 1].attrVal;
+					newAttrVal = internal_entries[MIDDLE_INDEX_INTERNAL].attrVal;
 
 				}
 			} else //if parent == -1 i.e root is split now
