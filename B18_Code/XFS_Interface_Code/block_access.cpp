@@ -285,8 +285,9 @@ int ba_delete(int relId) {
 		}
 
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
-		prev_recid.block = -1;
-		prev_recid.slot = -1;
+		// TODO :::: REVIEW
+//		prev_recid.block = -1;
+//		prev_recid.slot = -1;
 		// Delete Attribute Catalog Entry
 		deleteAttrCatEntry(attrcat_recid);
 	}

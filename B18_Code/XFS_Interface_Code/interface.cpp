@@ -60,7 +60,7 @@ void print16(char char_string_thing[ATTR_SIZE]);
 
 void print16(char char_string_thing[ATTR_SIZE], bool newline);
 
-void printTree(char rel_name[ATTR_SIZE], char attr_name[ATTR_SIZE]);
+void testBPlusTree(char *rel_name, char *attr_name);
 
 /* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
  * I have done wherever i saw, check all that you added once again Jezzy
@@ -252,7 +252,7 @@ int regexMatchAndExecute(const string input_command) {
 		/*
 		 * DEBUG
 		 */
-		printTree(relname, attr_name);
+		testBPlusTree(relname, attr_name);
 
 		if (ret == SUCCESS)
 			cout << "Index created successfully\n";
@@ -331,6 +331,7 @@ int regexMatchAndExecute(const string input_command) {
 
 		if (retValue == SUCCESS) {
 			cout << "Inserted successfully" << endl;
+			testBPlusTree("numbers", "key");
 		} else {
 			printErrorMsg(retValue);
 			return FAILURE;
@@ -1010,11 +1011,57 @@ void printBPlusTree(int rootBlock, queue<int> &keys) {
 	}
 }
 
-void printTree(char rel_name[ATTR_SIZE], char attr_name[ATTR_SIZE]) {
+void printBlock(int blockNum) {
+	HeadInfo header = getHeader(blockNum);
+	int block_type = getBlockType(blockNum);
+	int num_entries = header.numEntries;
+
+	cout << "BLOCK " << blockNum << endl;
+	cout << "Block Type: " << block_type << endl;
+	cout << "Parent Block: " << header.pblock << endl;
+	cout << "No of entries: " <<  num_entries << endl;
+
+	if (block_type == IND_INTERNAL) {
+		InternalEntry internal_entry;
+		for (int iter = 0; iter < num_entries; iter++) {
+			internal_entry = getInternalEntry(blockNum, iter);
+			cout << "lchild: " << internal_entry.lChild << ", ";
+			cout << "key_val: " << (int) internal_entry.attrVal.nval << ", ";
+			cout << "rchild: " << internal_entry.rChild << endl;
+		}
+	} else if (block_type == IND_LEAF) {
+		cout << "left node: " << header.lblock << ", ";
+		cout << "right node: " << header.rblock << endl;
+		for (int iter = 0; iter < num_entries; iter++) {
+			Index index = getLeafEntry(blockNum, iter);
+			cout << "key_val: " << (int) index.attrVal.nval << endl;
+		}
+	}
+	cout << " --------- " << endl;
+
+	if (block_type == IND_INTERNAL) {
+		InternalEntry internal_entry;
+
+		int entry_num = 0;
+		internal_entry = getInternalEntry(blockNum, entry_num);
+		printBlock(internal_entry.lChild);
+
+		for (entry_num = 0; entry_num < num_entries; entry_num++) {
+			internal_entry = getInternalEntry(blockNum, entry_num);
+			printBlock(internal_entry.rChild);
+		}
+	}
+}
+
+void testBPlusTree(char *rel_name, char *attr_name) {
 	int relId = OpenRelTable::getRelationId(rel_name);
-	BPlusTree bPlusTree = BPlusTree(relId, attr_name);
-	int rootBlock = bPlusTree.getRootBlock();
+	Attribute attrCatEntry[6];
+	getAttrCatEntry(relId, attr_name, attrCatEntry);
+
+	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
 	queue<int> keys;
 
-	printBPlusTree(rootBlock, keys);
+//	printBPlusTree(rootBlock, keys);
+	cout << endl;
+	printBlock(rootBlock);
 }

@@ -24,3 +24,13 @@ INSERT INTO numbers VALUES (25);
 INSERT INTO numbers VALUES (40);
 
 run create_ind/t0
+
+55
+60
+65
+15
+40
+70
+45
+25
+40

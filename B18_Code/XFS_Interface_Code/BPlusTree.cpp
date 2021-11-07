@@ -39,7 +39,7 @@ void BFS(int rootBlock) {
 			for (int iter = 0; iter < num_entries; iter++) {
 				internal_entry = getInternalEntry(current_block, iter);
 				// keys.push((int) internal_entry.attrVal.nval);
-				cout << (int) internal_entry.attrVal.nval << ", ";
+				cout << (int) internal_entry.attrVal.nval << ",";
 			}
 			cout  << " - ";
 		} else if (block_type == IND_LEAF) {
@@ -167,9 +167,10 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 			/*
 			 * DEBUGING----------------
 			 */
-			BFS(this->rootBlock);
+//			BFS(this->rootBlock);
+//			cout << endl;
 			// -----------------
-			break;
+//			break;
 			if (res != SUCCESS) {
 				bPlusDestroy(root_block);
 				this->rootBlock = FAILURE;
@@ -292,7 +293,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 		int newRightBlkNum = getFreeBlock(IND_LEAF);
 
 		if (newRightBlkNum == FAILURE) {
-			//failed to obtain an empty leaf index becauase the disk is full
+			//failed to obtain an empty leaf index because the disk is full
 
 			//destroy the existing B+ tree by passing rootBlock member field to bPlusDestroy().
 			bPlusDestroy(this->rootBlock);
@@ -343,7 +344,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 			setLeafEntry(indices[indices_iter], leftBlkNum, indices_iter);
 		}
 		// set the first 32 entries of newRightBlk as the next 32 entries of indices array
-		for (int rBlockIndexIter = 0; rBlockIndexIter < MIDDLE_INDEX_LEAF; rBlockIndexIter++) {
+		for (int rBlockIndexIter = 0; rBlockIndexIter <= MIDDLE_INDEX_LEAF; rBlockIndexIter++) {
 			setLeafEntry(indices[indices_iter], newRightBlkNum, rBlockIndexIter);
 			indices_iter++;
 		}
@@ -435,7 +436,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 					setHeader(&parentHeader, parentBlock);
 
 					// iterate through all entries in internalEntries array and populate the entries of parentBlock with them
-					for (indices_iter = 0; indices_iter < (parentHeader.numEntries + 1); ++indices_iter) {
+					for (indices_iter = 0; indices_iter < parentHeader.numEntries; ++indices_iter) {
 						setInternalEntry(internal_entries[indices_iter], parentBlock, indices_iter);
 					}
 
@@ -571,7 +572,7 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 				setHeader(&header2, newRightBlkNum);
 
 				attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = new_root_block;
-				setAttrCatEntry(relId, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrCatEntry);
+				setAttrCatEntry(relId, attrName, attrCatEntry);
 
 				this->rootBlock = new_root_block;
 				done = true;
