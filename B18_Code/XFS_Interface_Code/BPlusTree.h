@@ -19,7 +19,7 @@ public:
 	BPlusTree(int relid, char attrName[ATTR_SIZE]);
 	int getRootBlock();
 	int bPlusInsert(union Attribute attrVal, recId recordId);
-	recId BPlusSearch(union Attribute attrVal, int op, indexId *prev_indexId);
+	recId BPlusSearch(union Attribute attrVal, int op, recId *prev_indexId);
 	int bPlusDestroy(int blockNum);
 };
 

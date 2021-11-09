@@ -122,6 +122,8 @@ int ba_search(relId relid, Attribute *record, char attrName[ATTR_SIZE], Attribut
 		} else {
 			// Indexing exists for the attribute
 			// TODO: recid = bplus_search(relid, attrName, attrval, op,&prev_recid);
+            BPlusTree bPlusTree(relid, attrName);
+            recid = bPlusTree.BPlusSearch(attrval, op, prev_recid);
 		}
 	}
 

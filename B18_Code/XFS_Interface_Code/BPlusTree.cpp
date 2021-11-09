@@ -636,11 +636,11 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 	return SUCCESS;
 }
 
-recId BPlusTree::BPlusSearch(Attribute attrVal, int op, indexId *prev_indexId) {
+recId BPlusTree::BPlusSearch(Attribute attrVal, int op, recId *prev_indexId) {
 	// Used to store search index for attrName
 	indexId searchIndex;
 	searchIndex.block = prev_indexId->block;
-	searchIndex.index = prev_indexId->index;
+	searchIndex.index = prev_indexId->slot;
 
 	// Get attribute catalog entry of target attribute
 	Attribute attrCatEntry[6];
@@ -828,7 +828,7 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op, indexId *prev_indexId) {
 			if (cond == 1) {
 				// Update prev_indexId to reflect this new search hit
 				(*prev_indexId).block = block;
-				(*prev_indexId).index = index;
+				(*prev_indexId).slot = index;
 
 				return {leafEntry.block, leafEntry.slot};
 			} else if (cond == -1) {

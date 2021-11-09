@@ -1,0 +1,8 @@
+fdisk
+import numbers.csv
+OPEN TABLE numbers
+CREATE INDEX ON numbers.key
+SELECT * FROM numbers INTO numSelBP WHERE key > 50;
+ls
+export numSelBp numSelBp.csv
+exit
