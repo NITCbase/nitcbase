@@ -14,4 +14,16 @@ export numSelBP3 numSelBp3.csv
 SELECT * FROM numbers INTO numSelBP4 WHERE key <= 55;
 ls
 export numSelBP4 numSelBp4.csv
+SELECT * FROM numbers INTO numSelBP5 WHERE key >= 40;
+ls
+export numSelBP5 numSelBp5.csv
+SELECT * FROM numbers INTO numSelBP6 WHERE key <= 40;
+ls
+export numSelBP6 numSelBp6.csv
+SELECT * FROM numbers INTO numSelBP7 WHERE key < 40;
+ls
+export numSelBP7 numSelBp7.csv
+SELECT * FROM numbers INTO numSelBP8 WHERE key > 40;
+ls
+export numSelBP8 numSelBp8.csv
 exit
