@@ -941,6 +941,9 @@ int deleteAttrCatEntry(recId attrcat_recid) {
 
 /*
  * Compare two attributes based on their type
+ * if  attr1  < attr 2 return -1
+ * if equal return 0
+ * else return 1
  */
 int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType) {
 	if (attrType == STRING) {

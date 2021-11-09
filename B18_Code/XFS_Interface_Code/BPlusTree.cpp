@@ -709,7 +709,7 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op, recId *prev_indexId) {
 		// Iterate over all
 		for (currEntryNum = 0; currEntryNum < numOfEntries; currEntryNum++) {
 			internalEntry = getInternalEntry(block, currEntryNum);
-			int flag = compareAttributes(attrVal, internalEntry.attrVal, attrType);
+			int flag = compareAttributes(internalEntry.attrVal, attrVal, attrType);
 			switch (op) {
 				case EQ:
 					if (flag >= 0) {
@@ -747,7 +747,7 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op, recId *prev_indexId) {
 			if (cond == 1) {
 				// Condition Met in this Internal Block
 				// Now, Search in the Left Child
-				block = intHead.lblock;
+				block = internalEntry.lChild;
 				break;
 			} else {
 				// Continue iterating this Internal index block
@@ -757,7 +757,7 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op, recId *prev_indexId) {
 		if (cond == 0) {
 			// traversed all the entries of internalBlk without satisfying op condition
 			// proceed to search the right child
-			block = intHead.rblock;
+			block = internalEntry.rChild;
 		}
 	}
 	/* Traversing of B+ tree has been done and Appropriate Leaf Block has been reached */
@@ -777,7 +777,7 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op, recId *prev_indexId) {
 		leafHead = getHeader(block);
 		while (index < leafHead.numEntries) {
 			leafEntry = getLeafEntry(block, index);
-			int flag = compareAttributes(attrVal, leafEntry.attrVal, attrType);
+			int flag = compareAttributes(leafEntry.attrVal, attrVal, attrType);
 			switch (op) {
 				case EQ:
 					if (flag == 0) {

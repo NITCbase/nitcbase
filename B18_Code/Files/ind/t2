@@ -2,7 +2,16 @@ fdisk
 import numbers.csv
 OPEN TABLE numbers
 CREATE INDEX ON numbers.key
-SELECT * FROM numbers INTO numSelBP WHERE key > 50;
+SELECT * FROM numbers INTO numSelBP1 WHERE key > 50;
 ls
-export numSelBp numSelBp.csv
+export numSelBP1 numSelBp1.csv
+SELECT * FROM numbers INTO numSelBP2 WHERE key >= 20;
+ls
+export numSelBP2 numSelBp2.csv
+SELECT * FROM numbers INTO numSelBP3 WHERE key < 20;
+ls
+export numSelBP3 numSelBp3.csv
+SELECT * FROM numbers INTO numSelBP4 WHERE key <= 55;
+ls
+export numSelBP4 numSelBp4.csv
 exit
