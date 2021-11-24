@@ -19,7 +19,7 @@ Disk::Disk() {
     /* An efficient method to copy files */
     /* Copy Disk to Disk Run Copy */
     std::ifstream  src(DISK_PATH, std::ios::binary);
-    std::ofstream  dst(DISK_RUN_COPY_PATH,   std::ios::binary);
+    std::ofstream  dst(DISK_RUN_COPY_PATH, std::ios::binary);
 
     dst << src.rdbuf();
     src.close();
@@ -34,7 +34,7 @@ Disk::~Disk() {
     /* An efficient method to copy files */
     /* Copy Disk Run Copy to Disk */
     std::ifstream  src(DISK_RUN_COPY_PATH, std::ios::binary);
-    std::ofstream  dst(DISK_PATH,   std::ios::binary);
+    std::ofstream  dst(DISK_PATH, std::ios::binary);
 
     dst << src.rdbuf();
     src.close();

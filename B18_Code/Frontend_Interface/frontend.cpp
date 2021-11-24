@@ -7,7 +7,7 @@
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "frontend.h"
-#include "Disk.h"
+#include "../DiskClass/Disk.h"
 
 using namespace std;
 
@@ -558,6 +558,7 @@ int regexMatchAndExecute(const string input_command) {
 int main() {
     /* Initialize the Run Copy of Disk */
     Disk disk_run;
+    cout << "Run Copy of Disk Initialized successfully\n";
     while (true) {
         cout << "# ";
         string input_command;
