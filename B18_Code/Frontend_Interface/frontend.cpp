@@ -540,6 +540,7 @@ int regexMatchAndExecute(const string input_command) {
 
 //        return select_attr_from_join_handler(sourceRelOneName, sourceRelTwoName, targetRelName, attrCount,
 //                                             joinAttributeOne, joinAttributeTwo, attributeList);
+
         int ret = SUCCESS;
         if (ret == SUCCESS) {
             cout << "Selected successfully" << endl;
