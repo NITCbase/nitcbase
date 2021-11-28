@@ -698,7 +698,7 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op, recId *prev_indexId) {
 	InternalEntry internalEntry;
 	/* cond =>
 	 * if 1 move to left child
-	 * else move to right child after going through all the internal entries
+	 * else move to right child AFTER GOING through all the internal entries
 	 */
 	int cond;
 	while (getBlockType(block) == IND_INTERNAL) {
@@ -732,7 +732,8 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op, recId *prev_indexId) {
 					}
 					break;
 				case GT:
-					if (flag >= 0) {
+					if (flag > 0) {
+                        // BUG : HERE (It was >=)
 						// move to the left child of the first entry that is greater than or equal to attrVal.
 						cond = 1;
 					}

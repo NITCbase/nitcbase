@@ -1,0 +1,11 @@
+fdisk
+import num123.csv
+OPEN TABLE num123
+CREATE INDEX ON num123.key
+echo -------------------------------
+SELECT * FROM num123 INTO o1 WHERE key > 4;
+export numSelBP1 num-1.csv
+ls
+echo -------------------------------
+echo
+exit
