@@ -1,0 +1,21 @@
+fdisk
+import num123.csv
+OPEN TABLE num123
+CREATE INDEX ON num123.key
+echo -------------------------------
+SELECT * FROM num123 INTO t5-num-1 WHERE key > 7;
+export t5-num-1 t5-num-1.csv
+echo -------------------------------
+SELECT * FROM num123 INTO t5-num-2 WHERE key < 7;
+export t5-num-2 t5-num-2.csv
+echo -------------------------------
+SELECT * FROM num123 INTO t5-num-3 WHERE key >= 7;
+export t5-num-3 t5-num-3.csv
+echo -------------------------------
+SELECT * FROM num123 INTO t5-num-4 WHERE key <= 7;
+export t5-num-4 t5-num-4.csv
+echo -------------------------------
+SELECT * FROM num123 INTO t5-num-5 WHERE key = 7;
+export t5-num-5 t5-num-5.csv
+echo -------------------------------
+exit

@@ -3,9 +3,19 @@ import num123.csv
 OPEN TABLE num123
 CREATE INDEX ON num123.key
 echo -------------------------------
-SELECT * FROM num123 INTO o1 WHERE key > 4;
-export numSelBP1 num-1.csv
-ls
+SELECT * FROM num123 INTO t4-num-1 WHERE key > 5;
+export t4-num-1 t4-num-1.csv
 echo -------------------------------
-echo
+SELECT * FROM num123 INTO t4-num-2 WHERE key < 5;
+export t4-num-2 t4-num-2.csv
+echo -------------------------------
+SELECT * FROM num123 INTO t4-num-3 WHERE key >= 5;
+export t4-num-3 t4-num-3.csv
+echo -------------------------------
+SELECT * FROM num123 INTO t4-num-4 WHERE key <= 5;
+export t4-num-4 t4-num-4.csv
+echo -------------------------------
+SELECT * FROM num123 INTO t4-num-5 WHERE key = 5;
+export t4-num-5 t4-num-5.csv
+echo -------------------------------
 exit
