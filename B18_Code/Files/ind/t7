@@ -1,0 +1,24 @@
+fdisk
+import abc.csv
+OPEN TABLE abc
+CREATE INDEX ON abc.key
+echo Selecting Grades better than or equal to B after indexing
+SELECT * FROM abc INTO abc1 WHERE key <= B;
+export abc1 abc1.csv
+echo -------------------------------
+echo Selecting Grades worse than or equal to B after indexing
+SELECT * FROM abc INTO abc2 WHERE key >= B;
+export abc2 abc2.csv
+echo -------------------------------
+echo Selecting Grades equal to B after indexing
+SELECT * FROM abc INTO abc3 WHERE key = B;
+export abc3 abc3.csv
+echo -------------------------------
+echo Selecting Grades better than B after indexing
+SELECT * FROM abc INTO abc4 WHERE key > B;
+export abc4 abc4.csv
+echo -------------------------------
+echo Selecting Grades worse than B after indexing
+SELECT * FROM abc INTO abc5 WHERE key < B;
+export abc5 abc5.csv
+echo -------------------------------

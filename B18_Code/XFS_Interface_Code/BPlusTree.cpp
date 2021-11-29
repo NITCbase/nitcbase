@@ -698,7 +698,7 @@ recId BPlusTree::BPlusSearch(Attribute attrVal, int op, recId *prev_indexId) {
 	InternalEntry internalEntry;
 	/* cond =>
 	 * if 1 move to left child
-	 * else move to right child AFTER GOING through all the internal entries
+	 * else move to right to the next internal entry
 	 */
 	int cond;
 	while (getBlockType(block) == IND_INTERNAL) {
