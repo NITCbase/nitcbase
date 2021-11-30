@@ -49,16 +49,17 @@ int createRel(char relname[ATTR_SIZE], int nAttrs, char attrs[][ATTR_SIZE], int 
 		return E_DUPLICATEATTR;
 	}
 
-	int relId = OpenRelTable::openRelation(relname);
 
 	Attribute *relcatrec = make_relcatrec(relname, nAttrs, 0, -1,
 	                                      -1);
 	// Relcat Entry: relname, #attrs, #records, first_blk, #slots_per_blkflag
 	flag = ba_insert(RELCAT_RELID, relcatrec);
 	if (flag != SUCCESS) {
-		ba_delete(relId);
+//		ba_delete(relId);
 		return flag;
 	}
+
+	int relId = OpenRelTable::openRelation(relname);
 
 	for (int offset = 0; offset < nAttrs; offset++) {
 		Attribute *attrcatrec = make_attrcatrec(relname, attrs[offset], attrtypes[offset], -1,
