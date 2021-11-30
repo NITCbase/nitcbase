@@ -14,106 +14,6 @@
 
 using namespace std;
 
-void BFS(int rootBlock) {
-	queue<int> blocks;
-	blocks.push(rootBlock);
-	blocks.push(INT_MAX);
-	while (!blocks.empty()) {
-		int current_block = blocks.front();
-
-		if (current_block == INT_MAX) {
-			// keys.push(current_block);
-//			cout << endl;
-			cout << " - ";
-			blocks.pop();
-			continue;
-		}
-		blocks.pop();
-
-		HeadInfo header = getHeader(current_block);
-		int block_type = getBlockType(current_block);
-		int num_entries = header.numEntries;
-
-		if (block_type == IND_INTERNAL) {
-			InternalEntry internal_entry;
-			for (int iter = 0; iter < num_entries; iter++) {
-				internal_entry = getInternalEntry(current_block, iter);
-				// keys.push((int) internal_entry.attrVal.nval);
-				cout << (int) internal_entry.attrVal.nval << ",";
-			}
-			cout  << " - ";
-		} else if (block_type == IND_LEAF) {
-			for (int iter = 0; iter < num_entries; iter++) {
-				Index index = getLeafEntry(current_block, iter);
-				// keys.push((int) index.attrVal.nval);
-				cout << (int) index.attrVal.nval << ",";
-			}
-			cout  << " - ";
-		}
-
-		if (block_type == IND_INTERNAL) {
-			InternalEntry internal_entry;
-
-			int entry_num = 0;
-			internal_entry = getInternalEntry(current_block, entry_num);
-			blocks.push(internal_entry.lChild);
-//			blocks.push(INT_MIN);
-
-			for (entry_num = 0; entry_num < num_entries; entry_num++) {
-				internal_entry = getInternalEntry(current_block, entry_num);
-				blocks.push(internal_entry.rChild);
-//				blocks.push(INT_MIN);
-			}
-			blocks.push(INT_MAX);
-		}
-	}
-}
-
-void printTreeBlocks(int blockNum) {
-	HeadInfo header = getHeader(blockNum);
-	int block_type = getBlockType(blockNum);
-	int num_entries = header.numEntries;
-
-	cout << "BLOCK " << blockNum << endl;
-	cout << "Block Type: " << block_type << endl;
-	cout << "Parent Block: " << header.pblock << endl;
-	cout << "No of entries: " <<  num_entries << endl;
-
-	if (block_type == IND_INTERNAL) {
-		InternalEntry internal_entry;
-		for (int iter = 0; iter < num_entries; iter++) {
-			internal_entry = getInternalEntry(blockNum, iter);
-//			cout << "***block, offset : " << blockNum << ", " << iter << endl;
-			cout << "No of entries: " <<  num_entries << endl;
-			cout << "lchild: " << internal_entry.lChild << ", ";
-			cout << "key_val: " << (int) internal_entry.attrVal.nval << ", ";
-			cout << "rchild: " << internal_entry.rChild << endl;
-		}
-	} else if (block_type == IND_LEAF) {
-		cout << "left node: " << header.lblock << ", ";
-		cout << "right node: " << header.rblock << endl;
-		for (int iter = 0; iter < num_entries; iter++) {
-			Index index = getLeafEntry(blockNum, iter);
-			cout << "key_val: " << (int) index.attrVal.nval << endl;
-		}
-	}
-	cout << " --------- " << endl;
-
-	if (block_type == IND_INTERNAL) {
-		InternalEntry internal_entry;
-
-		int entry_num = 0;
-		internal_entry = getInternalEntry(blockNum, entry_num);
-		printTreeBlocks(internal_entry.lChild);
-
-		for (entry_num = 0; entry_num < num_entries; entry_num++) {
-			internal_entry = getInternalEntry(blockNum, entry_num);
-			printTreeBlocks(internal_entry.rChild);
-		}
-	}
-}
-
-
 BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 	// initialise object instance member fields
 	this->relId = relId;
@@ -207,16 +107,7 @@ BPlusTree::BPlusTree(int relId, char attrName[ATTR_SIZE]) {
 			rec_id.slot = iter;
 
 			int res = bPlusInsert(attrval, rec_id);
-//			printTreeBlocks(this->rootBlock);
-			cout << "***************";
 
-			/*
-			 * DEBUGING----------------
-			 */
-//			BFS(this->rootBlock);
-//			cout << endl;
-			// -----------------
-//			break;
 			if (res != SUCCESS) {
 				bPlusDestroy(root_block);
 				this->rootBlock = FAILURE;

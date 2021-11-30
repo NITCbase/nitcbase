@@ -60,7 +60,10 @@ void print16(char char_string_thing[ATTR_SIZE]);
 
 void print16(char char_string_thing[ATTR_SIZE], bool newline);
 
-void testBPlusTree(char *rel_name, char *attr_name);
+int getRootBlock(char *rel_name, char *attr_name);
+void printBPlusTree(int rootBlock);
+void printBPlusTreeBlocks(int blockNum);
+
 
 /* TODO: RETURN 0 here means Success, return -1 (EXIT or FAILURE) means quit XFS,
  * I have done wherever i saw, check all that you added once again Jezzy
@@ -82,17 +85,40 @@ int regexMatchAndExecute(const string input_command) {
 		if (executeCommandsFromFile(file_name) == EXIT) {
 			return EXIT;
 		}
-	} else if (regex_match(input_command, bplus)) {
-		regex_search(input_command, m, bplus);
-		string tablename = m[3];
-		string attrname = m[4];
+	} else if (regex_match(input_command, bplus_tree)) {
+		regex_search(input_command, m, bplus_tree);
+		string tablename = m[4];
+		string attrname = m[5];
 		char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
 
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
-		testBPlusTree(relname, attr_name);
-	} else if (regex_match(input_command, fdisk)) {
+		int rootBlock = getRootBlock(relname, attr_name);
+		if (rootBlock <= 0) {
+			printErrorMsg(rootBlock);
+			return FAILURE;
+		}
+		printBPlusTree(rootBlock);
+
+	}  else if (regex_match(input_command, bplus_blocks)) {
+		regex_search(input_command, m, bplus_blocks);
+		string tablename = m[4];
+		string attrname = m[5];
+		char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
+
+		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
+
+		int rootBlock = getRootBlock(relname, attr_name);
+		if (rootBlock <= 0) {
+			printErrorMsg(rootBlock);
+			return FAILURE;
+		}
+		cout << "----- B+ TREE BLOCKS -----" <<endl;
+		printBPlusTreeBlocks(rootBlock);
+	}
+	else if (regex_match(input_command, fdisk)) {
 		Disk::createDisk();
 		Disk::formatDisk();
 		// Re-initialize OpenRelTable
@@ -1106,10 +1132,11 @@ void printBPlusTree(int rootBlock) {
 	queue<int> bplus_blocks;
 	vector<int> children;
 	getBPlusBlocks(rootBlock, bplus_blocks, children);
+	cout << "----- B+ TREE -----" <<endl;
 	printBPlusTreeHelper(bplus_blocks, children);
 }
 
-void testBPlusTree(char *rel_name, char *attr_name) {
+int getRootBlock(char *rel_name, char *attr_name) {
 	/* Get the Relation Catalog Entry */
 	Attribute relNameAsAttribute;
 	strcpy(relNameAsAttribute.sval, rel_name);
@@ -1119,8 +1146,8 @@ void testBPlusTree(char *rel_name, char *attr_name) {
 	prev_recid.slot = -1;
 	relcat_recid = linear_search(RELCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
 	if (relcat_recid.block == -1 || relcat_recid.slot == -1) {
-		cout << "ERROR: Relation does not exist"<<endl;
-		return;
+//		cout << "ERROR: Relation does not exist"<<endl;
+		return E_RELNOTEXIST;
 	}
 	getRecord(relCatEntry, relcat_recid.block, relcat_recid.slot);
 
@@ -1140,16 +1167,15 @@ void testBPlusTree(char *rel_name, char *attr_name) {
 	}
 
 	if (i == no_of_attrs) {
-		cout << "ERROR: Attrbiute does not exist" <<endl;
-		return;
+//		cout << "ERROR: Attrbiute does not exist" <<endl;
+		return E_ATTRNOTEXIST;
 	}
 
 	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
 	if (rootBlock == -1) {
-		cout << "ERROR: Index does not exist" << endl;
-		return;
+//		cout << "ERROR: Index does not exist" << endl;
+		return E_NOINDEX;
 	}
 
-	printBPlusTree(rootBlock);
-//	getBPlusBlocks(rootBlock);
+	return rootBlock;
 }
