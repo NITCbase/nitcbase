@@ -1,0 +1,5 @@
+fdisk
+echo trying to create index on an attributes of  RELATIONCAT or ATTRIBUTECAT
+CREATE INDEX ON RELATIONCAT.attr_name
+CREATE INDEX ON ATTRIBUTECAT.attr_name
+exit

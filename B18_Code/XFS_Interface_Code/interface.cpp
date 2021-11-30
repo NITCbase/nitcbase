@@ -247,15 +247,15 @@ int regexMatchAndExecute(const string input_command) {
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
-		cout << "size of internal entry : " << sizeof(InternalEntry) << endl;
-		cout << "size of int : " << sizeof(int32_t) << endl;
-		cout << "size of attrval : " << sizeof(Attribute) << endl;
+//		cout << "size of internal entry : " << sizeof(InternalEntry) << endl;
+//		cout << "size of int : " << sizeof(int32_t) << endl;
+//		cout << "size of attrval : " << sizeof(Attribute) << endl;
 		int ret = createIndex(relname, attr_name);
 
 		/*
 		 * DEBUG
 		 */
-		testBPlusTree(relname, attr_name);
+//		testBPlusTree(relname, attr_name);
 
 		if (ret > 0)
 			cout << "Index created successfully\n";

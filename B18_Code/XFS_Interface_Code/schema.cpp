@@ -136,6 +136,11 @@ int closeRel(int relid) {
 }
 
 int createIndex(char *relationName, char *attrName){
+	if (strcmp(relationName, "RELATIONCAT") == 0 || strcmp(relationName, "ATTRIBUTECAT") == 0) {
+		std::cout << "Creating or Dropping index for attributes of Catalogs is an invalid operation" << std::endl;
+		return E_INVALID;
+	}
+
 	// get the src relation's open relation id, using getRelId() method of Openreltable.
 	int relId = OpenRelTable::getRelationId(relationName);
 
@@ -149,6 +154,11 @@ int createIndex(char *relationName, char *attrName){
 }
 
 int dropIndex(char *relationName, char *attrName){
+	if (strcmp(relationName, "RELATIONCAT") == 0 || strcmp(relationName, "ATTRIBUTECAT") == 0) {
+		std::cout << "Creating or Dropping index for attributes of Catalogs is an invalid operation" << std::endl;
+		return E_INVALID;
+	}
+
 	// get the src relation's open relation id, using getRelId() method of Openreltable.
 	int relId = OpenRelTable::getRelationId(relationName);
 

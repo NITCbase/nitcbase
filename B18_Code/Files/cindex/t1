@@ -1,0 +1,5 @@
+fdisk
+import numbers.csv
+echo trying to create index on an attribute whose relation is not open
+CREATE INDEX ON numbers.key
+exit
