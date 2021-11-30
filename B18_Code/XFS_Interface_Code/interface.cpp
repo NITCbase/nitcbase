@@ -82,6 +82,16 @@ int regexMatchAndExecute(const string input_command) {
 		if (executeCommandsFromFile(file_name) == EXIT) {
 			return EXIT;
 		}
+	} else if (regex_match(input_command, bplus)) {
+		regex_search(input_command, m, bplus);
+		string tablename = m[3];
+		string attrname = m[4];
+		char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
+
+		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
+
+		testBPlusTree(relname, attr_name);
 	} else if (regex_match(input_command, fdisk)) {
 		Disk::createDisk();
 		Disk::formatDisk();
@@ -958,62 +968,7 @@ void string_to_char_array(string x, char *a, int size) {
 	}
 }
 
-void printBPlusTree(int rootBlock) {
-	queue<int> blocks;
-	blocks.push(rootBlock);
-	blocks.push(INT_MAX);
-	while (!blocks.empty()) {
-		int current_block = blocks.front();
-
-		if (current_block == INT_MAX) {
-			// keys.push(current_block);
-//			cout << endl;
-			cout << " - ";
-			blocks.pop();
-			continue;
-		}
-		blocks.pop();
-
-		HeadInfo header = getHeader(current_block);
-		int block_type = getBlockType(current_block);
-		int num_entries = header.numEntries;
-
-		if (block_type == IND_INTERNAL) {
-			InternalEntry internal_entry;
-			for (int iter = 0; iter < num_entries; iter++) {
-				internal_entry = getInternalEntry(current_block, iter);
-				// keys.push((int) internal_entry.attrVal.nval);
-				cout << (int) internal_entry.attrVal.nval << ", ";
-			}
-			cout  << " - ";
- 		} else if (block_type == IND_LEAF) {
-			for (int iter = 0; iter < num_entries; iter++) {
-				Index index = getLeafEntry(current_block, iter);
-				// keys.push((int) index.attrVal.nval);
-				cout << (int) index.attrVal.nval << ",";
-			}
-			cout  << " - ";
-		}
-
-		if (block_type == IND_INTERNAL) {
-			InternalEntry internal_entry;
-
-			int entry_num = 0;
-			internal_entry = getInternalEntry(current_block, entry_num);
-			blocks.push(internal_entry.lChild);
-//			blocks.push(INT_MIN);
-
-			for (entry_num = 0; entry_num < num_entries; entry_num++) {
-				internal_entry = getInternalEntry(current_block, entry_num);
-				blocks.push(internal_entry.rChild);
-//				blocks.push(INT_MIN);
-			}
-			blocks.push(INT_MAX);
-		}
-	}
-}
-
-void printTree(int blockNum) {
+void printBPlusTreeBlocks(int blockNum) {
 	HeadInfo header = getHeader(blockNum);
 	int block_type = getBlockType(blockNum);
 	int num_entries = header.numEntries;
@@ -1046,23 +1001,155 @@ void printTree(int blockNum) {
 
 		int entry_num = 0;
 		internal_entry = getInternalEntry(blockNum, entry_num);
-		printTree(internal_entry.lChild);
+		printBPlusTreeBlocks(internal_entry.lChild);
 
 		for (entry_num = 0; entry_num < num_entries; entry_num++) {
 			internal_entry = getInternalEntry(blockNum, entry_num);
-			printTree(internal_entry.rChild);
+			printBPlusTreeBlocks(internal_entry.rChild);
 		}
 	}
 }
 
+void printBPlusNode(int block) {
+
+	HeadInfo header = getHeader(block);
+	int block_type = getBlockType(block);
+	int num_entries = header.numEntries;
+
+	if (block_type == IND_INTERNAL) {
+		InternalEntry internal_entry;
+		for (int iter = 0; iter < num_entries; iter++) {
+			internal_entry = getInternalEntry(block, iter);
+			cout << (int) internal_entry.attrVal.nval;
+			if (iter != num_entries-1)
+				cout << ",";
+		}
+	} else if (block_type == IND_LEAF) {
+		for (int iter = 0; iter < num_entries; iter++) {
+			Index index = getLeafEntry(block, iter);
+			cout << (int) index.attrVal.nval;
+			if (iter != num_entries-1)
+				cout << ",";
+		}
+	}
+}
+
+void getBPlusBlocks(int rootBlock, queue<int>& bplus_blocks, vector<int>& children) {
+	queue<int> blocks_tmp;
+	blocks_tmp.push(rootBlock);
+
+	while (!blocks_tmp.empty()) {
+		int current_block = blocks_tmp.front();
+
+		bplus_blocks.push(blocks_tmp.front());
+		blocks_tmp.pop();
+
+		HeadInfo header = getHeader(current_block);
+		int block_type = getBlockType(current_block);
+		int num_entries = header.numEntries;
+
+		if (block_type == IND_INTERNAL) {
+			children.push_back(num_entries+1);
+
+		}
+//		else if (block_type == IND_LEAF) {
+//			children.push_back(0);
+//		}
+
+		if (block_type == IND_INTERNAL) {
+			InternalEntry internal_entry;
+
+			int entry_num = 0;
+			internal_entry = getInternalEntry(current_block, entry_num);
+			blocks_tmp.push(internal_entry.lChild);
+
+			for (entry_num = 0; entry_num < num_entries; entry_num++) {
+				internal_entry = getInternalEntry(current_block, entry_num);
+				blocks_tmp.push(internal_entry.rChild);
+			}
+		}
+	}
+}
+
+void printBPlusTreeHelper(queue<int> bplus_blocks, vector<int> children) {
+
+	vector<int> noOfNodesInEachLevel;
+	noOfNodesInEachLevel.push_back(1);
+	noOfNodesInEachLevel.push_back(children.front());
+	int i = 1, k = 1;
+	while (i < children.size()){
+		int nodes_in_current_level = noOfNodesInEachLevel[k];
+		int nodes_in_next_level = 0;
+		for (int j = 0; j < nodes_in_current_level; ++j) {
+			nodes_in_next_level += children[i++];
+		}
+		noOfNodesInEachLevel[++k] = nodes_in_next_level;
+	}
+
+	int levels = k+1;
+	for (int current_level = 0; current_level < levels; ++current_level) {
+		cout << "LEVEL "<< current_level << endl;
+		int nodesInCurrentLevel = noOfNodesInEachLevel[current_level];
+		int nodesLeft = nodesInCurrentLevel;
+		while(nodesLeft > 0) {
+			int current_block = bplus_blocks.front();
+			printBPlusNode(current_block);
+			cout << "   ";
+			bplus_blocks.pop();
+			nodesLeft--;
+		}
+		cout << endl;
+	}
+}
+
+void printBPlusTree(int rootBlock) {
+	queue<int> bplus_blocks;
+	vector<int> children;
+	getBPlusBlocks(rootBlock, bplus_blocks, children);
+	printBPlusTreeHelper(bplus_blocks, children);
+}
+
 void testBPlusTree(char *rel_name, char *attr_name) {
-	int relId = OpenRelTable::getRelationId(rel_name);
+	/* Get the Relation Catalog Entry */
+	Attribute relNameAsAttribute;
+	strcpy(relNameAsAttribute.sval, rel_name);
+	Attribute relCatEntry[6];
+	recId prev_recid, relcat_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	relcat_recid = linear_search(RELCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
+	if (relcat_recid.block == -1 || relcat_recid.slot == -1) {
+		cout << "ERROR: Relation does not exist"<<endl;
+		return;
+	}
+	getRecord(relCatEntry, relcat_recid.block, relcat_recid.slot);
+
+	int no_of_attrs = (int)relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
 	Attribute attrCatEntry[6];
+	recId attrcat_recid;
 
-	getAttrCatEntry(relId, attr_name, attrCatEntry);
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+	int i;
+	for (i = 0; i < no_of_attrs; i++) {
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
+		getRecord(attrCatEntry, attrcat_recid.block, attrcat_recid.slot);
+		if (strcmp(attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attr_name) == 0 ) {
+			break;
+		}
+	}
+
+	if (i == no_of_attrs) {
+		cout << "ERROR: Attrbiute does not exist" <<endl;
+		return;
+	}
+
 	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
-	cout << "ATTR CAT ENTRY 3[Root Block] : " << rootBlock << endl;
+	if (rootBlock == -1) {
+		cout << "ERROR: Index does not exist" << endl;
+		return;
+	}
 
-	printTree(rootBlock);
 	printBPlusTree(rootBlock);
+//	getBPlusBlocks(rootBlock);
 }

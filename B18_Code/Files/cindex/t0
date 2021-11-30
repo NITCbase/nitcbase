@@ -3,4 +3,4 @@ import numbers.csv
 OPEN TABLE numbers
 CREATE INDEX ON numbers.key
 dump attrcat
-exit
+print tree numbers.key
