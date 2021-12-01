@@ -1000,7 +1000,11 @@ void printBPlusTreeBlocks(int blockNum) {
 	int num_entries = header.numEntries;
 
 	cout << "BLOCK " << blockNum << endl;
-	cout << "Block Type: " << block_type << endl;
+	cout << "Block Type: ";
+	if (block_type == 1)
+		cout << "IND_INTERNAL" << endl;
+	else if (block_type == 2)
+		cout << "IND_LEAF" << endl;
 	cout << "Parent Block: " << header.pblock << endl;
 	cout << "No of entries: " <<  num_entries << endl;
 
@@ -1020,7 +1024,7 @@ void printBPlusTreeBlocks(int blockNum) {
 			cout << "key_val: " << (int) index.attrVal.nval << endl;
 		}
 	}
-	cout << " --------- " << endl;
+	cout << "---------" << endl;
 
 	if (block_type == IND_INTERNAL) {
 		InternalEntry internal_entry;
@@ -1146,7 +1150,6 @@ int getRootBlock(char *rel_name, char *attr_name) {
 	prev_recid.slot = -1;
 	relcat_recid = linear_search(RELCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
 	if (relcat_recid.block == -1 || relcat_recid.slot == -1) {
-//		cout << "ERROR: Relation does not exist"<<endl;
 		return E_RELNOTEXIST;
 	}
 	getRecord(relCatEntry, relcat_recid.block, relcat_recid.slot);
@@ -1167,13 +1170,11 @@ int getRootBlock(char *rel_name, char *attr_name) {
 	}
 
 	if (i == no_of_attrs) {
-//		cout << "ERROR: Attrbiute does not exist" <<endl;
 		return E_ATTRNOTEXIST;
 	}
 
 	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
 	if (rootBlock == -1) {
-//		cout << "ERROR: Index does not exist" << endl;
 		return E_NOINDEX;
 	}
 
