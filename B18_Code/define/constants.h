@@ -31,6 +31,7 @@
 #define OCCUPIED 1
 #define FREE 0
 
+#define INT_MAX 2147483647
 
 // TODO : use enum here
 
