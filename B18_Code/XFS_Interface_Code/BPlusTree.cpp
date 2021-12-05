@@ -334,7 +334,8 @@ int BPlusTree::bPlusInsert(Attribute val, recId recordId) {
 
 					// inserting newAttrVal at appropriate place
 					if (flag == 0) {
-						if (compareAttributes(newAttrVal, internalEntry.attrVal, attrType) < 0) {
+//						if (compareAttributes(newAttrVal, internalEntry.attrVal, attrType) <= 0) {
+						if (internalEntry.lChild == leftBlkNum) {
 							if (attrType == NUMBER) {
 								internal_entries[current_entryNumber].attrVal.nval = newAttrVal.nval;
 							} else if (attrType == STRING) {

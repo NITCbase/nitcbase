@@ -1,0 +1,27 @@
+fdisk
+import test.csv
+OPEN TABLE test
+CREATE INDEX ON test.key
+print b+ tree test.key
+print b+ blocks test.key
+exit
+echo Selecting Grades better than or equal to 2 after indexing
+SELECT * FROM test INTO test1 WHERE key <= 5;
+export test1 test1.csv
+echo -------------------------------
+echo Selecting Grades worse than or equal to 2 after indexing
+SELECT * FROM test INTO test2 WHERE key >= 5;
+export test2 test2.csv
+echo -------------------------------
+echo Selecting Grades equal to 2 after indexing
+SELECT * FROM test INTO test3 WHERE key = 5;
+export test3 test3.csv
+echo -------------------------------
+echo Selecting Grades better than 2 after indexing
+SELECT * FROM test INTO test4 WHERE key > 5;
+export test4 test4.csv
+echo -------------------------------
+echo Selecting Grades worse than 2 after indexing
+SELECT * FROM test INTO test5 WHERE key < 5;
+export test5 test5.csv
+echo -------------------------------
