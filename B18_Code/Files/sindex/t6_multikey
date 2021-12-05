@@ -1,0 +1,16 @@
+fdisk
+import grades.csv
+OPEN TABLE grades
+CREATE INDEX ON grades.Grade
+echo Selecting Grades better than or equal to B after indexing
+SELECT * FROM grades INTO gradesCDF1 WHERE Grade <= B;
+export gradesCDF1 gradesCDF1.csv
+echo -------------------------------
+echo Selecting Grades worse than or equal to B after indexing
+SELECT * FROM grades INTO gradesCDF2 WHERE Grade >= B;
+export gradesCDF2 gradesCDF2.csv
+echo -------------------------------
+echo Selecting Grades equal to B after indexing
+SELECT * FROM grades INTO gradesCDF3 WHERE Grade = B;
+export gradesCDF3 gradesCDF3.csv
+echo -------------------------------

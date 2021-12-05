@@ -90,7 +90,7 @@ int OpenRelTable::closeRelation(int relationId) {
 		return E_OUTOFBOUND;
 	}
     if (relationId == RELCAT_RELID || relationId == ATTRCAT_RELID) {
-        return E_INVALID;
+    	return E_INVALID;
     }
 	if (tableMetaInfo[relationId].free == FREE) {
 		return E_RELNOTOPEN;
@@ -119,4 +119,13 @@ int OpenRelTable::checkIfRelationOpen(int relationId) {
 	else {
 		return SUCCESS;
 	}
+}
+
+int OpenRelTable::checkIfOpenRelTableHasFreeEntry() {
+	for (auto relationIterator: tableMetaInfo) {
+		if (relationIterator.free == FREE) {
+			return SUCCESS;
+		}
+	}
+	return FAILURE;
 }

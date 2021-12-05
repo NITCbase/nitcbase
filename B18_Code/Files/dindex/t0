@@ -1,0 +1,8 @@
+fdisk
+import numbers.csv
+OPEN TABLE numbers
+CREATE INDEX ON numbers.key
+dump attrcat
+DROP INDEX ON numbers.key
+dump attrcat
+exit

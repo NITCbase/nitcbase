@@ -1,0 +1,5 @@
+fdisk
+import numbers.csv
+echo trying to drop index of an attribute which does not exist
+DROP INDEX ON numbers.random_name
+exit

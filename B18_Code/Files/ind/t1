@@ -1,0 +1,9 @@
+fdisk
+CREATE TABLE numbers(key NUM);
+OPEN TABLE numbers
+INSERT INTO numbers VALUES (10);
+CREATE INDEX ON numbers.key
+INSERT INTO numbers VALUES (5);
+INSERT INTO numbers VALUES (75);
+INSERT INTO numbers VALUES (20);
+INSERT INTO numbers VALUES (55);

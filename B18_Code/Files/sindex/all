@@ -1,0 +1,6 @@
+echo Selecting from Index created on a Unique Keyed Numerical Attribute
+run sindex/t1
+echo ------------------------------------------------------------------
+echo Selecting from Index created on a Unique Keyed String Attribute
+run sindex/t2
+echo ------------------------------------------------------------------

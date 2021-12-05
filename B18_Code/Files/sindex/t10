@@ -1,0 +1,7 @@
+fdisk
+import 500nums.csv
+OPEN TABLE 500nums
+CREATE INDEX ON 500nums.key
+echo Selecting Grades greater than or equal to 200 after indexing
+SELECT * FROM 500nums INTO 500nums_1 WHERE key >= 200;
+export 500nums_1 500nums_1.csv

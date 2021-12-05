@@ -5,12 +5,12 @@
 #ifndef B18_CODE_BLOCK_ACCESS_H
 #define B18_CODE_BLOCK_ACCESS_H
 
-int ba_insert(int relid, Attribute *rec);
+int ba_insert(int relId, Attribute *rec);
 int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
 recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId *prev_recid);
 int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE]);
 int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName[ATTR_SIZE]);
-int ba_delete(char relName[ATTR_SIZE]);
+int ba_delete(int relId);
 
 void add_disk_metainfo();
 HeadInfo getHeader(int blockNum);

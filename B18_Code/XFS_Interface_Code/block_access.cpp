@@ -4,11 +4,13 @@
 #include <cstdio>
 #include <string>
 #include <cstring>
+#include <iostream>
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "disk_structures.h"
 #include "schema.h"
 #include "OpenRelTable.h"
+#include "BPlusTree.h"
 
 int getFreeRecBlock();
 
@@ -21,13 +23,13 @@ int deleteAttrCatEntry(recId attrcat_recid);
 /*
  *  Inserts the Record into the given Relation
  */
-int ba_insert(int relid, Attribute *rec) {
-	Attribute relcat_entry[6];
-	getRelCatEntry(relid, relcat_entry);
+int ba_insert(int relId, Attribute *rec) {
+	Attribute relCatEntry[6];
+	getRelCatEntry(relId, relCatEntry);
 
-	int num_attrs = relcat_entry[1].nval;
-	int first_block = relcat_entry[3].nval;
-	int num_slots = relcat_entry[5].nval;
+	int num_attrs = (int)relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
+	int first_block = (int)relCatEntry[RELCAT_FIRST_BLOCK_INDEX].nval;
+	int num_slots = (int)relCatEntry[RELCAT_NO_SLOTS_PER_BLOCK_INDEX].nval;
 
 	HeadInfo header;
 
@@ -36,18 +38,18 @@ int ba_insert(int relid, Attribute *rec) {
 
 	if (first_block == -1) {
 		blockNum = getFreeRecBlock();
-		relcat_entry[3].nval = blockNum;
+		relCatEntry[RELCAT_FIRST_BLOCK_INDEX].nval = blockNum;
 
 		// TODO: Take make_headerInfo() function out
-		HeadInfo *H = (HeadInfo *) malloc(sizeof(HeadInfo));
-		H->blockType = REC;
-		H->pblock = -1;
-		H->lblock = -1;
-		H->rblock = -1;
-		H->numEntries = 0;
-		H->numAttrs = num_attrs;
-		H->numSlots = num_slots;
-		setHeader(H, blockNum);
+		HeadInfo *headInfo = (HeadInfo *) malloc(sizeof(HeadInfo));
+		headInfo->blockType = REC;
+		headInfo->pblock = -1;
+		headInfo->lblock = -1;
+		headInfo->rblock = -1;
+		headInfo->numEntries = 0;
+		headInfo->numAttrs = num_attrs;
+		headInfo->numSlots = num_slots;
+		setHeader(headInfo, blockNum);
 		getSlotmap(slotmap, blockNum);
 
 		// set all slots as free
@@ -55,28 +57,46 @@ int ba_insert(int relid, Attribute *rec) {
 		setSlotmap(slotmap, num_slots, blockNum);
 	}
 
-	recId recid = getFreeSlot(blockNum);
+	recId rec_id = getFreeSlot(blockNum);
 
 	// no free slot found
-	if (recid.block == -1 && recid.slot == -1) {
+	if (rec_id.block == -1 && rec_id.slot == -1) {
 		return FAILURE;
-	} else if (recid.block == E_MAXRELATIONS && recid.slot == E_MAXRELATIONS) {
+	} else if (rec_id.block == E_MAXRELATIONS && rec_id.slot == E_MAXRELATIONS) {
 		// only one block allowed for RELCAT
 		return E_MAXRELATIONS;
 	}
 
-	setRecord(rec, recid.block, recid.slot);
+	setRecord(rec, rec_id.block, rec_id.slot);
 
 	// increment #entries in header (as record is inserted)
-	header = getHeader(recid.block);
+	header = getHeader(rec_id.block);
 	header.numEntries = header.numEntries + 1;
-	setHeader(&header, recid.block);
+	setHeader(&header, rec_id.block);
 
 	// increment #entries in relation catalog entry
-	relcat_entry[2].nval = relcat_entry[2].nval + 1;
+	relCatEntry[RELCAT_NO_RECORDS_INDEX].nval = relCatEntry[RELCAT_NO_RECORDS_INDEX].nval + 1;
 	// update last block in relation catalogue entry
-	relcat_entry[4].nval = recid.block;
-	setRelCatEntry(relid, relcat_entry);
+	relCatEntry[RELCAT_LAST_BLOCK_INDEX].nval = rec_id.block;
+	setRelCatEntry(relId, relCatEntry);
+
+	char attrName[ATTR_SIZE];
+	/*
+	 * B+ TREE MODIFICATIONS
+	 */
+	// iterate through all attributes
+	for (int i = 0; i < num_attrs; i++) {
+		Attribute attrCatEntry[6];
+		getAttrCatEntry(relId, i, attrCatEntry);
+		strcpy(attrName, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval);
+
+		// if index exists for the attribute, insert record into b plus tree
+		int rootBlock = (int) attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+		if (rootBlock != -1) {
+			BPlusTree bPlusTree = BPlusTree(relId, attrName);
+			bPlusTree.bPlusInsert(rec[i], rec_id);
+		}
+	}
 
 	return SUCCESS;
 }
@@ -102,6 +122,8 @@ int ba_search(relId relid, Attribute *record, char attrName[ATTR_SIZE], Attribut
 		} else {
 			// Indexing exists for the attribute
 			// TODO: recid = bplus_search(relid, attrName, attrval, op,&prev_recid);
+            BPlusTree bPlusTree(relid, attrName);
+            recid = bPlusTree.BPlusSearch(attrval, op, prev_recid);
 		}
 	}
 
@@ -218,39 +240,21 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
  *      - Clears the Relation Catalog entry for this relation
  */
 // I have changed the order in which Relation Catalog and Open Relation table is searched respectively for the given relation
-// REMOVE ONCE JEZZY SEES - ITS A NOTE TO CHECK
-int ba_delete(char relName[ATTR_SIZE]) {
+int ba_delete(int relId) {
 	// TODO: There was some issue with deletion earlier, we can check it later, I have added and cleaned the code now (A LOOOT of cleaning)
-	Attribute relName_Attr;
-	strcpy(relName_Attr.sval, relName);
-
-	/* Check if a relation with the given name exists in Relation Catalog and retrieve the relcat_recid */
-	recId prev_recid, relcat_recid;
-	prev_recid.block = -1;
-	prev_recid.slot = -1;
-
-	relcat_recid = linear_search(RELCAT_RELID, "RelName", relName_Attr, EQ, &prev_recid);
-	if ((relcat_recid.block == -1) && (relcat_recid.slot == -1)) {
-		return E_RELNOTEXIST;
-	}
-
-	/* Check if a relation with the given name exists in Open Relation Table */
-	if (OpenRelTable::checkIfRelationOpen(relName) == SUCCESS) {
-		return FAILURE;
-	}
 
 	/* Get the Relation Catalog Entry */
-	Attribute relcat_rec[6];
-	getRecord(relcat_rec, relcat_recid.block, relcat_recid.slot);
+	Attribute relCatEntry[6];
+	getRelCatEntry(relId, relCatEntry);
 
 	/* Get first record block corresponding to the given relation */
-	int curr_block = relcat_rec[3].nval;
-	int no_of_attrs = relcat_rec[1].nval;
-	int next_block = -1;
+	int curr_block = (int)relCatEntry[RELCAT_FIRST_BLOCK_INDEX].nval;
+	int no_of_attrs = (int)relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
+	int next_block;
 
 	/*
 	 * Delete the Relation Block-by-Block starting from the first block
-	 * Get the Next Block by using headerInfo of the Current Block
+	 * Get the Next Block by using headerInfo.rblock of the Current Block
 	 * deleteBlock() will erase the block and mark UNUSED_BLK in the Block Allocation Map
 	 */
 	while (curr_block != -1) {
@@ -260,24 +264,50 @@ int ba_delete(char relName[ATTR_SIZE]) {
 		curr_block = next_block;
 	}
 
-	recId attrcat_recid;
+	recId attrcat_recid, prev_recid;
 	prev_recid.block = -1;
 	prev_recid.slot = -1;
+	char attrName[ATTR_SIZE];
+	char relName[ATTR_SIZE];
+	OpenRelTable::getRelationName(relId, relName);
+	Attribute relNameAsAttribute;
+	strcpy(relNameAsAttribute.sval, relName);
 	for (int i = 0; i < no_of_attrs; i++) {
-		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relName_Attr, EQ, &prev_recid);
+
+		Attribute attrCatEntry[6];
+		getAttrCatEntry(relId, i, attrCatEntry);
+		strcpy(attrName, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval);
+
+		// Delete B+ tree blocks, if it exists for any of the attributes
+		int rootBlock = (int) attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+		if (rootBlock != -1) {
+			BPlusTree bPlusTree = BPlusTree(relId, attrName);
+			bPlusTree.bPlusDestroy(rootBlock);
+			attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
+			setAttrCatEntry(relId, attrName, attrCatEntry);
+		}
+
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
+		// TODO :::: REVIEW
 		prev_recid.block = -1;
 		prev_recid.slot = -1;
-		/* Updating the Attribute Catalog for the current Attribute Deletion */
+		// Delete Attribute Catalog Entry
 		deleteAttrCatEntry(attrcat_recid);
 	}
 
 	/*
-	 * Updating the Relation Catalog for the Relation Deletion
+	 * Delete Relation Catalog Entry
 	 */
-	deleteRelCatEntry(relcat_recid, relcat_rec);
+	recId relcat_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+
+	relcat_recid = linear_search(RELCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
+	deleteRelCatEntry(relcat_recid, relCatEntry);
+
+	closeRel(relId);
 
 	return SUCCESS;
-
 }
 
 int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE]) {
@@ -345,7 +375,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 	// CHECK IF ATTRIBUTE WITH THE NEW NAME ALREADY EXISTS
 	prev_recid.block = -1;
 	prev_recid.slot = -1;
-	while (1) {
+	while (true) {
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
 		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
 			getRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
@@ -360,7 +390,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 	 */
 	prev_recid.block = -1;
 	prev_recid.slot = -1;
-	while (1) {
+	while (true) {
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ, &prev_recid);
 		if (!((attrcat_recid.block == -1) && (attrcat_recid.slot == -1))) {
 			getRecord(attrcat_record, attrcat_recid.block, attrcat_recid.slot);
@@ -376,7 +406,7 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 
 /*
  * Retrieves whether the block is occupied or not
- * If occupied returns the type of occupied block (REC: 0, IND_NUMBERERNAL: 1, IND_LEAF: 2)
+ * If occupied returns the type of occupied block (REC: 0, IND_INTERNAL: 1, IND_LEAF: 2)
  * If Not returns UNUSED_BLK: 3
  */
 int getBlockType(int blocknum) {
@@ -435,7 +465,7 @@ void setSlotmap(unsigned char *SlotMap, int no_of_slots, int blockNum) {
 
 int getFreeBlock(int block_type) {
 
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, 0, SEEK_SET);
 	unsigned char blockAllocationMap[4 * BLOCK_SIZE];
 	fread(blockAllocationMap, 4 * BLOCK_SIZE, 1, disk);
@@ -692,26 +722,27 @@ int setRelCatEntry(int relationId, Attribute *relcat_entry) {
 /*
  * Reads attribute catalogue entry from disk for the given attribute name of a given relation
  */
-int getAttrCatEntry(int relationId, char attrname[16], Attribute *attrcat_entry) {
+int getAttrCatEntry(int relationId, char attrname[ATTR_SIZE], Attribute *attrcat_entry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
 		return E_OUTOFBOUND;
 
 	if (OpenRelTable::checkIfRelationOpen(relationId) == FAILURE)
 		return E_NOTOPEN;
 
-	char relName[16];
+	char relName[ATTR_SIZE];
+
 	OpenRelTable::getRelationName(relationId, relName);
 
 	int curr_block = 5;
 	int next_block = -1;
 	while (curr_block != -1) {
-		struct HeadInfo header;
+		HeadInfo header;
 		header = getHeader(curr_block);
 		next_block = header.rblock;
 		for (int i = 0; i < 20; i++) {
 			getRecord(attrcat_entry, curr_block, i);
-			if (strcmp(attrcat_entry[0].sval, relName) == 0) {
-				if (strcmp(attrcat_entry[1].sval, attrname) == 0)
+			if (strcmp(attrcat_entry[ATTRCAT_REL_NAME_INDEX].sval, relName) == 0) {
+				if (strcmp(attrcat_entry[ATTRCAT_ATTR_NAME_INDEX].sval, attrname) == 0)
 					return SUCCESS;
 			}
 		}
@@ -752,7 +783,7 @@ int getAttrCatEntry(int relationId, int offset, Attribute *attrCatEntry) {
 }
 
 /*
- * Writes relation catalogue entry into disk
+ * Writes attribute catalogue entry into disk
  */
 int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCatEntry) {
 	if (relationId < 0 || relationId >= MAX_OPEN)
@@ -770,10 +801,11 @@ int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCat
 		HeadInfo header;
 		header = getHeader(curr_block);
 		next_block = header.rblock;
+		Attribute currentAttrCatEntry[NO_OF_ATTRS_RELCAT_ATTRCAT];
 		for (int slotIter = 0; slotIter < SLOTMAP_SIZE_RELCAT_ATTRCAT; slotIter++) {
-			getRecord(attrCatEntry, curr_block, slotIter);
-			if (strcmp(attrCatEntry[ATTRCAT_REL_NAME_INDEX].sval, relName) == 0) {
-				if (strcmp(attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrName) == 0) {
+			getRecord(currentAttrCatEntry, curr_block, slotIter);
+			if (strcmp(currentAttrCatEntry[ATTRCAT_REL_NAME_INDEX].sval, relName) == 0) {
+				if (strcmp(currentAttrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attrName) == 0) {
 					setRecord(attrCatEntry, curr_block, slotIter);
 					return SUCCESS;
 				}
@@ -789,7 +821,7 @@ int setAttrCatEntry(int relationId, char attrName[ATTR_SIZE], Attribute *attrCat
 // */
 //struct InternalEntry getEntry(int block, int entry_number) {
 //	InternalEntry rec;
-//	FILE *disk = fopen("disk", "rb");
+//	FILE *disk = fopen(DISK_PATH, "rb");
 //	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entry_number * 20, SEEK_SET);
 //	fread(&rec, sizeof(rec), 1, disk);
 //	fclose(disk);
@@ -909,6 +941,9 @@ int deleteAttrCatEntry(recId attrcat_recid) {
 
 /*
  * Compare two attributes based on their type
+ * if  attr1  < attr 2 return -1
+ * if equal return 0
+ * else return 1
  */
 int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType) {
 	if (attrType == STRING) {
@@ -927,34 +962,53 @@ int compareAttributes(union Attribute attr1, union Attribute attr2, int attrType
 
 InternalEntry getInternalEntry(int block, int entryNum) {
 	InternalEntry rec;
-	FILE *disk = fopen("disk", "rb");
+	FILE *disk = fopen(DISK_PATH, "rb");
 	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + entryNum * INTERNAL_ENTRY_SIZE, SEEK_SET);
-	fread(&rec, sizeof(rec), 1, disk);
+
+	fread(&rec.lChild, 4, 1, disk);
+	fread(&rec.attrVal, 16, 1, disk);
+	fread(&rec.rChild, 4, 1, disk);
+
 	fclose(disk);
+//	std::cout << "DEBUG-GET\n";
+//	std::cout << "lchild: " << rec.lChild << ", ";
+//	std::cout << "key_val: " << (int) rec.attrVal.nval << ", ";
+//	std::cout << "rchild: " << rec.rChild << std::endl;
+//	std::cout << "block: " << block << std::endl;
+//	std::cout << "offset: " << entryNum << std::endl;
 	return rec;
 }
 
 void setInternalEntry(InternalEntry internalEntry, int block, int offset) {
-	if ((internalEntry.lChild == block) || (internalEntry.rChild == block)) {
-		InternalEntry entry;
-		entry = getInternalEntry(block, offset);
-		if (internalEntry.attrVal.nval == entry.attrVal.nval)
-			return;
-		if (internalEntry.lChild == block)
-			internalEntry.lChild = entry.lChild;
-		else
-			internalEntry.rChild = entry.rChild;
-	}
+//	std::cout << "DEBUG-SET\n";
+//	std::cout << "lchild: " << internalEntry.lChild << ", ";
+//	std::cout << "key_val: " << (int) internalEntry.attrVal.nval << ", ";
+//	std::cout << "rchild: " << internalEntry.rChild << std::endl;
+//	std::cout << "block: " << block << std::endl;
+//	std::cout << "offset: " << offset << std::endl;
+//	if ((internalEntry.lChild == block) || (internalEntry.rChild == block)) {
+//		InternalEntry entry;
+//		entry = getInternalEntry(block, offset);
+//
+//		if (internalEntry.attrVal.nval == entry.attrVal.nval)
+//			return;
+//		if (internalEntry.lChild == block)
+//			internalEntry.lChild = entry.lChild;
+//		else
+//			internalEntry.rChild = entry.rChild;
+//	}
 
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, block * BLOCK_SIZE + HEADER_SIZE + offset * INTERNAL_ENTRY_SIZE, SEEK_SET);
-	fwrite(&internalEntry, sizeof(internalEntry), 1, disk);
+	fwrite(&internalEntry.lChild, 4, 1, disk);
+	fwrite(&internalEntry.attrVal, 16, 1, disk);
+	fwrite(&internalEntry.rChild, 4, 1, disk);
 	fclose(disk);
 }
 
 Index getLeafEntry(int leaf, int offset) {
 	Index rec;
-	FILE *disk = fopen("disk", "rb");
+	FILE *disk = fopen(DISK_PATH, "rb");
 	fseek(disk, leaf * BLOCK_SIZE + HEADER_SIZE + offset * LEAF_ENTRY_SIZE, SEEK_SET);
 	fread(&rec, sizeof(rec), 1, disk);
 	fclose(disk);
@@ -962,7 +1016,7 @@ Index getLeafEntry(int leaf, int offset) {
 }
 
 void setLeafEntry(Index rec, int leaf, int offset) {
-	FILE *disk = fopen("disk", "rb+");
+	FILE *disk = fopen(DISK_PATH, "rb+");
 	fseek(disk, leaf * BLOCK_SIZE + HEADER_SIZE + offset * LEAF_ENTRY_SIZE, SEEK_SET);
 	fwrite(&rec, sizeof(rec), 1, disk);
 	fclose(disk);

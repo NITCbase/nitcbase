@@ -20,6 +20,7 @@ CREATE TABLE new16(Id NUM, Name STR, Age NUM);
 CREATE TABLE new17(Id NUM, Name STR, Age NUM);
 CREATE TABLE new18(Id NUM, Name STR, Age NUM, Weight NUM, Hair STR);
 echo 18 tables created, now creating 19th one:
+exit
 CREATE TABLE new19(Id NUM, Name STR, Age NUM, Weight NUM, Hair STR);
 ls
 dump relcat
