@@ -1,0 +1,25 @@
+fdisk
+import err_t2.csv
+OPEN TABLE err_t2
+CREATE INDEX ON err_t2.key
+print b+ tree err_t2.key
+echo Selecting LE 2
+SELECT * FROM err_t2 INTO err_t21 WHERE key <= 2;
+export err_t21 err_t21.csv
+echo -------------------------------
+echo Selecting GE 2
+SELECT * FROM err_t2 INTO err_t22 WHERE key >= 2;
+export err_t22 err_t22.csv
+echo -------------------------------
+echo Selecting EQ 1
+SELECT * FROM err_t2 INTO err_t23 WHERE key = 1;
+export err_t23 err_t23.csv
+echo -------------------------------
+echo Selecting GT 2
+SELECT * FROM err_t2 INTO err_t24 WHERE key > 2;
+export err_t24 err_t24.csv
+echo -------------------------------
+echo Selecting LT 2
+SELECT * FROM err_t2 INTO err_t25 WHERE key < 2;
+export err_t25 err_t25.csv
+echo -------------------------------

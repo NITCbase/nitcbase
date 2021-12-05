@@ -1,0 +1,25 @@
+fdisk
+import RigStr_1000.csv
+OPEN TABLE RigStr_1000
+CREATE INDEX ON RigStr_1000.key
+print b+ tree RigStr_1000.key
+echo Selecting LE BBB
+SELECT * FROM RigStr_1000 INTO RigStr_10001 WHERE key <= BBB;
+export RigStr_10001 RigStr_10001.csv
+echo -------------------------------
+echo Selecting GE YYY
+SELECT * FROM RigStr_1000 INTO RigStr_10002 WHERE key >= YYY;
+export RigStr_10002 RigStr_10002.csv
+echo -------------------------------
+echo Selecting EQ GPS
+SELECT * FROM RigStr_1000 INTO RigStr_10003 WHERE key = GPS;
+export RigStr_10003 RigStr_10003.csv
+echo -------------------------------
+echo Selecting GT YYY
+SELECT * FROM RigStr_1000 INTO RigStr_10004 WHERE key > YYY;
+export RigStr_10004 RigStr_10004.csv
+echo -------------------------------
+echo Selecting LT BBB
+SELECT * FROM RigStr_1000 INTO RigStr_10005 WHERE key < BBB;
+export RigStr_10005 RigStr_10005.csv
+echo -------------------------------
