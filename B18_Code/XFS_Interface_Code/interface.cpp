@@ -60,8 +60,10 @@ void print16(char char_string_thing[ATTR_SIZE]);
 
 void print16(char char_string_thing[ATTR_SIZE], bool newline);
 
-int getRootBlock(char *rel_name, char *attr_name, int& attrType);
+int getRootBlock(char *rel_name, char *attr_name, int &attrType);
+
 void printBPlusTree(int rootBlock, int attrType);
+
 void printBPlusTreeBlocks(int blockNum, int attrType);
 
 
@@ -94,7 +96,7 @@ int regexMatchAndExecute(const string input_command) {
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
-        int attrType;
+		int attrType;
 		int rootBlock = getRootBlock(relname, attr_name, attrType);
 		if (rootBlock <= 0) {
 			printErrorMsg(rootBlock);
@@ -102,7 +104,7 @@ int regexMatchAndExecute(const string input_command) {
 		}
 		printBPlusTree(rootBlock, attrType);
 
-	}  else if (regex_match(input_command, bplus_blocks)) {
+	} else if (regex_match(input_command, bplus_blocks)) {
 		regex_search(input_command, m, bplus_blocks);
 		string tablename = m[4];
 		string attrname = m[5];
@@ -111,16 +113,15 @@ int regexMatchAndExecute(const string input_command) {
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
-        int attrType;
+		int attrType;
 		int rootBlock = getRootBlock(relname, attr_name, attrType);
 		if (rootBlock <= 0) {
 			printErrorMsg(rootBlock);
 			return FAILURE;
 		}
-		cout << "----- B+ TREE BLOCKS -----" <<endl;
+		cout << "----- B+ TREE BLOCKS -----" << endl;
 		printBPlusTreeBlocks(rootBlock, attrType);
-	}
-	else if (regex_match(input_command, fdisk)) {
+	} else if (regex_match(input_command, fdisk)) {
 		Disk::createDisk();
 		Disk::formatDisk();
 		// Re-initialize OpenRelTable
@@ -1008,14 +1009,18 @@ void printBPlusTreeBlocks(int blockNum, int attrType) {
 	else if (block_type == 2)
 		cout << "IND_LEAF" << endl;
 	cout << "Parent Block: " << header.pblock << endl;
-	cout << "No of entries: " <<  num_entries << endl;
+	cout << "No of entries: " << num_entries << endl;
 
 	if (block_type == IND_INTERNAL) {
 		InternalEntry internal_entry;
 		for (int iter = 0; iter < num_entries; iter++) {
 			internal_entry = getInternalEntry(blockNum, iter);
 			cout << "lchild: " << internal_entry.lChild << ", ";
-			cout << "key_val: " << (int) internal_entry.attrVal.nval << ", ";
+			if (attrType == NUMBER) {
+				cout << "key_val: " << internal_entry.attrVal.nval << ", ";
+			} else {
+				cout << "key_val: " << internal_entry.attrVal.sval << ", ";
+			}
 			cout << "rchild: " << internal_entry.rChild << endl;
 		}
 	} else if (block_type == IND_LEAF) {
@@ -1023,7 +1028,12 @@ void printBPlusTreeBlocks(int blockNum, int attrType) {
 		cout << "right node: " << header.rblock << endl;
 		for (int iter = 0; iter < num_entries; iter++) {
 			Index index = getLeafEntry(blockNum, iter);
-			cout << "key_val: " << (int) index.attrVal.nval << endl;
+			if (attrType == NUMBER) {
+				cout << "key_val: " << index.attrVal.nval << endl;
+			} else {
+				cout << "key_val: " << index.attrVal.sval << endl;
+			}
+
 		}
 	}
 	cout << "---------" << endl;
@@ -1052,29 +1062,29 @@ void printBPlusNode(int block, int attrType) {
 		InternalEntry internal_entry;
 		for (int iter = 0; iter < num_entries; iter++) {
 			internal_entry = getInternalEntry(block, iter);
-            if (attrType == NUMBER) {
-                cout << internal_entry.attrVal.nval;
-            } else {
-                cout << internal_entry.attrVal.sval;
-            }
-			if (iter != num_entries-1)
+			if (attrType == NUMBER) {
+				cout << internal_entry.attrVal.nval;
+			} else {
+				cout << internal_entry.attrVal.sval;
+			}
+			if (iter != num_entries - 1)
 				cout << ",";
 		}
 	} else if (block_type == IND_LEAF) {
 		for (int iter = 0; iter < num_entries; iter++) {
 			Index index = getLeafEntry(block, iter);
-            if (attrType == NUMBER) {
-                cout << index.attrVal.nval;
-            } else {
-                cout << index.attrVal.sval;
-            }
-			if (iter != num_entries-1)
+			if (attrType == NUMBER) {
+				cout << index.attrVal.nval;
+			} else {
+				cout << index.attrVal.sval;
+			}
+			if (iter != num_entries - 1)
 				cout << ",";
 		}
 	}
 }
 
-void getBPlusBlocks(int rootBlock, queue<int>& bplus_blocks, vector<int>& children) {
+void getBPlusBlocks(int rootBlock, queue<int> &bplus_blocks, vector<int> &children) {
 	queue<int> blocks_tmp;
 	blocks_tmp.push(rootBlock);
 
@@ -1089,12 +1099,9 @@ void getBPlusBlocks(int rootBlock, queue<int>& bplus_blocks, vector<int>& childr
 		int num_entries = header.numEntries;
 
 		if (block_type == IND_INTERNAL) {
-			children.push_back(num_entries+1);
+			children.push_back(num_entries + 1);
 
 		}
-//		else if (block_type == IND_LEAF) {
-//			children.push_back(0);
-//		}
 
 		if (block_type == IND_INTERNAL) {
 			InternalEntry internal_entry;
@@ -1117,7 +1124,7 @@ void printBPlusTreeHelper(queue<int> bplus_blocks, vector<int> children, int att
 	noOfNodesInEachLevel.push_back(1);
 	noOfNodesInEachLevel.push_back(children.front());
 	int i = 1, k = 1;
-	while (i < children.size()){
+	while (i < children.size()) {
 		int nodes_in_current_level = noOfNodesInEachLevel[k];
 		int nodes_in_next_level = 0;
 		for (int j = 0; j < nodes_in_current_level; ++j) {
@@ -1126,12 +1133,12 @@ void printBPlusTreeHelper(queue<int> bplus_blocks, vector<int> children, int att
 		noOfNodesInEachLevel[++k] = nodes_in_next_level;
 	}
 
-	int levels = k+1;
+	int levels = k + 1;
 	for (int current_level = 0; current_level < levels; ++current_level) {
-		cout << "LEVEL "<< current_level << endl;
+		cout << "LEVEL " << current_level << endl;
 		int nodesInCurrentLevel = noOfNodesInEachLevel[current_level];
 		int nodesLeft = nodesInCurrentLevel;
-		while(nodesLeft > 0) {
+		while (nodesLeft > 0) {
 			int current_block = bplus_blocks.front();
 			printBPlusNode(current_block, attrType);
 			cout << "   ";
@@ -1146,11 +1153,11 @@ void printBPlusTree(int rootBlock, int attrType) {
 	queue<int> bplus_blocks;
 	vector<int> children;
 	getBPlusBlocks(rootBlock, bplus_blocks, children);
-	cout << "----- B+ TREE -----" <<endl;
+	cout << "----- B+ TREE -----" << endl;
 	printBPlusTreeHelper(bplus_blocks, children, attrType);
 }
 
-int getRootBlock(char *rel_name, char *attr_name, int& attrType) {
+int getRootBlock(char *rel_name, char *attr_name, int &attrType) {
 	/* Get the Relation Catalog Entry */
 	Attribute relNameAsAttribute;
 	strcpy(relNameAsAttribute.sval, rel_name);
@@ -1164,7 +1171,7 @@ int getRootBlock(char *rel_name, char *attr_name, int& attrType) {
 	}
 	getRecord(relCatEntry, relcat_recid.block, relcat_recid.slot);
 
-	int no_of_attrs = (int)relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
+	int no_of_attrs = (int) relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
 	Attribute attrCatEntry[6];
 	recId attrcat_recid;
 
@@ -1174,7 +1181,7 @@ int getRootBlock(char *rel_name, char *attr_name, int& attrType) {
 	for (i = 0; i < no_of_attrs; i++) {
 		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
 		getRecord(attrCatEntry, attrcat_recid.block, attrcat_recid.slot);
-		if (strcmp(attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attr_name) == 0 ) {
+		if (strcmp(attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval, attr_name) == 0) {
 			break;
 		}
 	}
@@ -1183,8 +1190,8 @@ int getRootBlock(char *rel_name, char *attr_name, int& attrType) {
 		return E_ATTRNOTEXIST;
 	}
 
-	int rootBlock = (int)attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
-    attrType = (int)attrCatEntry[ATTRCAT_ATTR_TYPE_INDEX].nval;
+	int rootBlock = (int) attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+	attrType = (int) attrCatEntry[ATTRCAT_ATTR_TYPE_INDEX].nval;
 	if (rootBlock == -1) {
 		return E_NOINDEX;
 	}
