@@ -1,0 +1,11 @@
+fdisk
+import 10000nums.csv
+OPEN TABLE 10000nums
+CREATE INDEX ON 10000nums.key
+print b+ tree 10000nums.key
+echo Selecting Grades greater than or equal to 3495 after indexing
+SELECT * FROM 10000nums INTO 10000nums_1 WHERE key >= 3495;
+export 10000nums_1 10000nums_1.csv
+echo Selecting Grades equal to 200 after indexing
+SELECT * FROM 10000nums INTO 10000nums_2 WHERE key = 200;
+export 10000nums_2 10000nums_2.csv

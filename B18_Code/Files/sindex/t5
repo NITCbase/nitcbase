@@ -1,28 +1,26 @@
 fdisk
-import numbers.csv
-OPEN TABLE numbers
-CREATE INDEX ON numbers.key
-SELECT * FROM numbers INTO numSelBP1 WHERE key > 50;
-ls
+import Students.csv
+OPEN TABLE Students
+echo creating index on Last_Name and Age
+CREATE INDEX ON Students.Last_Name
+CREATE INDEX ON Students.Age
+print b+ tree Students.Last_Name
+print b+ tree Students.Age
+echo selecting Age GT 30
+SELECT * FROM Students INTO numSelBP1 WHERE Age > 30;
 export numSelBP1 numSelBp1.csv
-SELECT * FROM numbers INTO numSelBP2 WHERE key >= 20;
-ls
+echo selecting Age GE 30
+SELECT * FROM Students INTO numSelBP2 WHERE Age >= 30;
 export numSelBP2 numSelBp2.csv
-SELECT * FROM numbers INTO numSelBP3 WHERE key < 20;
-ls
+echo selecting Age LT 50
+SELECT * FROM Students INTO numSelBP3 WHERE Age < 50;
 export numSelBP3 numSelBp3.csv
-SELECT * FROM numbers INTO numSelBP4 WHERE key <= 55;
-ls
+echo selecting Age LE 50
+SELECT * FROM Students INTO numSelBP4 WHERE Age <= 50;
 export numSelBP4 numSelBp4.csv
-SELECT * FROM numbers INTO numSelBP5 WHERE key >= 40;
-ls
+echo selecting Last Name after D
+SELECT * FROM Students INTO numSelBP5 WHERE Last_Name > D;
 export numSelBP5 numSelBp5.csv
-SELECT * FROM numbers INTO numSelBP6 WHERE key <= 40;
-ls
+echo selecting Last Name equal to Bradford
+SELECT * FROM Students INTO numSelBP6 WHERE Last_Name = Bradford;
 export numSelBP6 numSelBp6.csv
-SELECT * FROM numbers INTO numSelBP7 WHERE key < 40;
-ls
-export numSelBP7 numSelBp7.csv
-SELECT * FROM numbers INTO numSelBP8 WHERE key > 40;
-ls
-export numSelBP8 numSelBp8.csv
