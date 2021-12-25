@@ -6,7 +6,8 @@
 #include <string>
 #include "../define/constants.h"
 #include "../define/errors.h"
-#include "frontend.h"
+#include "frontend-runner.h"
+#include "Frontend.h"
 #include "../DiskClass/Disk.h"
 
 using namespace std;
@@ -33,6 +34,7 @@ void print16(char char_string_thing[ATTR_SIZE]);
 
 int getOperator(string op_str);
 
+// TODO: Based on return values, print appropriate messages for Frontend methods being called (refer new Docs).
 int regexMatchAndExecute(const string input_command) {
     smatch m;
     if (regex_match(input_command, help)) {
@@ -55,9 +57,8 @@ int regexMatchAndExecute(const string input_command) {
         char relname[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
-//        int ret = openRel(relname);
-        int ret = SUCCESS;
-        if (ret >= 0 && ret <= MAX_OPEN - 1) {
+        int ret = Frontend::open_table(relname);
+        if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
             cout << " opened successfully\n";
@@ -72,8 +73,7 @@ int regexMatchAndExecute(const string input_command) {
         char relname[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
-//        int ret = closeRel(relname);
-        int ret = SUCCESS;
+        int ret = Frontend::close_table(relname);
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
@@ -82,10 +82,8 @@ int regexMatchAndExecute(const string input_command) {
             printErrorMsg(ret);
             return FAILURE;
         }
-
     } else if (regex_match(input_command, create_table)) {
         regex_search(input_command, m, create_table);
-
         string tablename = m[3];
         char relname[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
@@ -112,17 +110,7 @@ int regexMatchAndExecute(const string input_command) {
                 type_attr[i] = NUMBER;
         }
 
-        // LOGGING DEBUG //
-        print16(relname);
-        for (auto i = 0; i < no_attrs; i++) {
-            print16(attribute[i], false);
-            cout << " type = ";
-            cout << type_attr[i] << endl;
-        }
-        /**********/
-
-//        int ret = createRel(relname, no_attrs, attribute, type_attr);
-        int ret = SUCCESS;
+        int ret = Frontend::create_table(relname, no_attrs, attribute, type_attr);
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
@@ -137,24 +125,23 @@ int regexMatchAndExecute(const string input_command) {
         string tablename = m[3];
         char relname[ATTR_SIZE];
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+
         if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0) {
             cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
             return FAILURE;
         }
 
-//        int ret = deleteRel(relname);
-        int ret = SUCCESS;
+        int ret = Frontend::drop_table(relname);
         if (ret == SUCCESS) {
             cout << "Relation ";
             print16(relname, false);
-            cout << " deleted successfully\n";
+            cout << " deleted successfully" << endl;
         } else {
             printErrorMsg(ret);
             return FAILURE;
         }
 
     } else if (regex_match(input_command, create_index)) {
-
         regex_search(input_command, m, create_index);
         string tablename = m[4];
         string attrname = m[5];
@@ -163,24 +150,10 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
         string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
-        // LOGGING DEBUG //
-        print16(relname);
-        print16(attr_name);
-        /**********/
-
-
-        // Do Check of Relation Open
-//        int relId = OpenRelTable::getRelationId(relname);
-//        if (relId == E_RELNOTOPEN) {
-//            printErrorMsg(E_RELNOTOPEN);
-//            return FAILURE;
-//        }
-
-//        int ret = createIndex(relname, attr_name);
-        int ret = SUCCESS;
-        if (ret == SUCCESS)
+        int ret = Frontend::create_index(relname, attr_name);
+        if (ret == SUCCESS) {
             cout << "Index created successfully\n";
-        else {
+        } else {
             printErrorMsg(ret);
             return FAILURE;
         }
@@ -193,21 +166,15 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(tablename, relname, ATTR_SIZE - 1);
         string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
 
-        // LOGGING DEBUG //
-        print16(relname);
-        print16(attr_name);
-        /**********/
-
-//        int ret = dropIndex(relname, attr_name);
-        int ret = SUCCESS;
-        if (ret == SUCCESS)
+        int ret = Frontend::drop_index(relname, attr_name);
+        if (ret == SUCCESS) {
             cout << "Index deleted successfully\n";
-        else {
+        } else {
             printErrorMsg(ret);
             return FAILURE;
         }
-    } else if (regex_match(input_command, rename_table)) {
 
+    } else if (regex_match(input_command, rename_table)) {
         regex_search(input_command, m, rename_table);
         string oldTableName = m[4];
         string newTableName = m[6];
@@ -216,9 +183,7 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(oldTableName, old_relation_name, ATTR_SIZE - 1);
         string_to_char_array(newTableName, new_relation_name, ATTR_SIZE - 1);
 
-//        int ret = renameRel(old_relation_name, new_relation_name);
-
-        int ret = SUCCESS;
+        int ret = Frontend::alter_table_rename(old_relation_name, new_relation_name);
         if (ret == SUCCESS) {
             cout << "Renamed Relation Successfully" << endl;
         } else {
@@ -227,7 +192,6 @@ int regexMatchAndExecute(const string input_command) {
         }
 
     } else if (regex_match(input_command, rename_column)) {
-
         regex_search(input_command, m, rename_column);
         string tablename = m[4];
         string oldcolumnname = m[6];
@@ -239,8 +203,7 @@ int regexMatchAndExecute(const string input_command) {
         string_to_char_array(oldcolumnname, old_col, ATTR_SIZE - 1);
         string_to_char_array(newcolumnname, new_col, ATTR_SIZE - 1);
 
-//        int ret = renameAtrribute(relname, old_col, new_col);
-        int ret = SUCCESS;
+        int ret = Frontend::alter_table_rename_column(relname, old_col, new_col);
         if (ret == SUCCESS) {
             cout << "Renamed Attribute Successfully" << endl;
         } else {
@@ -249,7 +212,6 @@ int regexMatchAndExecute(const string input_command) {
         }
 
     } else if (regex_match(input_command, insert_single)) {
-
         regex_search(input_command, m, insert_single);
         string table_name = m[3];
         char rel_name[ATTR_SIZE];
@@ -258,22 +220,14 @@ int regexMatchAndExecute(const string input_command) {
         string attrs = m[0];
         vector<string> words = extract_tokens(attrs);
 
-        // LOGGING DEBUG //
-        print16(rel_name);
-        for (const auto word: words) {
-            cout << word;
-        }
-        /**********/
-
-//        int ret = insert(words, rel_name);
-
-        int ret = SUCCESS;
+        int ret = Frontend::insert_into_table_values(rel_name, words);
         if (ret == SUCCESS) {
             cout << "Inserted successfully" << endl;
         } else {
             printErrorMsg(ret);
             return FAILURE;
         }
+
     } else if (regex_match(input_command, insert_multiple)) {
         regex_search(input_command, m, insert_multiple);
         string tablename = m[3];
@@ -285,14 +239,14 @@ int regexMatchAndExecute(const string input_command) {
         char Filepath[p.length() + 1];
         string_to_char_array(p, Filepath, p.length() + 1);
         FILE *file = fopen(Filepath, "r");
-        cout << Filepath << endl;
         if (!file) {
             cout << "Invalid file path or file does not exist" << endl;
             return FAILURE;
         }
         fclose(file);
-//        int ret = insert(relname, Filepath);
-        int ret = SUCCESS;
+        cout << "File path: " << Filepath << endl;
+
+        int ret = Frontend::insert_into_table_from_file(relname, Filepath);
         if (ret == SUCCESS) {
             cout << "Inserted successfully" << endl;
         } else {
@@ -559,7 +513,7 @@ int regexMatchAndExecute(const string input_command) {
 int main() {
     /* Initialize the Run Copy of Disk */
     Disk disk_run;
-    cout << "Run Copy of Disk Initialized successfully\n";
+    cout << "Run Copy of Disk Initialized\n";
     while (true) {
         cout << "# ";
         string input_command;
@@ -767,27 +721,4 @@ vector<string> extract_tokens(string input_command) {
         tokens.push_back(token);
 
     return tokens;
-}
-
-void print16(char char_string_thing[ATTR_SIZE]) {
-    for (int i = 0; i < ATTR_SIZE; i++) {
-        if (char_string_thing[i] == '\0') {
-            break;
-        }
-        cout << char_string_thing[i];
-    }
-    cout << endl;
-}
-
-void print16(char char_string_thing[ATTR_SIZE], bool newline) {
-    for (int i = 0; i < ATTR_SIZE; i++) {
-        if (char_string_thing[i] == '\0') {
-            break;
-        }
-        cout << char_string_thing[i];
-    }
-    if (newline) {
-        cout << endl;
-    }
-    return;
 }
