@@ -34,7 +34,7 @@ void print16(char char_string_thing[ATTR_SIZE]);
 
 int getOperator(string op_str);
 
-// TODO: Based on return values, print appropriate messages for Frontend methods being called (refer new Docs).
+// TODO: Call Frontend Class methods for Commands as well.
 int regexMatchAndExecute(const string input_command) {
     smatch m;
     if (regex_match(input_command, help)) {
