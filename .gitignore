@@ -14,6 +14,7 @@
 # Ignore cmake debug files
 /B18_Code/cmake-build-debug
 /B18_Code/XFS_Interface_Code/cmake-build-debug
+/B18_Code/XFS_Interface_Code/cmake-build-debug--remote/
 /B18_Code/XFS_Interface_Code/CMakeFiles
 /B18_Code/CMakeFiles
 /B18_Code/Frontend_Interface/cmake-build-debug/
