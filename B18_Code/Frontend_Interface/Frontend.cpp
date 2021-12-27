@@ -6,10 +6,11 @@
 #include "Frontend.h"
 
 void print16(char char_string_thing[ATTR_SIZE], bool newline);
+
 void print16(char char_string_thing[ATTR_SIZE]);
 
-// TODO: Complete the DML Commands, Should we make the functions static?
-int Frontend::create_table(char relname[ATTR_SIZE], int no_attrs, char attribute[no_attrs][ATTR_SIZE], int type_attr[no_attrs]) {
+int Frontend::create_table(char relname[ATTR_SIZE], int no_attrs, char attribute[no_attrs][ATTR_SIZE],
+                           int type_attr[no_attrs]) {
     cout << "In Create Table\n";
     print16(relname);
     for (auto i = 0; i < no_attrs; i++) {
@@ -85,27 +86,73 @@ int Frontend::insert_into_table_from_file(char relname[ATTR_SIZE], char filepath
     return SUCCESS;
 }
 
-int Frontend::select_from_table() {
+int Frontend::select_from_table(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE]) {
+    cout << "In select from table\n";
+    print16(relname_source);
+    print16(relname_target);
     return SUCCESS;
 }
 
-int Frontend::select_attrlist_from_table() {
+int Frontend::select_attrlist_from_table(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
+                                         int attr_count, char attr_list[attr_count][ATTR_SIZE]) {
+    cout << "In select attrlist from table\n";
+    print16(relname_source);
+    print16(relname_target);
+    for (int attr_no = 0; attr_no < attr_count; attr_no++) {
+        print16(attr_list[attr_no]);
+    }
     return SUCCESS;
 }
 
-int Frontend::select_from_table_where() {
+int Frontend::select_from_table_where(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
+                                      char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
+    cout << "In select from table where\n";
+    print16(relname_source);
+    print16(relname_target);
+    print16(attribute);
+    cout << op << endl;
+    print16(value);
     return SUCCESS;
 }
 
-int Frontend::select_attrlist_from_table_where() {
+int Frontend::select_attrlist_from_table_where(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
+                                               int attr_count, char attr_list[attr_count][ATTR_SIZE],
+                                               char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
+    cout << "In select from table where\n";
+    print16(relname_source);
+    print16(relname_target);
+    for (int attr_no = 0; attr_no < attr_count; attr_no++) {
+        print16(attr_list[attr_no]);
+    }
+    print16(attribute);
+    cout << op << endl;
+    print16(value);
     return SUCCESS;
 }
 
-int Frontend::select_from_join_where() {
+int Frontend::select_from_join_where(char relname_source_one[ATTR_SIZE], char relname_source_two[ATTR_SIZE],
+                                     char relname_target[ATTR_SIZE],
+                                     char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE]) {
+    print16(relname_source_one);
+    print16(relname_source_two);
+    print16(relname_target);
+    print16(join_attr_one);
+    print16(join_attr_two);
     return SUCCESS;
 }
 
-int Frontend::select_attrlist_from_join_where() {
+int Frontend::select_attrlist_from_join_where(char relname_source_one[ATTR_SIZE], char relname_source_two[ATTR_SIZE],
+                                              char relname_target[ATTR_SIZE],
+                                              char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE],
+                                              int attr_count, char attr_list[attr_count][ATTR_SIZE]) {
+    print16(relname_source_one);
+    print16(relname_source_two);
+    print16(relname_target);
+    print16(join_attr_one);
+    print16(join_attr_two);
+    for (int attr_no = 0; attr_no < attr_count; attr_no++) {
+        print16(attr_list[attr_no]);
+    }
     return SUCCESS;
 }
 

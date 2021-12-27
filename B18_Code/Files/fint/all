@@ -1,6 +1,8 @@
-echo Hello World, this is a test
+echo TEST: ALL COMMANDS OF FRONTEND INTERFACE
+echo OPEN TABLE
 OPEN TABLE testTable
 echo _____________________________________________________________________________________________________________________
+echo CLOSE TABLE
 CLOSE TABLE testTable
 echo _____________________________________________________________________________________________________________________
 echo CREATE TABLE
@@ -25,7 +27,7 @@ echo INSERT INTO VALUES
 INSERT INTO Student VALUES (Isa, 16, Female);
 echo _____________________________________________________________________________________________________________________
 echo INSERT VALUES FROM FILE
-INSERT INTO Student VALUES FROM Student_File_Path.csv;
+INSERT INTO Student VALUES FROM 123.csv;
 echo _____________________________________________________________________________________________________________________
 echo SELECT * FROM
 SELECT * FROM Students INTO Target_Students;
@@ -36,5 +38,11 @@ echo ___________________________________________________________________________
 echo SELECT * FROM WHERE
 SELECT * FROM Students INTO Target_Students WHERE CGPA > 8;
 echo _____________________________________________________________________________________________________________________
+echo SELECT ATTRLIST FROM WHERE
+SELECT Name, DOB FROM Students INTO Target_Students WHERE CGPA > 8;
+echo _____________________________________________________________________________________________________________________
 echo SELECT * FROM JOIN WHERE
 SELECT * FROM Students1 JOIN Students2 INTO Students WHERE Students1.Rollno = Students2.Rollno;
+echo _____________________________________________________________________________________________________________________
+echo SELECT ATTRLIST FROM JOIN WHERE
+SELECT Name, DOB, Age, Gender FROM Students1 JOIN Students2 INTO Students WHERE Students1.Rollno = Students2.Rollno;
