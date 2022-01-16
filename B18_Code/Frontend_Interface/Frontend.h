@@ -16,7 +16,7 @@ class Frontend {
 public:
     // DDL
     static int
-    create_table(char relname[ATTR_SIZE], int no_attrs, char attribute[no_attrs][ATTR_SIZE], int type_attr[no_attrs]);
+    create_table(char relname[ATTR_SIZE], int no_attrs, char attribute[][ATTR_SIZE], int type_attr[]);
 
     static int drop_table(char relname[ATTR_SIZE]);
 
@@ -40,13 +40,13 @@ public:
     static int select_from_table(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE]);
 
     static int select_attrlist_from_table(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
-                                          int attr_count, char attr_list[attr_count][ATTR_SIZE]);
+                                          int attr_count, char attr_list[][ATTR_SIZE]);
 
     static int select_from_table_where(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
                                        char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]);
 
     static int select_attrlist_from_table_where(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
-                                                int attr_count, char attr_list[attr_count][ATTR_SIZE],
+                                                int attr_count, char attr_list[][ATTR_SIZE],
                                                 char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]);
 
     static int select_from_join_where(char relname_source_one[ATTR_SIZE], char relname_source_two[ATTR_SIZE],
@@ -56,7 +56,7 @@ public:
     static int select_attrlist_from_join_where(char relname_source_one[ATTR_SIZE], char relname_source_two[ATTR_SIZE],
                                                char relname_target[ATTR_SIZE],
                                                char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE],
-                                               int attr_count, char attr_list[attr_count][ATTR_SIZE]);
+                                               int attr_count, char attr_list[][ATTR_SIZE]);
 };
 
 
