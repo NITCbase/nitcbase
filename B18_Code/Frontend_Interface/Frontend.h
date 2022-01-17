@@ -15,8 +15,7 @@ using namespace std;
 class Frontend {
 public:
     // DDL
-    static int
-    create_table(char relname[ATTR_SIZE], int no_attrs, char attribute[][ATTR_SIZE], int type_attr[]);
+    static int create_table(char relname[ATTR_SIZE], int no_attrs, char attributes[][ATTR_SIZE], int type_attrs[]);
 
     static int drop_table(char relname[ATTR_SIZE]);
 

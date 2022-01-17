@@ -9,14 +9,14 @@ void print16(char char_string_thing[ATTR_SIZE], bool newline);
 
 void print16(char char_string_thing[ATTR_SIZE]);
 
-int Frontend::create_table(char relname[ATTR_SIZE], int no_attrs, char attribute[][ATTR_SIZE],
-                           int type_attr[]) {
+int Frontend::create_table(char relname[ATTR_SIZE], int no_attrs, char attributes[][ATTR_SIZE],
+                           int type_attrs[]) {
     cout << "In Create Table\n";
     print16(relname);
     for (auto i = 0; i < no_attrs; i++) {
-        print16(attribute[i], false);
+        print16(attributes[i], false);
         cout << " type = ";
-        cout << type_attr[i] << endl;
+        cout << type_attrs[i] << endl;
     }
     return SUCCESS;
 }
