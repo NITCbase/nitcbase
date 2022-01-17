@@ -1,0 +1,3 @@
+/Users/jessiyajoy/Developer/nitcbase/B18_Code/XFS_Interface/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/jessiyajoy/Developer/nitcbase/B18_Code/XFS_Interface/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/jessiyajoy/Developer/nitcbase/B18_Code/XFS_Interface/cmake-build-debug/CMakeFiles/XFS-Interface.dir
