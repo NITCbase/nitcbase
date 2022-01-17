@@ -1122,8 +1122,8 @@ void printBPlusTreeHelper(queue<int> bplus_blocks, vector<int> children, int att
 
 	vector<int> noOfNodesInEachLevel;
 	noOfNodesInEachLevel.push_back(1);
-	noOfNodesInEachLevel.push_back(children.front());
-	int i = 1, k = 1;
+//	noOfNodesInEachLevel.push_back(children.front());
+	int i = 0, k = 0;
 	while (i < children.size()) {
 		int nodes_in_current_level = noOfNodesInEachLevel[k];
 		int nodes_in_next_level = 0;
