@@ -94,7 +94,8 @@ int project(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], int tar_nAttrs, c
 			ret = ba_insert(targetRelId, proj_rec);
 			if (ret != SUCCESS) {
 				// unable to insert into target relation
-				ba_delete(targetRelId);
+				OpenRelTable::closeRelation(targetRelId);
+				ba_delete(targetrel);
 				return ret;
 			}
 		} else
@@ -194,7 +195,8 @@ int select(char srcrel[ATTR_SIZE], char targetrel[ATTR_SIZE], char attr[ATTR_SIZ
 		if (retval == SUCCESS) {
 			int ret = ba_insert(targetRelId, record);
 			if (ret != SUCCESS) {
-				ba_delete(targetRelId);
+				OpenRelTable::closeRelation(targetRelId);
+				ba_delete(targetrel);
 				return ret;
 			}
 		} else

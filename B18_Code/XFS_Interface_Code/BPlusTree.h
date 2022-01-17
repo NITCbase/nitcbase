@@ -20,7 +20,7 @@ public:
 	int getRootBlock();
 	int bPlusInsert(union Attribute attrVal, recId recordId);
 	recId BPlusSearch(union Attribute attrVal, int op, recId *prev_indexId);
-	int bPlusDestroy(int blockNum);
+	static int bPlusDestroy(int blockNum);
 };
 
 #endif //B18_CODE_BPLUSTREE_H

@@ -339,7 +339,8 @@ int importRelation(char *fileName) {
 			if (currentCharacter == ',')
 				numOfFieldsInLine++;
 			if (currentCharacter == previousCharacter && currentCharacter == ',') {
-				ba_delete(relId);
+				OpenRelTable::closeRelation(relId);
+				ba_delete(relationName);
 				cout << "Null values are not allowed in attribute fields\n";
 				return FAILURE;
 			}
@@ -353,13 +354,16 @@ int importRelation(char *fileName) {
 		}
 
 		if (previousCharacter == ',') {
-			ba_delete(relId);
+			OpenRelTable::closeRelation(relId);
+			ba_delete(relationName);
 
 			cout << "Null values are not allowed in attribute fields\n";
 			return FAILURE;
 		}
 		if (numOfAttributes != numOfFieldsInLine + 1) {
-			ba_delete(relId);
+			OpenRelTable::closeRelation(relId);
+			ba_delete(relationName);
+
 			cout << "Mismatch in number of attributes\n";
 			return FAILURE;
 		}
@@ -390,10 +394,14 @@ int importRelation(char *fileName) {
 		int retValue = constructRecordFromAttrsArray(numOfAttributes, record, attributesCharArray, attrTypes);
 
 		if (retValue == E_ATTRTYPEMISMATCH) {
-			ba_delete(relId);
+			OpenRelTable::closeRelation(relId);
+			ba_delete(relationName);
+
 			return E_ATTRTYPEMISMATCH;
 		} else if (retValue == E_INVALID) {
-			ba_delete(relId);
+			OpenRelTable::closeRelation(relId);
+			ba_delete(relationName);
+
 			cout << "Invalid character at line " << lineNumber << " in file \n";
 			return FAILURE;
 		}
@@ -401,7 +409,9 @@ int importRelation(char *fileName) {
 		int retVal = ba_insert(relId, record);
 
 		if (retVal != SUCCESS) {
-			ba_delete(relId);
+			OpenRelTable::closeRelation(relId);
+			ba_delete(relationName);
+
 			cout << "Insert failed" << endl;
 			return retVal;
 		}

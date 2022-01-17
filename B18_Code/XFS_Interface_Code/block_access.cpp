@@ -232,7 +232,6 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 }
 
 
-// Todo: [AN EXISTING TODO] updating last block of attribute catalog
 /*
  * Deletes the relation of the given name
  *      - Clears the Data stored in ALL record blocks corresponding to the relation
@@ -240,16 +239,94 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
  *      - Clears the Relation Catalog entry for this relation
  */
 // I have changed the order in which Relation Catalog and Open Relation table is searched respectively for the given relation
-int ba_delete(int relId) {
-	// TODO: There was some issue with deletion earlier, we can check it later, I have added and cleaned the code now (A LOOOT of cleaning)
+//int ba_delete(int relId) {
+//	/* Get the Relation Catalog Entry */
+//	Attribute relCatEntry[6];
+//	getRelCatEntry(relId, relCatEntry);
+//
+//	/* Get first record block corresponding to the given relation */
+//	int curr_block = (int)relCatEntry[RELCAT_FIRST_BLOCK_INDEX].nval;
+//	int no_of_attrs = (int)relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
+//	int next_block;
+//
+//	/*
+//	 * Delete the Relation Block-by-Block starting from the first block
+//	 * Get the Next Block by using headerInfo.rblock of the Current Block
+//	 * deleteBlock() will erase the block and mark UNUSED_BLK in the Block Allocation Map
+//	 */
+//	while (curr_block != -1) {
+//		struct HeadInfo header = getHeader(curr_block);
+//		next_block = header.rblock;
+//		deleteBlock(curr_block);
+//		curr_block = next_block;
+//	}
+//
+//	recId attrcat_recid, prev_recid;
+//	prev_recid.block = -1;
+//	prev_recid.slot = -1;
+//	char attrName[ATTR_SIZE];
+//	char relName[ATTR_SIZE];
+//	OpenRelTable::getRelationName(relId, relName);
+//	Attribute relNameAsAttribute;
+//	strcpy(relNameAsAttribute.sval, relName);
+//	for (int i = 0; i < no_of_attrs; i++) {
+//
+//		Attribute attrCatEntry[6];
+//		getAttrCatEntry(relId, i, attrCatEntry);
+//		strcpy(attrName, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval);
+//
+//		// Delete B+ tree blocks, if it exists for any of the attributes
+//		int rootBlock = (int) attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+//		if (rootBlock != -1) {
+//			BPlusTree bPlusTree = BPlusTree(relId, attrName);
+//			bPlusTree.bPlusDestroy(rootBlock);
+//			attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
+//			setAttrCatEntry(relId, attrName, attrCatEntry);
+//		}
+//
+//		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
+//		prev_recid.block = -1;
+//		prev_recid.slot = -1;
+//		// Delete Attribute Catalog Entry
+//		deleteAttrCatEntry(attrcat_recid);
+//	}
+//
+//	/*
+//	 * Delete Relation Catalog Entry
+//	 */
+//	recId relcat_recid;
+//	prev_recid.block = -1;
+//	prev_recid.slot = -1;
+//
+//	relcat_recid = linear_search(RELCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
+//	deleteRelCatEntry(relcat_recid, relCatEntry);
+//
+//	closeRel(relId);
+//
+//	return SUCCESS;
+//}
 
+int ba_delete(char relName[ATTR_SIZE]) {
 	/* Get the Relation Catalog Entry */
-	Attribute relCatEntry[6];
-	getRelCatEntry(relId, relCatEntry);
+	Attribute relName_Attr;
+	strcpy(relName_Attr.sval, relName);
+
+	/* Check if a relation with the given name exists in Relation Catalog and retrieve the relcat_recid */
+	recId prev_recid, relcat_recid;
+	prev_recid.block = -1;
+	prev_recid.slot = -1;
+
+	relcat_recid = linear_search(RELCAT_RELID, "RelName", relName_Attr, EQ, &prev_recid);
+	if ((relcat_recid.block == -1) && (relcat_recid.slot == -1)) {
+		return E_RELNOTEXIST;
+	}
+
+	Attribute relCatRecord[6];
+	getRecord(relCatRecord, relcat_recid.block, relcat_recid.slot);
 
 	/* Get first record block corresponding to the given relation */
-	int curr_block = (int)relCatEntry[RELCAT_FIRST_BLOCK_INDEX].nval;
-	int no_of_attrs = (int)relCatEntry[RELCAT_NO_ATTRIBUTES_INDEX].nval;
+	int curr_block = (int)relCatRecord[RELCAT_FIRST_BLOCK_INDEX].nval;
+	int no_of_attrs = (int)relCatRecord[RELCAT_NO_ATTRIBUTES_INDEX].nval;
 	int next_block;
 
 	/*
@@ -264,48 +341,35 @@ int ba_delete(int relId) {
 		curr_block = next_block;
 	}
 
-	recId attrcat_recid, prev_recid;
+	recId attrcat_recid;
 	prev_recid.block = -1;
 	prev_recid.slot = -1;
 	char attrName[ATTR_SIZE];
-	char relName[ATTR_SIZE];
-	OpenRelTable::getRelationName(relId, relName);
+
+	Attribute attrCatRecord[6];
+
 	Attribute relNameAsAttribute;
 	strcpy(relNameAsAttribute.sval, relName);
 	for (int i = 0; i < no_of_attrs; i++) {
-
-		Attribute attrCatEntry[6];
-		getAttrCatEntry(relId, i, attrCatEntry);
-		strcpy(attrName, attrCatEntry[ATTRCAT_ATTR_NAME_INDEX].sval);
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
+		getRecord(attrCatRecord, attrcat_recid.block, attrcat_recid.slot);
 
 		// Delete B+ tree blocks, if it exists for any of the attributes
-		int rootBlock = (int) attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval;
+		int rootBlock = (int) attrCatRecord[ATTRCAT_ROOT_BLOCK_INDEX].nval;
 		if (rootBlock != -1) {
-			BPlusTree bPlusTree = BPlusTree(relId, attrName);
-			bPlusTree.bPlusDestroy(rootBlock);
-			attrCatEntry[ATTRCAT_ROOT_BLOCK_INDEX].nval = -1;
-			setAttrCatEntry(relId, attrName, attrCatEntry);
+			BPlusTree::bPlusDestroy(rootBlock);
 		}
-
-		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
-		// TODO :::: REVIEW
-		prev_recid.block = -1;
-		prev_recid.slot = -1;
 		// Delete Attribute Catalog Entry
 		deleteAttrCatEntry(attrcat_recid);
+
+		prev_recid.block = -1;
+		prev_recid.slot = -1;
 	}
 
 	/*
 	 * Delete Relation Catalog Entry
 	 */
-	recId relcat_recid;
-	prev_recid.block = -1;
-	prev_recid.slot = -1;
-
-	relcat_recid = linear_search(RELCAT_RELID, "RelName", relNameAsAttribute, EQ, &prev_recid);
-	deleteRelCatEntry(relcat_recid, relCatEntry);
-
-	closeRel(relId);
+	deleteRelCatEntry(relcat_recid, relCatRecord);
 
 	return SUCCESS;
 }

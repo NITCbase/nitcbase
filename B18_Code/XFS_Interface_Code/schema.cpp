@@ -20,14 +20,13 @@ Attribute *make_attrcatrec(char relname[ATTR_SIZE], char attrname[ATTR_SIZE], in
 /*
  * Schema Layer function for Creating a Relation/Table from the given name and attributes
  */
-// TODO : review whether relation should be opened after creation
 int createRel(char relname[ATTR_SIZE], int nAttrs, char attrs[][ATTR_SIZE], int attrtypes[]) {
 
-	int status = OpenRelTable::checkIfOpenRelTableHasFreeEntry();
-	if (status == FAILURE) {
-		std::cout << "createRel not possible as openRel failed\n";
-		return E_CACHEFULL;
-	}
+//	int status = OpenRelTable::checkIfOpenRelTableHasFreeEntry();
+//	if (status == FAILURE) {
+//		std::cout << "createRel not possible as openRel failed\n";
+//		return E_CACHEFULL;
+//	}
 
 	Attribute attrval;
 	strcpy(attrval.sval, relname);
@@ -59,7 +58,7 @@ int createRel(char relname[ATTR_SIZE], int nAttrs, char attrs[][ATTR_SIZE], int 
 		return flag;
 	}
 
-	int relId = OpenRelTable::openRelation(relname);
+//	int relId = OpenRelTable::openRelation(relname);
 
 	for (int offset = 0; offset < nAttrs; offset++) {
 		Attribute *attrcatrec = make_attrcatrec(relname, attrs[offset], attrtypes[offset], -1,
@@ -67,27 +66,27 @@ int createRel(char relname[ATTR_SIZE], int nAttrs, char attrs[][ATTR_SIZE], int 
 		flag = ba_insert(ATTRCAT_RELID, attrcatrec);
 
 		if (flag != SUCCESS) {
-			ba_delete(relId);
+			ba_delete(relname);
 			return flag;
 		}
 	}
-	closeRel(relId);
+//	closeRel(relId);
 	return SUCCESS;
 }
 
 int deleteRel(char relname[ATTR_SIZE]) {
-	// get the relation's open relation id
-	int relId = OpenRelTable::getRelationId(relname);
-
-	if (relId == RELCAT_RELID || relId == ATTRCAT_RELID) {
+	if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0) {
 		return E_INVALID;
 	}
 
-	// if relation is not open return E_RELNOTOPEN - cannot be deleted
-	if (relId == E_RELNOTOPEN)
-		return E_RELNOTOPEN;
+	// get the relation's open relation id
+	int relId = OpenRelTable::getRelationId(relname);
 
-	int retval = ba_delete(relId);
+	// if relation is not open return E_RELNOTOPEN - cannot be deleted
+	if (relId != E_RELNOTOPEN)
+		return E_RELOPEN;
+
+	int retval = ba_delete(relname);
 
 	return retval;
 }
