@@ -31,7 +31,7 @@ jobs:
 
       - name: Pushes to another repository
         id: push_directory
-        uses: Nitcbase/nitcbase@main
+        uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
