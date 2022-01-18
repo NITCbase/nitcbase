@@ -1,1 +1,5 @@
-Disk
+Disk/disk
+
+B18_Code/XFS_Interface/cmake-build-debug/
+
+B18_Code/Frontend_Interface/cmake-build-debug/
