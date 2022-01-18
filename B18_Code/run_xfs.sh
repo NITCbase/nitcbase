@@ -1,9 +1,5 @@
 #!/bin/sh
 
-echo Building docker image xfs
-
-docker build . -t xfs
-
 echo Running docker container from image xfs
 
 disk_volume_path="$HOME/NITCbase/Files:/opt/NITCbase/Files"
