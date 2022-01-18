@@ -8,7 +8,7 @@ WORKDIR /src/B18_Code/Frontend_Interface/
 
 RUN cmake --clean-first . && make
 
-# Use second docker image for the XFS-Executable and Volumes
+# Use second docker image for the Frontend-Executable and Volumes
 FROM ubuntu:bionic
 
 WORKDIR /opt/B18_Code/Frontend_Interface/
