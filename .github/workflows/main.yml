@@ -24,7 +24,10 @@ jobs:
         run: sudo apt install zip
         
       - name: Create NITCbase.zip
-        run: zip -r NITCbase.zip B18_Code/
+        uses: papeloto/action-zip@v1
+        with:
+          files: B18_Code/
+          dest: NITCbase.zip
         
       - name: Move NITCbase.zip to downloads folder
         run: mv NITCbase.zip downloads
