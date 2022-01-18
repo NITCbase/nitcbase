@@ -38,7 +38,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source-directory: NITCbase.zip
+          source-directory: downloads
           destination-github-username: 'Nitcbase'
           destination-repository-name: 'nitcbase-download'
           user-email: jessiyajoy@gmail.com
