@@ -8,7 +8,7 @@
 #include "../define/errors.h"
 #include "frontend-runner.h"
 #include "Frontend.h"
-#include "../DiskClass/Disk.h"
+#include "../Disk_Class/Disk.h"
 
 using namespace std;
 
