@@ -30,7 +30,7 @@ jobs:
         run: zip NITCbase.zip B18_Code/
         
       - name: Move NITCbase.zip to downloads folder
-        run: mv NITCbase.zip downloads
+        run: mkdir downloads && mv NITCbase.zip downloads
 
       - name: Pushes to another repository
         id: push_directory
