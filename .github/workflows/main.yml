@@ -27,7 +27,7 @@ jobs:
         run: sudo apt install zip && ls
         
       - name: Create NITCbase.zip
-        run: cd B18_Code && zip -r ../NITCbase.zip *
+        run: zip -r ../NITCbase.zip *
         
       - name: Move NITCbase.zip to downloads folder
         run: mkdir downloads && mv NITCbase.zip downloads
