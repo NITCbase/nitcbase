@@ -1,2 +1,0 @@
-echo dropping relcat
-DROP TABLE RELATIONCAT

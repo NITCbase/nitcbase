@@ -1,3 +1,0 @@
-fdisk
-echo trying to import relation from a file with different attributes types in a row
-import fruits_e2.csv

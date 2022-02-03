@@ -1,5 +1,0 @@
-fdisk
-echo trying to create index on an attributes of  RELATIONCAT or ATTRIBUTECAT
-DROP INDEX ON RELATIONCAT.attr_name
-DROP INDEX ON ATTRIBUTECAT.attr_name
-exit

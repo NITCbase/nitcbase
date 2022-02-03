@@ -1,8 +1,0 @@
-echo Rigorous Test 1 - 5000 numbers all between 1-100
-run sindex/rig1
-echo _____________________________________________________________________________________________________________________
-echo Rigorous Test 2 - 1000 string of length 3
-run sindex/rig2
-echo _____________________________________________________________________________________________________________________
-echo Rigorous Test 3 - 10000 Unique numbers
-run sindex/rig3

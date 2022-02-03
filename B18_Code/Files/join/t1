@@ -1,8 +1,0 @@
-fdisk
-import pupil.csv
-import reward.csv
-open table pupil
-echo performing join on 2 tables - pupil, reward
-echo table reward is not open
-SELECT * FROM pupil JOIN reward INTO pupil_reward WHERE pupil.final_grade = reward.grade;
-exit

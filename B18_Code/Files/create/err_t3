@@ -1,3 +1,0 @@
-fdisk
-echo creating a relation called 'temp'
-CREATE TABLE temp(ID NUM);

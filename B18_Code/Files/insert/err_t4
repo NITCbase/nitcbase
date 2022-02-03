@@ -1,5 +1,0 @@
-fdisk
-echo inserting with null attribute values
-CREATE TABLE new(ID NUM, Age NUM, Grade STR);
-OPEN TABLE new;
-INSERT INTO new VALUES (2, , A);

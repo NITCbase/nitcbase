@@ -1,5 +1,0 @@
-echo renaming to attr name which already exists
-fdisk
-create table a(id NUM, roll NUM)
-alter table rename a column id to roll
-exit

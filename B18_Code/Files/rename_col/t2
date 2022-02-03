@@ -1,4 +1,0 @@
-echo renaming when relation does not exist
-fdisk
-alter table rename a column id to rollno
-exit

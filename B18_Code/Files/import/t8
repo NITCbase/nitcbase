@@ -1,3 +1,0 @@
-fdisk
-echo importing relation from a file having null attribute values
-import fruits_e3.csv

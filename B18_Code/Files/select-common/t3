@@ -1,2 +1,0 @@
-echo selecting when target relation is Attribute catalog
-SELECT * FROM RELATIONCAT INTO ATTRIBUTECAT;

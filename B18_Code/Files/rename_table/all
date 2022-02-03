@@ -1,9 +1,0 @@
-echo ---- 1 -----
-run rename_table/t1
-echo ---- 2 -----
-run rename_table/t2
-echo ---- 3 -----
-run rename_table/t3
-echo ---- 4 -----
-run rename_table/t4
-exit

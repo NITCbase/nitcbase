@@ -1,6 +1,0 @@
-fdisk
-import numbers.csv
-OPEN TABLE numbers
-echo trying to drop index of an attribute for which indexing does not exist
-DROP INDEX ON numbers.key
-exit

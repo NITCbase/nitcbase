@@ -1,5 +1,0 @@
-fdisk
-echo the actual number of attributes in the relation is different from the provided number of attributes
-CREATE TABLE new(ID NUM);
-OPEN TABLE new;
-INSERT INTO new VALUES (1, 3);

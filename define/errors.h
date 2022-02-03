@@ -1,3 +1,6 @@
+#ifndef B18_CODE_ERRORS_H
+#define B18_CODE_ERRORS_H
+
 #define SUCCESS 0
 #define FAILURE -1
 #define E_OUTOFBOUND -2
@@ -15,3 +18,8 @@
 #define E_NATTRMISMATCH -14
 #define E_DUPLICATEATTR -15
 #define E_RELOPEN -16
+#define E_ATTRTYPEMISMATCH -17
+#define E_INVALID -18
+#define E_MAXRELATIONS -19
+
+#endif //B18_CODE_ERRORS_H

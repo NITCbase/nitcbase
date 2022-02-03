@@ -1,9 +1,0 @@
-echo -------------
-run close/t1
-echo -------------
-run close/t2
-echo -------------
-run close/t3
-echo -------------
-fdisk
-exit

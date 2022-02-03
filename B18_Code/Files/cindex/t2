@@ -1,6 +1,0 @@
-fdisk
-import numbers.csv
-OPEN TABLE numbers
-echo trying to create index on an attribute which does not exist
-CREATE INDEX ON numbers.random_name
-exit

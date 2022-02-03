@@ -1,7 +1,0 @@
-fdisk
-create table students(id NUM)
-open table students
-alter table rename students column id to rollno
-echo renamed column id of table students to rollno
-dump attrcat
-exit

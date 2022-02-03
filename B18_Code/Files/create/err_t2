@@ -1,3 +1,0 @@
-fdisk
-echo creating table with duplicate attributes
-CREATE TABLE new(Name STR, Age NUM, Name STR);

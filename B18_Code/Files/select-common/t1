@@ -1,6 +1,0 @@
-fdisk
-import health3.csv
-OPEN TABLE health3
-echo Selecting when target relation already exists
-CREATE TABLE target_rel(id NUM);
-SELECT Last_Name, Age FROM health3 INTO target_rel;

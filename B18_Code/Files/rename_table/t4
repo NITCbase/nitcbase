@@ -1,3 +1,0 @@
-echo renaming RELATIONCAT or ATTRIBUTECAT
-alter table rename RELATIONCAT to a
-alter table rename ATTRIBUTECAT to a

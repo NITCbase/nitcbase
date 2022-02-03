@@ -1,8 +1,0 @@
-fdisk
-import numbers.csv
-OPEN TABLE numbers
-CREATE INDEX ON numbers.key
-CLOSE TABLE numbers
-echo trying to drop index of an attribute whose relation is not open
-DROP INDEX ON numbers.key
-exit
