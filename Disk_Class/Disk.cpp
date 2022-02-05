@@ -48,7 +48,7 @@ Disk::~Disk() {
  * blockNum - Block number of the disk block to be read.
  */
 int Disk::readBlock(unsigned char *block, int blockNum) {
-    FILE *disk = fopen(DISK_RUN_COPY_PATH, "rb");
+    FILE *disk = fopen(&DISK_RUN_COPY_PATH[0], "rb");
     if (blockNum < 0 || blockNum > 8191) {
         return E_OUTOFBOUND;
     }
@@ -66,7 +66,7 @@ int Disk::readBlock(unsigned char *block, int blockNum) {
  * blockNum - Block number of the disk block to be written into.
  */
 int Disk::writeBlock(unsigned char *block, int blockNum) {
-    FILE *disk = fopen(DISK_RUN_COPY_PATH, "wb");
+    FILE *disk = fopen(&DISK_RUN_COPY_PATH[0], "wb");
     if (blockNum < 0 || blockNum > 8191) {
         return E_OUTOFBOUND;
     }

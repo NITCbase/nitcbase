@@ -1,9 +1,10 @@
 #ifndef B18_CODE_CONSTANTS_H
 #define B18_CODE_CONSTANTS_H
+#include <iostream>
 
-#define DISK_PATH "../Disk/disk"
-#define DISK_RUN_COPY_PATH "../Disk/disk_run_copy"
-#define FILES_PATH "../Files/"
+extern std::string DISK_PATH;
+extern std::string DISK_RUN_COPY_PATH;
+extern std::string FILES_PATH;
 
 #define BLOCK_SIZE 2048
 #define ATTR_SIZE 16
@@ -30,8 +31,6 @@
 
 #define OCCUPIED 1
 #define FREE 0
-
-#define INT_MAX 2147483647
 
 // TODO : use enum here
 
