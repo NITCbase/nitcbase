@@ -506,7 +506,7 @@ int main(int argc, char *argv[]) {
 		DISK_RUN_COPY_PATH = "../Disk/disk_run_copy";
 		FILES_PATH = "../Files/";
 	}
-	cout << DISK_PATH << " " << DISK_RUN_COPY_PATH << " " << FILES_PATH << endl;
+	// cout << DISK_PATH << " " << DISK_RUN_COPY_PATH << " " << FILES_PATH << endl;
 
 	/* Initialize the Run Copy of Disk */
 	Disk disk_run;
