@@ -2,6 +2,6 @@ mkdir build
 cd build
 cmake ..
 make
-cp Frontend-Interfacee ../
+cp Frontend-Interface ../
 cd ..
 rm -rf build/
