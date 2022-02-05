@@ -99,6 +99,12 @@ int regexMatchAndExecute(const string input_command) {
         vector<string> words = extract_tokens(attrs);
 
         int no_attrs = words.size() / 2;
+
+        if (no_attrs > 125) {
+            printErrorMsg(E_MAXATTRS);
+            return FAILURE;
+        }
+
         char attribute[no_attrs][ATTR_SIZE];
         int type_attr[no_attrs];
 
@@ -656,6 +662,8 @@ void printErrorMsg(int ret) {
         cout << "Error: Invalid index or argument" << endl;
     else if (ret == E_MAXRELATIONS)
         cout << "Error: Maximum number of relations already present" << endl;
+    else if (ret == E_MAXATTRS)
+        cout << "Error: Maximum number of attributes allowed for a relation is 125" << endl;
 }
 
 vector<string> extract_tokens(string input_command) {
