@@ -3,7 +3,12 @@
 
 # Igonre .idea folder files
 .idea/
+.idea/misc.xml
 
 # Ignore cmake debug files
 XFS_Interface/cmake-build-debug/
 Frontend_Interface/cmake-build-debug/
+
+# Local copy of Executables
+XFS_Interface/XFS-Interface
+Frontend_Interface/Frontend-Interface
