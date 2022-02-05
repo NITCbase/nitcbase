@@ -3,26 +3,7 @@
 
 # Igonre .idea folder files
 .idea/
-/Archive/.idea/
-/B18_Code/.idea
-/B18_Code/XFS_Interface_Code/.idea
-
-# Idea Misc
-.idea/csv-plugin.xml
-.idea/misc.xml
 
 # Ignore cmake debug files
-/B18_Code/cmake-build-debug
-/B18_Code/XFS_Interface_Code/cmake-build-debug
-/B18_Code/XFS_Interface_Code/cmake-build-debug--remote/
-/B18_Code/XFS_Interface_Code/CMakeFiles
-/B18_Code/CMakeFiles
-/B18_Code/Frontend_Interface/cmake-build-debug/
-/Archive/cmake-build-debug
-
-# Disk and Default Dump Files 
-/B18_Code/Disk/disk
-/B18_Code/attribute_catalog
-/B18_Code/relation_catalog
-/B18_Code/block_allocation_map
-/B18_Code/XFS_Interface_Code/cmake-build-debug---remote/
+XFS_Interface/cmake-build-debug/
+Frontend_Interface/cmake-build-debug/
