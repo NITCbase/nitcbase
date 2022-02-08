@@ -16,14 +16,14 @@ using namespace std;
  * the previous state of the disk is not lost.
  */
 Disk::Disk() {
-    /* An efficient method to copy files */
-    /* Copy Disk to Disk Run Copy */
-    std::ifstream  src(Disk_Path, std::ios::binary);
-    std::ofstream  dst(Disk_Run_Copy_Path, std::ios::binary);
+	/* An efficient method to copy files */
+	/* Copy Disk to Disk Run Copy */
+	std::ifstream src(DISK_PATH, std::ios::binary);
+	std::ofstream dst(DISK_RUN_COPY_PATH, std::ios::binary);
 
-    dst << src.rdbuf();
-    src.close();
-    dst.close();
+	dst << src.rdbuf();
+	src.close();
+	dst.close();
 }
 
 /*
@@ -31,14 +31,14 @@ Disk::Disk() {
  * This ensures that these changes are visible in future sessions.
  */
 Disk::~Disk() {
-    /* An efficient method to copy files */
-    /* Copy Disk Run Copy to Disk */
-    std::ifstream  src(Disk_Run_Copy_Path, std::ios::binary);
-    std::ofstream  dst(Disk_Path, std::ios::binary);
+	/* An efficient method to copy files */
+	/* Copy Disk Run Copy to Disk */
+	std::ifstream src(DISK_RUN_COPY_PATH, std::ios::binary);
+	std::ofstream dst(DISK_PATH, std::ios::binary);
 
-    dst << src.rdbuf();
-    src.close();
-    dst.close();
+	dst << src.rdbuf();
+	src.close();
+	dst.close();
 }
 
 /*
@@ -48,15 +48,15 @@ Disk::~Disk() {
  * blockNum - Block number of the disk block to be read.
  */
 int Disk::readBlock(unsigned char *block, int blockNum) {
-    FILE *disk = fopen(&Disk_Run_Copy_Path[0], "rb");
-    if (blockNum < 0 || blockNum > 8191) {
-        return E_OUTOFBOUND;
-    }
-    const int offset = blockNum * BLOCK_SIZE;
-    fseek(disk, offset, SEEK_SET);
-    fread(block, BLOCK_SIZE, 1, disk);
-    fclose(disk);
-    return SUCCESS;
+	FILE *disk = fopen(DISK_RUN_COPY_PATH, "rb");
+	if (blockNum < 0 || blockNum > 8191) {
+		return E_OUTOFBOUND;
+	}
+	const int offset = blockNum * BLOCK_SIZE;
+	fseek(disk, offset, SEEK_SET);
+	fread(block, BLOCK_SIZE, 1, disk);
+	fclose(disk);
+	return SUCCESS;
 }
 
 /*
@@ -66,13 +66,13 @@ int Disk::readBlock(unsigned char *block, int blockNum) {
  * blockNum - Block number of the disk block to be written into.
  */
 int Disk::writeBlock(unsigned char *block, int blockNum) {
-    FILE *disk = fopen(&Disk_Run_Copy_Path[0], "wb");
-    if (blockNum < 0 || blockNum > 8191) {
-        return E_OUTOFBOUND;
-    }
-    const int offset = blockNum * BLOCK_SIZE;
-    fseek(disk, offset, SEEK_SET);
-    fwrite(block, BLOCK_SIZE, 1, disk);
-    fclose(disk);
-    return SUCCESS;
+	FILE *disk = fopen(DISK_RUN_COPY_PATH, "wb");
+	if (blockNum < 0 || blockNum > 8191) {
+		return E_OUTOFBOUND;
+	}
+	const int offset = blockNum * BLOCK_SIZE;
+	fseek(disk, offset, SEEK_SET);
+	fwrite(block, BLOCK_SIZE, 1, disk);
+	fclose(disk);
+	return SUCCESS;
 }

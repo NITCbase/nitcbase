@@ -244,7 +244,7 @@ int regexMatchAndExecute(const string input_command) {
 		regex_search(input_command, m, insert_multiple);
 		string tablename = m[3];
 		char relname[ATTR_SIZE];
-		string p = Input_Files_Path;
+		string p = INPUT_FILES_PATH;
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		string t = m[6];
 		p = p + t;
@@ -517,38 +517,7 @@ int regexMatchAndExecute(const string input_command) {
 	return SUCCESS;
 }
 
-// defining extern variables declared in constants.h
-string Disk_Path, Disk_Run_Copy_Path, Files_Path, Input_Files_Path, Output_Files_Path, Batch_Files_Path;
-
 int main(int argc, char *argv[]) {
-
-	string executable_path(argv[0]);
-	int index = executable_path.find("Frontend-Interface");
-	int root_path_length = executable_path.length() - (strlen("./") + strlen("Frontend-Interface"));
-
-	/*
-	* NITCbase/Files
-	* NITCbase/Disk
-	* NITCbase/XFS_Interface/XFS-Interface
-	*/
-	if (root_path_length) {
-		string root_path = executable_path.substr(2, root_path_length - strlen("Frontend_Interface/"));
-		Disk_Path = Disk_Run_Copy_Path = Files_Path = Input_Files_Path = Output_Files_Path = Batch_Files_Path = root_path;
-		Disk_Path += "Disk/disk";
-		Disk_Run_Copy_Path += "Disk/disk_run_copy";
-		Files_Path += "Files/";
-		Input_Files_Path += "Files/Input_Files/";
-		Output_Files_Path += "Files/Output_Files/";
-		Batch_Files_Path += "Files/Batch_Execution_Files/";
-	} else {
-		Disk_Path = "../Disk/disk";
-		Disk_Run_Copy_Path = "../Disk/disk_run_copy";
-		Files_Path = "../Files/";
-		Input_Files_Path += "../Files/Input_Files/";
-		Output_Files_Path += "../Files/Output_Files/";
-		Batch_Files_Path += "../Files/Batch_Execution_Files/";
-	}
-	// cout << DISK_PATH << " " << DISK_RUN_COPY_PATH << " " << FILES_PATH << endl;
 
 	/* Initialize the Run Copy of Disk */
 	Disk disk_run;
@@ -577,7 +546,7 @@ int main(int argc, char *argv[]) {
 }
 
 int executeCommandsFromFile(const string fileName) {
-	const string filePath = Batch_Files_Path;
+	const string filePath = BATCH_FILES_PATH;
 	fstream commandsFile;
 	commandsFile.open(filePath + fileName, ios::in);
 	string command;
