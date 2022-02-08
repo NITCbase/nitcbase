@@ -238,7 +238,7 @@ int regexMatchAndExecute(const string input_command) {
 		regex_search(input_command, m, insert_multiple);
 		string tablename = m[3];
 		char relname[ATTR_SIZE];
-		string p = FILES_PATH;
+		string p = Input_Files_Path;
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 		string t = m[6];
 		p = p + t;
@@ -481,7 +481,8 @@ int regexMatchAndExecute(const string input_command) {
 	return SUCCESS;
 }
 
-string DISK_PATH, DISK_RUN_COPY_PATH, FILES_PATH;
+// defining extern variables declared in constants.h
+string Disk_Path, Disk_Run_Copy_Path, Files_Path, Input_Files_Path, Output_Files_Path, Batch_Files_Path;
 
 int main(int argc, char *argv[]) {
 
@@ -496,14 +497,20 @@ int main(int argc, char *argv[]) {
 	*/
 	if (root_path_length) {
 		string root_path = executable_path.substr(2, root_path_length - strlen("Frontend_Interface/"));
-		DISK_PATH = DISK_RUN_COPY_PATH = FILES_PATH = root_path;
-		DISK_PATH += "Disk/disk";
-		DISK_RUN_COPY_PATH += "Disk/disk_run_copy";
-		FILES_PATH += "Files/";
+		Disk_Path = Disk_Run_Copy_Path = Files_Path = Input_Files_Path = Output_Files_Path = Batch_Files_Path = root_path;
+		Disk_Path += "Disk/disk";
+		Disk_Run_Copy_Path += "Disk/disk_run_copy";
+		Files_Path += "Files/";
+		Input_Files_Path += "Files/Input_Files/";
+		Output_Files_Path += "Files/Output_Files/";
+		Batch_Files_Path += "Files/Batch_Execution_Files/";
 	} else {
-		DISK_PATH = "../Disk/disk";
-		DISK_RUN_COPY_PATH = "../Disk/disk_run_copy";
-		FILES_PATH = "../Files/";
+		Disk_Path = "../Disk/disk";
+		Disk_Run_Copy_Path = "../Disk/disk_run_copy";
+		Files_Path = "../Files/";
+		Input_Files_Path += "../Files/Input_Files/";
+		Output_Files_Path += "../Files/Output_Files/";
+		Batch_Files_Path += "../Files/Batch_Execution_Files/";
 	}
 	// cout << DISK_PATH << " " << DISK_RUN_COPY_PATH << " " << FILES_PATH << endl;
 
@@ -534,7 +541,7 @@ int main(int argc, char *argv[]) {
 }
 
 int executeCommandsFromFile(const string fileName) {
-	const string filePath = FILES_PATH;
+	const string filePath = Batch_Files_Path;
 	fstream commandsFile;
 	commandsFile.open(filePath + fileName, ios::in);
 	string command;

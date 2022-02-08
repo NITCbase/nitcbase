@@ -18,8 +18,8 @@ using namespace std;
 Disk::Disk() {
     /* An efficient method to copy files */
     /* Copy Disk to Disk Run Copy */
-    std::ifstream  src(DISK_PATH, std::ios::binary);
-    std::ofstream  dst(DISK_RUN_COPY_PATH, std::ios::binary);
+    std::ifstream  src(Disk_Path, std::ios::binary);
+    std::ofstream  dst(Disk_Run_Copy_Path, std::ios::binary);
 
     dst << src.rdbuf();
     src.close();
@@ -33,8 +33,8 @@ Disk::Disk() {
 Disk::~Disk() {
     /* An efficient method to copy files */
     /* Copy Disk Run Copy to Disk */
-    std::ifstream  src(DISK_RUN_COPY_PATH, std::ios::binary);
-    std::ofstream  dst(DISK_PATH, std::ios::binary);
+    std::ifstream  src(Disk_Run_Copy_Path, std::ios::binary);
+    std::ofstream  dst(Disk_Path, std::ios::binary);
 
     dst << src.rdbuf();
     src.close();
@@ -48,7 +48,7 @@ Disk::~Disk() {
  * blockNum - Block number of the disk block to be read.
  */
 int Disk::readBlock(unsigned char *block, int blockNum) {
-    FILE *disk = fopen(&DISK_RUN_COPY_PATH[0], "rb");
+    FILE *disk = fopen(&Disk_Run_Copy_Path[0], "rb");
     if (blockNum < 0 || blockNum > 8191) {
         return E_OUTOFBOUND;
     }
@@ -66,7 +66,7 @@ int Disk::readBlock(unsigned char *block, int blockNum) {
  * blockNum - Block number of the disk block to be written into.
  */
 int Disk::writeBlock(unsigned char *block, int blockNum) {
-    FILE *disk = fopen(&DISK_RUN_COPY_PATH[0], "wb");
+    FILE *disk = fopen(&Disk_Run_Copy_Path[0], "wb");
     if (blockNum < 0 || blockNum > 8191) {
         return E_OUTOFBOUND;
     }
