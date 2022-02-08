@@ -88,11 +88,11 @@ int regexMatchAndExecute(const string input_command) {
 		char relname[ATTR_SIZE];
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
-		// 'temp' is used for internal purposes as of now
-		if (std::strcmp(relname, TEMP) == 0) {
-			cout << "Error: relation name 'temp' is used for internal purposes" << endl;
-			return FAILURE;
-		}
+        // 'temp' is used for internal purposes as of now
+        if (tablename == TEMP) {
+            printErrorMsg(E_CREATETEMP);
+            return FAILURE;
+        }
 
 		regex_search(input_command, m, temp);
 		string attrs = m[0];
@@ -184,6 +184,12 @@ int regexMatchAndExecute(const string input_command) {
 		regex_search(input_command, m, rename_table);
 		string oldTableName = m[4];
 		string newTableName = m[6];
+
+        if (newTableName == TEMP) {
+            printErrorMsg(E_RENAMETOTEMP);
+            return FAILURE;
+        }
+
 		char old_relation_name[ATTR_SIZE];
 		char new_relation_name[ATTR_SIZE];
 		string_to_char_array(oldTableName, old_relation_name, ATTR_SIZE - 1);
@@ -265,6 +271,11 @@ int regexMatchAndExecute(const string input_command) {
 		string sourceRelName_str = m[4];
 		string targetRelName_str = m[6];
 
+        if (targetRelName_str == TEMP) {
+            printErrorMsg(E_RENAMETOTEMP);
+            return FAILURE;
+        }
+
 		char sourceRelName[ATTR_SIZE];
 		char targetRelName[ATTR_SIZE];
 
@@ -287,6 +298,11 @@ int regexMatchAndExecute(const string input_command) {
 		string attribute_str = m[8];
 		string op_str = m[9];
 		string value_str = m[10];
+
+        if (targetRel_str == TEMP) {
+            printErrorMsg(E_RENAMETOTEMP);
+            return FAILURE;
+        }
 
 		char sourceRelName[ATTR_SIZE];
 		char targetRelName[ATTR_SIZE];
@@ -318,7 +334,12 @@ int regexMatchAndExecute(const string input_command) {
 		string sourceRel_str = command_tokens[index_of_from + 1];
 		string targetRel_str = command_tokens[index_of_from + 3];
 
-		char sourceRelName[ATTR_SIZE];
+        if (targetRel_str == TEMP) {
+            printErrorMsg(E_RENAMETOTEMP);
+            return FAILURE;
+        }
+
+        char sourceRelName[ATTR_SIZE];
 		char targetRelName[ATTR_SIZE];
 		string_to_char_array(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
 		string_to_char_array(targetRel_str, targetRelName, ATTR_SIZE - 1);
@@ -357,7 +378,12 @@ int regexMatchAndExecute(const string input_command) {
 		string op_str = command_tokens[index_of_where + 2];
 		string value_str = command_tokens[index_of_where + 3];
 
-		char sourceRelName[ATTR_SIZE];
+        if (targetRel_str == TEMP) {
+            printErrorMsg(E_RENAMETOTEMP);
+            return FAILURE;
+        }
+
+        char sourceRelName[ATTR_SIZE];
 		char targetRelName[ATTR_SIZE];
 		char attribute[ATTR_SIZE];
 		char value[ATTR_SIZE];
@@ -403,7 +429,12 @@ int regexMatchAndExecute(const string input_command) {
 		char joinAttributeOne[ATTR_SIZE];
 		char joinAttributeTwo[ATTR_SIZE];
 
-		string_to_char_array(m[4], sourceRelOneName, ATTR_SIZE - 1);
+        if (m[8] == TEMP) {
+            printErrorMsg(E_RENAMETOTEMP);
+            return FAILURE;
+        }
+
+        string_to_char_array(m[4], sourceRelOneName, ATTR_SIZE - 1);
 		string_to_char_array(m[6], sourceRelTwoName, ATTR_SIZE - 1);
 		string_to_char_array(m[8], targetRelName, ATTR_SIZE - 1);
 		string_to_char_array(m[11], joinAttributeOne, ATTR_SIZE - 1);
@@ -438,6 +469,11 @@ int regexMatchAndExecute(const string input_command) {
 		char targetRelName[ATTR_SIZE];
 		char joinAttributeOne[ATTR_SIZE];
 		char joinAttributeTwo[ATTR_SIZE];
+
+        if (tokens[refIndex + 5] == TEMP) {
+            printErrorMsg(E_RENAMETOTEMP);
+            return FAILURE;
+        }
 
 		string_to_char_array(tokens[refIndex + 1], sourceRelOneName, ATTR_SIZE - 1);
 		string_to_char_array(tokens[refIndex + 3], sourceRelTwoName, ATTR_SIZE - 1);
@@ -667,46 +703,53 @@ void display_help() {
 }
 
 void printErrorMsg(int ret) {
-	if (ret == FAILURE)
-		cout << "Error: Command Failed" << endl;
-	else if (ret == E_OUTOFBOUND)
-		cout << "Error: Out of bound" << endl;
-	else if (ret == E_FREESLOT)
-		cout << "Error: Free slot" << endl;
-	else if (ret == E_NOINDEX)
-		cout << "Error: No index" << endl;
-	else if (ret == E_DISKFULL)
-		cout << "Error: Insufficient space in Disk" << endl;
-	else if (ret == E_INVALIDBLOCK)
-		cout << "Error: Invalid block" << endl;
-	else if (ret == E_RELNOTEXIST)
-		cout << "Error: Relation does not exist" << endl;
-	else if (ret == E_RELEXIST)
-		cout << "Error: Relation already exists" << endl;
-	else if (ret == E_ATTRNOTEXIST)
-		cout << "Error: Attribute does not exist" << endl;
-	else if (ret == E_ATTREXIST)
-		cout << "Error: Attribute already exists" << endl;
-	else if (ret == E_CACHEFULL)
-		cout << "Error: Cache is full" << endl;
-	else if (ret == E_RELNOTOPEN)
-		cout << "Error: Relation is not open" << endl;
-	else if (ret == E_NOTOPEN)
-		cout << "Error: Relation is not open" << endl;
-	else if (ret == E_NATTRMISMATCH)
-		cout << "Error: Mismatch in number of attributes" << endl;
-	else if (ret == E_DUPLICATEATTR)
-		cout << "Error: Duplicate attributes found" << endl;
-	else if (ret == E_RELOPEN)
-		cout << "Error: Relation is open" << endl;
-	else if (ret == E_ATTRTYPEMISMATCH)
-		cout << "Error: Mismatch in attribute type" << endl;
-	else if (ret == E_INVALID)
-		cout << "Error: Invalid index or argument" << endl;
-	else if (ret == E_MAXRELATIONS)
-		cout << "Error: Maximum number of relations already present" << endl;
-	else if (ret == E_MAXATTRS)
-		cout << "Error: Maximum number of attributes allowed for a relation is 125" << endl;
+    if (ret == FAILURE)
+        cout << "Error: Command Failed" << endl;
+    else if (ret == E_OUTOFBOUND)
+        cout << "Error: Out of bound" << endl;
+    else if (ret == E_FREESLOT)
+        cout << "Error: Free slot" << endl;
+    else if (ret == E_NOINDEX)
+        cout << "Error: No index" << endl;
+    else if (ret == E_DISKFULL)
+        cout << "Error: Insufficient space in Disk" << endl;
+    else if (ret == E_INVALIDBLOCK)
+        cout << "Error: Invalid block" << endl;
+    else if (ret == E_RELNOTEXIST)
+        cout << "Error: Relation does not exist" << endl;
+    else if (ret == E_RELEXIST)
+        cout << "Error: Relation already exists" << endl;
+    else if (ret == E_ATTRNOTEXIST)
+        cout << "Error: Attribute does not exist" << endl;
+    else if (ret == E_ATTREXIST)
+        cout << "Error: Attribute already exists" << endl;
+    else if (ret == E_CACHEFULL)
+        cout << "Error: Cache is full" << endl;
+    else if (ret == E_RELNOTOPEN)
+        cout << "Error: Relation is not open" << endl;
+    else if (ret == E_NOTOPEN)
+        cout << "Error: Relation is not open" << endl;
+    else if (ret == E_NATTRMISMATCH)
+        cout << "Error: Mismatch in number of attributes" << endl;
+    else if (ret == E_DUPLICATEATTR)
+        cout << "Error: Duplicate attributes found" << endl;
+    else if (ret == E_RELOPEN)
+        cout << "Error: Relation is open" << endl;
+    else if (ret == E_ATTRTYPEMISMATCH)
+        cout << "Error: Mismatch in attribute type" << endl;
+    else if (ret == E_INVALID)
+        cout << "Error: Invalid index or argument" << endl;
+    else if (ret == E_MAXRELATIONS)
+        cout << "Error: Maximum number of relations already present" << endl;
+    else if (ret == E_MAXATTRS)
+        cout << "Error: Maximum number of attributes allowed for a relation is 125" << endl;
+    else if (ret == E_RENAMETOTEMP)
+        cout << "Error: Cannot rename a relation to 'temp'" << endl;
+    else if (ret == E_CREATETEMP)
+        cout << "Error: Cannot create relation named 'temp' as it is used for internal purposes" << endl;
+    else if (ret == E_TARGETNAMETEMP)
+        cout << "Error: Cannot create a target relation named 'temp' as it is used for internal purposes" << endl;
+
 }
 
 vector<string> extract_tokens(string input_command) {
