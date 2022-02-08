@@ -488,7 +488,6 @@ int main(int argc, char *argv[]) {
 	string executable_path(argv[0]);
 	int index = executable_path.find("Frontend-Interface");
 	int root_path_length = executable_path.length() - (strlen("./") + strlen("Frontend-Interface"));
-	string root_path("");
 
 	/*
 	* NITCbase/Files
@@ -511,6 +510,17 @@ int main(int argc, char *argv[]) {
 	/* Initialize the Run Copy of Disk */
 	Disk disk_run;
 	cout << "Run Copy of Disk Initialized\n";
+
+	// Taking Run Command as Command Line Argument(if provided)
+	if(argc == 3 && strcmp(argv[1], "run") == 0) {
+		string run_command("run ");
+		run_command.append(argv[2]);
+		int ret = regexMatchAndExecute(run_command);
+		if (ret == EXIT) {
+			return 0;
+		}
+	}
+
 	while (true) {
 		cout << "# ";
 		string input_command;
