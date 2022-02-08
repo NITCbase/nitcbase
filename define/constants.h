@@ -2,12 +2,12 @@
 #define B18_CODE_CONSTANTS_H
 #include <iostream>
 
-extern std::string Disk_Path;
-extern std::string Disk_Run_Copy_Path;
-extern std::string Files_Path;
-extern std::string Input_Files_Path;
-extern std::string Output_Files_Path;
-extern std::string Batch_Files_Path;
+#define DISK_PATH "../Disk/disk"
+#define DISK_RUN_COPY_PATH "../Disk/disk_run_copy"
+#define Files_Path "../Files/"
+#define INPUT_FILES_PATH "../Files/Input_Files/"
+#define OUTPUT_FILES_PATH "../Files/Output_Files/"
+#define BATCH_FILES_PATH "../Files/Batch_Execution_Files/"
 
 #define BLOCK_SIZE 2048
 #define ATTR_SIZE 16
