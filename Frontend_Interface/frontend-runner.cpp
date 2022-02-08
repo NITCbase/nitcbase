@@ -272,7 +272,7 @@ int regexMatchAndExecute(const string input_command) {
 		string targetRelName_str = m[6];
 
         if (targetRelName_str == TEMP) {
-            printErrorMsg(E_RENAMETOTEMP);
+            printErrorMsg(E_TARGETNAMETEMP);
             return FAILURE;
         }
 
@@ -300,7 +300,7 @@ int regexMatchAndExecute(const string input_command) {
 		string value_str = m[10];
 
         if (targetRel_str == TEMP) {
-            printErrorMsg(E_RENAMETOTEMP);
+            printErrorMsg(E_TARGETNAMETEMP);
             return FAILURE;
         }
 
@@ -335,7 +335,7 @@ int regexMatchAndExecute(const string input_command) {
 		string targetRel_str = command_tokens[index_of_from + 3];
 
         if (targetRel_str == TEMP) {
-            printErrorMsg(E_RENAMETOTEMP);
+            printErrorMsg(E_TARGETNAMETEMP);
             return FAILURE;
         }
 
@@ -379,7 +379,7 @@ int regexMatchAndExecute(const string input_command) {
 		string value_str = command_tokens[index_of_where + 3];
 
         if (targetRel_str == TEMP) {
-            printErrorMsg(E_RENAMETOTEMP);
+            printErrorMsg(E_TARGETNAMETEMP);
             return FAILURE;
         }
 
@@ -430,7 +430,7 @@ int regexMatchAndExecute(const string input_command) {
 		char joinAttributeTwo[ATTR_SIZE];
 
         if (m[8] == TEMP) {
-            printErrorMsg(E_RENAMETOTEMP);
+            printErrorMsg(E_TARGETNAMETEMP);
             return FAILURE;
         }
 
@@ -471,7 +471,7 @@ int regexMatchAndExecute(const string input_command) {
 		char joinAttributeTwo[ATTR_SIZE];
 
         if (tokens[refIndex + 5] == TEMP) {
-            printErrorMsg(E_RENAMETOTEMP);
+            printErrorMsg(E_TARGETNAMETEMP);
             return FAILURE;
         }
 
