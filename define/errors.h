@@ -23,4 +23,9 @@
 #define E_MAXRELATIONS -19
 #define E_MAXATTRS -20
 
+// 'temp' errors
+#define E_CREATETEMP -21
+#define E_TARGETNAMETEMP -22
+#define E_RENAMETOTEMP -23
+
 #endif //B18_CODE_ERRORS_H
