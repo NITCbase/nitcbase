@@ -27,10 +27,16 @@ jobs:
       - name: Create NITCbase.zip
         run: zip -r NITCbase.zip *
 
+      - name: Create NITCbase.tar.gz
+        run: tar -czvf file.tar.gz *
+
       - name: Move NITCbase.zip to downloads folder
         run: mkdir downloads && mv NITCbase.zip downloads
 
-      - name: Pushes to another repository
+      - name: Move NITCbase.tar.gz to downloads folder
+        run: mv NITCbase.tar.gz downloads
+
+      - name: Push to another repository
         id: push_directory
         uses: cpina/github-action-push-to-another-repository@main
         env:
