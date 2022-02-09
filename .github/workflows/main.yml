@@ -1,0 +1,45 @@
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Install Dependencies
+        run: sudo apt install zip && ls
+
+      - name: Create NITCbase.zip
+        run: zip -r NITCbase.zip *
+
+      - name: Move NITCbase.zip to downloads folder
+        run: mkdir downloads && mv NITCbase.zip downloads
+
+      - name: Pushes to another repository
+        id: push_directory
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: downloads
+          destination-github-username: 'Nitcbase'
+          destination-repository-name: 'nitcbase-download'
+          user-email: gokulsreekumar2@gmail.com
+          commit-message: "Automated update triggered by push to the nitcbase repo"
+          target-branch: main
+#           target-directory: 'NITCbase'
