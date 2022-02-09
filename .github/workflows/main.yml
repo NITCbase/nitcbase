@@ -28,7 +28,7 @@ jobs:
         run: zip -r NITCbase.zip *
 
       - name: Create NITCbase.tar.gz
-        run: tar -czvf file.tar.gz *
+        run: tar -czvf NITCbase.tar.gz *
 
       - name: Move NITCbase.zip to downloads folder
         run: mkdir downloads && mv NITCbase.zip downloads
