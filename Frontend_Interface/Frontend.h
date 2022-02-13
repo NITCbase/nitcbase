@@ -1,7 +1,3 @@
-//
-// Created by Gokul on 25/12/21.
-//
-
 #ifndef FRONTEND_INTERFACE_FRONTEND_H
 #define FRONTEND_INTERFACE_FRONTEND_H
 

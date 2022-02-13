@@ -1,7 +1,3 @@
-//
-// Created by Jessiya Joy on 13/02/22.
-//
-
 #include "BlockBuffer.h"
 
 #include "BlockBuffer.h"

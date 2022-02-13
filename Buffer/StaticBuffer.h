@@ -1,7 +1,3 @@
-//
-// Created by Jessiya Joy on 13/02/22.
-//
-
 #ifndef B18_CODE_STATICBUFFER_H
 #define B18_CODE_STATICBUFFER_H
 

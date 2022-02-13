@@ -1,7 +1,3 @@
-//
-// Created by Gokul on 25/12/21.
-//
-
 #include <iostream>
 #include "Frontend.h"
 

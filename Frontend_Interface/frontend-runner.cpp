@@ -1,6 +1,3 @@
-//
-// Created by gokul on 26-10-2021.
-//
 #include <iostream>
 #include <fstream>
 #include <string>
