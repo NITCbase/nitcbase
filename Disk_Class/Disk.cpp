@@ -1,14 +1,8 @@
-//
-// Created by Gokul Sreekumar on 31/10/21.
-//
-
 #include <iostream>
 #include <fstream>
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "Disk.h"
-
-using namespace std;
 
 /*
  * Used to make a temporary copy of the disk contents before the starting of a new session.
