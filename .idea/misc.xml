@@ -8,4 +8,7 @@
       <file path="$PROJECT_DIR$/B18_Code/define" />
     </sourceRoots>
   </component>
+  <component name="ProjectPlainTextFileTypeManager">
+    <file url="file://$PROJECT_DIR$/Files/Output_Files/attribute_catalog" />
+  </component>
 </project>
