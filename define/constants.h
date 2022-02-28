@@ -1,5 +1,5 @@
-#ifndef B18_CODE_CONSTANTS_H
-#define B18_CODE_CONSTANTS_H
+#ifndef NITCBASE_CONSTANTS_H
+#define NITCBASE_CONSTANTS_H
 #include <iostream>
 
 #define DISK_PATH "../Disk/disk"
@@ -90,4 +90,4 @@
 //#define MAX_KEYS_LEAF 12
 //#define MIDDLE_INDEX_LEAF 6
 
-#endif //B18_CODE_CONSTANTS_H
+#endif //NITCBASE_CONSTANTS_H

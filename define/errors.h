@@ -1,5 +1,5 @@
-#ifndef B18_CODE_ERRORS_H
-#define B18_CODE_ERRORS_H
+#ifndef NITCBASE_ERRORS_H
+#define NITCBASE_ERRORS_H
 
 #define SUCCESS 0
 #define FAILURE -1
@@ -28,4 +28,4 @@
 #define E_TARGETNAMETEMP -22
 #define E_RENAMETOTEMP -23
 
-#endif //B18_CODE_ERRORS_H
+#endif //NITCBASE_ERRORS_H

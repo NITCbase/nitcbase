@@ -2,8 +2,8 @@
 // Created by Jessiya Joy on 11/09/21.
 //
 
-#ifndef B18_CODE_ENUM_CONSTANTS_H
-#define B18_CODE_ENUM_CONSTANTS_H
+#ifndef NITCBASE_ENUM_CONSTANTS_H
+#define NITCBASE_ENUM_CONSTANTS_H
 
 enum AttributeType {
 	STRING,
@@ -80,7 +80,7 @@ enum ReturnTypes {
 };
 
 
-#endif //B18_CODE_ENUM_CONSTANTS_H
+#endif //NITCBASE_ENUM_CONSTANTS_H
 
 /* TODO :
  * - Return types

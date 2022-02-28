@@ -1,5 +1,5 @@
-#ifndef B18_CODE_BLOCKBUFFER_H
-#define B18_CODE_BLOCKBUFFER_H
+#ifndef NITCBASE_BLOCKBUFFER_H
+#define NITCBASE_BLOCKBUFFER_H
 
 #include "../define/constants.h"
 #include <cstdint>
@@ -115,4 +115,4 @@ public:
     int setEntry(void *ptr, int indexNum);
 };
 
-#endif //B18_CODE_BLOCKBUFFER_H
+#endif //NITCBASE_BLOCKBUFFER_H

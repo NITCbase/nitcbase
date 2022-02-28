@@ -1,5 +1,5 @@
-#ifndef B18_CODE_STATICBUFFER_H
-#define B18_CODE_STATICBUFFER_H
+#ifndef NITCBASE_STATICBUFFER_H
+#define NITCBASE_STATICBUFFER_H
 
 #include "../define/constants.h"
 
@@ -33,4 +33,4 @@ public:
 
 };
 
-#endif //B18_CODE_STATICBUFFER_H
+#endif //NITCBASE_STATICBUFFER_H
