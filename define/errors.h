@@ -22,6 +22,8 @@
 #define E_INVALID -18
 #define E_MAXRELATIONS -19
 #define E_MAXATTRS -20
+#define E_NOTPERMITTED -21
+#define E_NOTFOUND -22
 
 // 'temp' errors
 #define E_CREATETEMP -21

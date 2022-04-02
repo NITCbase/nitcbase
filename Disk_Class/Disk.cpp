@@ -43,7 +43,7 @@ Disk::~Disk() {
  */
 int Disk::readBlock(unsigned char *block, int blockNum) {
 	FILE *disk = fopen(DISK_RUN_COPY_PATH, "rb");
-	if (blockNum < 0 || blockNum > 8191) {
+	if (blockNum < 0 || blockNum > DISK_BLOCKS - 1) {
 		return E_OUTOFBOUND;
 	}
 	const int offset = blockNum * BLOCK_SIZE;
@@ -61,7 +61,7 @@ int Disk::readBlock(unsigned char *block, int blockNum) {
  */
 int Disk::writeBlock(unsigned char *block, int blockNum) {
 	FILE *disk = fopen(DISK_RUN_COPY_PATH, "rb+");
-	if (blockNum < 0 || blockNum > 8191) {
+	if (blockNum < 0 || blockNum > DISK_BLOCKS - 1) {
 		return E_OUTOFBOUND;
 	}
 	const int offset = blockNum * BLOCK_SIZE;
