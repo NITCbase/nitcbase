@@ -693,7 +693,7 @@ void printErrorMsg(int ret) {
         cout << "Error: Cache is full" << endl;
     else if (ret == E_RELNOTOPEN)
         cout << "Error: Relation is not open" << endl;
-    else if (ret == E_NOTOPEN)
+    else if (ret == E_RELNOTOPEN)
         cout << "Error: Relation is not open" << endl;
     else if (ret == E_NATTRMISMATCH)
         cout << "Error: Mismatch in number of attributes" << endl;

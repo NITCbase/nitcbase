@@ -13,7 +13,7 @@
 #define E_ATTRNOTEXIST -9
 #define E_ATTREXIST -10
 #define E_CACHEFULL -11
-#define E_NOTOPEN -12
+#define E_RELNOTOPEN -12
 #define E_RELNOTOPEN -13
 #define E_NATTRMISMATCH -14
 #define E_DUPLICATEATTR -15
