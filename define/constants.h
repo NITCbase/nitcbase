@@ -169,6 +169,23 @@
 // Index of the middle element in a Leaf Node of a B+ tree
 #define MIDDLE_INDEX_LEAF 31
 
+
+// Relation Catalog attribute name strings
+#define RELCAT_ATTR_RELNAME "RelName"
+#define RELCAT_ATTR_NO_ATTRIBUTES "#Attributes"
+#define RELCAT_ATTR_NO_RECORDS "#Records"
+#define RELCAT_ATTR_FIRST_BLOCK "FirstBlock"
+#define RELCAT_ATTR_LAST_BLOCK "LastBlock"
+#define RELCAT_ATTR_NO_SLOTS "#Slots"
+
+// Attribte Catalog attribute name strings
+#define ATTRCAT_ATTR_RELNAME "RelName"
+#define ATTRCAT_ATTR_ATTRIBUTE_NAME "AttributeName"
+#define ATTRCAT_ATTR_ATTRIBUTE_TYPE "AttributeType"
+#define ATTRCAT_ATTR_PRIMARY_FLAG "PrimaryFlag"
+#define ATTRCAT_ATTR_ROOT_BLOCK "RootBlock"
+#define ATTRCAT_ATTR_OFFSET "Offset"
+
 //#define MAX_KEYS_INTERNAL 4
 //#define MIDDLE_INDEX_INTERNAL 2
 //#define MAX_KEYS_LEAF 3
