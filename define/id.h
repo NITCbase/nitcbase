@@ -1,13 +1,19 @@
+#ifndef NITCBASE_ID_H
+#define NITCBASE_ID_H
 
-typedef int relId; //for any opened relation
+// for any opened relation
+typedef int relId;
 
 /* A record is identified by its block number and slot number */
-typedef struct recId{
-	int block;
-	int slot;
-} recId;
+struct RecId {
+    int block;
+    int slot;
+};
 
-typedef struct SearchIndexId{
-	int sblock;
-	int sindex;
-} SearchIndexId;
+/* An index is identified by its block number and index number */
+struct IndexId {
+    int block;
+    int index;
+};
+
+#endif //NITCBASE_ID_H
