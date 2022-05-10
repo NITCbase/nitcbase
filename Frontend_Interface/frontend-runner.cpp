@@ -129,6 +129,11 @@ int regexMatchAndExecute(const string input_command) {
 		char relname[ATTR_SIZE];
 		string_to_char_array(tablename, relname, ATTR_SIZE - 1);
 
+		if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0) {
+			cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
+			return FAILURE;
+		}
+
 		int ret = Frontend::drop_table(relname);
 		if (ret == SUCCESS) {
 			cout << "Relation ";
@@ -688,6 +693,8 @@ void printErrorMsg(int ret) {
         cout << "Error: Cache is full" << endl;
     else if (ret == E_RELNOTOPEN)
         cout << "Error: Relation is not open" << endl;
+    else if (ret == E_RELNOTOPEN)
+        cout << "Error: Relation is not open" << endl;
     else if (ret == E_NATTRMISMATCH)
         cout << "Error: Mismatch in number of attributes" << endl;
     else if (ret == E_DUPLICATEATTR)
@@ -698,24 +705,17 @@ void printErrorMsg(int ret) {
         cout << "Error: Mismatch in attribute type" << endl;
     else if (ret == E_INVALID)
         cout << "Error: Invalid index or argument" << endl;
-    else if (ret == E_INVALID)
-        cout << "Error: Invalid index or argument" << endl;
     else if (ret == E_MAXRELATIONS)
         cout << "Error: Maximum number of relations already present" << endl;
     else if (ret == E_MAXATTRS)
         cout << "Error: Maximum number of attributes allowed for a relation is 125" << endl;
-    else if (ret == E_NOTPERMITTED)
-        cout << "Error: Operation not permitted" << endl;
     else if (ret == E_RENAMETOTEMP)
         cout << "Error: Cannot rename a relation to 'temp'" << endl;
     else if (ret == E_CREATETEMP)
         cout << "Error: Cannot create relation named 'temp' as it is used for internal purposes" << endl;
     else if (ret == E_TARGETNAMETEMP)
         cout << "Error: Cannot create a target relation named 'temp' as it is used for internal purposes" << endl;
-    else if (ret == E_BLOCKNOTINBUFFER)
-        cout << "Error: Block not found in buffer\n" << endl;
-    else if (ret == E_INDEX_BLOCKS_RELEASED)
-        cout << "Note: Due to insufficient disk space, index blocks have been released from the disk\n" << endl;
+
 }
 
 vector<string> extract_tokens(string input_command) {

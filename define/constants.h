@@ -1,6 +1,5 @@
 #ifndef NITCBASE_CONSTANTS_H
 #define NITCBASE_CONSTANTS_H
-#include <iostream>
 
 // Path to disk
 #define DISK_PATH "../Disk/disk"
@@ -79,7 +78,7 @@
 // Value to mark an entry in Open relation table of Cache as Occupied
 #define OCCUPIED 1
 //// Value to mark an entry in Open relation table of Cache as Free
-#define FREE 1
+#define FREE 0
 
 // Block Types
 // Block type for Record Block
@@ -192,14 +191,11 @@
 #define SET 1
 #define UNSET 0
 
-//#define MAX_KEYS_INTERNAL 4
-//#define MIDDLE_INDEX_INTERNAL 2
-//#define MAX_KEYS_LEAF 3
-//#define MIDDLE_INDEX_LEAF 1
 
-//#define MAX_KEYS_INTERNAL 12
-//#define MIDDLE_INDEX_INTERNAL 6
-//#define MAX_KEYS_LEAF 12
-//#define MIDDLE_INDEX_LEAF 6
+
+
+
+
+
 
 #endif //NITCBASE_CONSTANTS_H
