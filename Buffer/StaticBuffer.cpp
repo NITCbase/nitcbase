@@ -2,7 +2,7 @@
 
 #include "StaticBuffer.h"
 #include "../define/constants.h"
-#include "../Disk_Class/Disk.cpp"
+//#include "../Disk_Class/Disk.cpp"
 
 StaticBuffer::StaticBuffer(){
 // copy blockAllocMap blocks from disk to buffer (using readblock() of disk)
@@ -30,8 +30,7 @@ int StaticBuffer::getFreeBuffer(int blockNum){
 }
 
 int StaticBuffer::getBufferNum(int blockNum){
-	//traverse through the metainfo array,
-	find the buffer index of the buffer to which the block is loaded.
+	//traverse through the metainfo array, find the buffer index of the buffer to which the block is loaded.
 
 	//if found return buffer index, else indicate failure.
 }

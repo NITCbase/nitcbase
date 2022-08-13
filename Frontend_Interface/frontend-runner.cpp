@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "frontend-runner.h"
