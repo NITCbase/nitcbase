@@ -2,12 +2,14 @@
 
 #include "StaticBuffer.h"
 #include "../define/constants.h"
+#include "../define/errors.h"
+
 //#include "../Disk_Class/Disk.cpp"
 
 StaticBuffer::StaticBuffer(){
-// copy blockAllocMap blocks from disk to buffer (using readblock() of disk)
+	// copy blockAllocMap blocks from disk to buffer (using readblock() of disk)
 
-//initialise metainfo of all the buffer blocks with dirty:false, free:true, timestamp:-1 and blockNum:-1
+	//initialise metainfo of all the buffer blocks with dirty:false, free:true, timestamp:-1 and blockNum:-1
 }
 
 StaticBuffer::~StaticBuffer(){
@@ -18,6 +20,9 @@ StaticBuffer::~StaticBuffer(){
 }
 
 int StaticBuffer::getFreeBuffer(int blockNum){
+	// Check if blockNum is valid (non zero and less than number of disk blocks)
+	// and return E_OUTOFBOUND if not valid.
+
 	// increase the time stamps in metainfo of all the occupied buffers.
 
 	// if free buffer is available, bufferIndex is the index of the free buffer.
@@ -30,19 +35,24 @@ int StaticBuffer::getFreeBuffer(int blockNum){
 }
 
 int StaticBuffer::getBufferNum(int blockNum){
-	//traverse through the metainfo array, find the buffer index of the buffer to which the block is loaded.
+	// Check if blockNum is valid (non zero and less than number of disk blocks)
+	// and return E_OUTOFBOUND if not valid.
 
-	//if found return buffer index, else indicate failure.
+	// traverse through the metainfo array, find the buffer index of the buffer to which the block is loaded.
+
+	// if found return buffer index, else indicate failure by returning E_BLOCKNOTINBUFFER
 }
 
 int StaticBuffer::getStaticBlockType(int blockNum){
-	//traverse the blockAllocMap to find the type corresponding to blockNum.
+	// Check if blockNum is valid (non zero and less than number of disk blocks)
+	// and return E_OUTOFBOUND if not valid.
 
-	//return the blockType obtained(REC/IND_INTERNAL/IND_LEAF/UNUSED)
+	// Access the entry in block allocation map corresponding to the blockNum argument
+	// and return the block type after type casting to integer.
 }
 
-void StaticBuffer::setDirtyBit(int blockNum){
-	//find the buffer index corresponding to the block using the getBufferNum().
+int StaticBuffer::setDirtyBit(int blockNum){
+	// find the buffer index corresponding to the block using the getBufferNum().
 
-	//set the dirty bit of that buffer in the metaInfo to true.
+	// set the dirty bit of that buffer in the metaInfo to true.
 }

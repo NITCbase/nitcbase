@@ -1,9 +1,11 @@
 #ifndef NITCBASE_BLOCKBUFFER_H
 #define NITCBASE_BLOCKBUFFER_H
 
-#include "../define/constants.h"
+#include <iostream>
 #include <cstdint>
 
+#include "../define/constants.h"
+#include "../define/errors.h"
 
 struct HeadInfo {
     int32_t blockType;
@@ -17,9 +19,8 @@ struct HeadInfo {
 };
 
 typedef union Attribute {
-    int ival;
-    float fval;
-    char strval[ATTR_SIZE];
+    double nVal;
+    char sVal[ATTR_SIZE];
 } Attribute;
 
 struct InternalEntry {
@@ -41,9 +42,7 @@ protected:
     int blockNum;
 
     // methods
-    unsigned char *getBufferPtr();
-
-    int getBlock();
+    int loadBlockAndGetBufferPtr(unsigned char **buffPtr);
 
     int getFreeBlock(int BlockType);
 
@@ -55,13 +54,13 @@ public:
 
     int getBlockNum();
 
-    int getBlockType(int bufferIndex);
+    int getBlockType();
 
-    void setBlockType(int blockType);
+    int setBlockType(int blockType);
 
-    void getHeader(struct HeadInfo *head);
+    int getHeader(struct HeadInfo *head);
 
-    void setHeader(struct HeadInfo *head);
+    int setHeader(struct HeadInfo *head);
 
     void releaseBlock();
 };
@@ -74,9 +73,9 @@ public:
 
     RecBuffer(int blockNum);
 
-    void getSlotMap(unsigned char *slotMap);
+    int getSlotMap(unsigned char *slotMap);
 
-    void setSlotMap(unsigned char *slotMap);
+    int setSlotMap(unsigned char *slotMap);
 
     int getRecord(union Attribute *rec, int slotNum);
 

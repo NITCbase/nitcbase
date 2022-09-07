@@ -27,7 +27,7 @@ private:
 public:
 	//methods
 	static int getStaticBlockType(int blockNum);
-	static void setDirtyBit(int blockNum);
+	static int setDirtyBit(int blockNum);
 	StaticBuffer();
 	~StaticBuffer();
 
