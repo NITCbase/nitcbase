@@ -77,7 +77,7 @@
 
 // Value to mark an entry in Open relation table of Cache as Occupied
 #define OCCUPIED 1
-//// Value to mark an entry in Open relation table of Cache as Free
+// Value to mark an entry in Open relation table of Cache as Free
 #define FREE 0
 
 // Block Types
@@ -102,11 +102,7 @@
 // Greater than
 #define GT 105
 // Not equal to
-#define NE 106 //if considered
-// Reset Operator (used to reset the previous hit's search index)
-#define RST 100 //reset op.
-// Project Operator (used for project operation)
-#define PRJCT 107
+#define NE 106  // if considered
 
 // Data types
 // For an Integer or a Floating point number
@@ -134,29 +130,29 @@
 // Index for the Relation Name attribute of a relation catalog entry
 #define RELCAT_REL_NAME_INDEX 0
 // Index for the #Attributes attribute of a relation catalog entry
-#define	RELCAT_NO_ATTRIBUTES_INDEX 1
+#define RELCAT_NO_ATTRIBUTES_INDEX 1
 // Index for the #Records attribute of a relation catalog entry
-#define	RELCAT_NO_RECORDS_INDEX 2
+#define RELCAT_NO_RECORDS_INDEX 2
 // Index for the First Block attribute of a relation catalog entry
-#define	RELCAT_FIRST_BLOCK_INDEX 3
+#define RELCAT_FIRST_BLOCK_INDEX 3
 // Index for the Last Block attribute of a relation catalog entry
-#define	RELCAT_LAST_BLOCK_INDEX 4
+#define RELCAT_LAST_BLOCK_INDEX 4
 // Index for the Number of slots per block attribute of a relation catalog entry
-#define	RELCAT_NO_SLOTS_PER_BLOCK_INDEX 5
+#define RELCAT_NO_SLOTS_PER_BLOCK_INDEX 5
 
 // Indexes for Attribute Catalog Attributes
 // Index for Relation Name attribute of an attribute catalog entry
 #define ATTRCAT_REL_NAME_INDEX 0
 // Index for Attribute Name attribute of an attribute catalog entry
-#define	ATTRCAT_ATTR_NAME_INDEX 1
+#define ATTRCAT_ATTR_NAME_INDEX 1
 // Index for Attribute Type attribute of an attribute catalog entry
-#define	ATTRCAT_ATTR_TYPE_INDEX 2
+#define ATTRCAT_ATTR_TYPE_INDEX 2
 // Index for Primary Flag attribute of an attribute catalog entry
-#define	ATTRCAT_PRIMARY_FLAG_INDEX 3
+#define ATTRCAT_PRIMARY_FLAG_INDEX 3
 // Index for Root Block attribute of an attribute catalog entry
-#define	ATTRCAT_ROOT_BLOCK_INDEX 4
+#define ATTRCAT_ROOT_BLOCK_INDEX 4
 // Index for Offset attribute of an attribute catalog entry
-#define	ATTRCAT_OFFSET_INDEX 5
+#define ATTRCAT_OFFSET_INDEX 5
 
 // Global variables for B+ Tree Layer
 // Maximum number of keys allowed in an Internal Node of a B+ tree
@@ -169,8 +165,8 @@
 #define MIDDLE_INDEX_LEAF 31
 
 // Name strings for Relation Catalog and Attribute Catalog (as it is stored in the Relation catalog)
-#define RELCAT_NAME "RELATIONCAT"
-#define ATTRCAT_NAME "ATTRIBUTECAT"
+#define RELCAT_RELNAME "RELATIONCAT"
+#define ATTRCAT_RELNAME "ATTRIBUTECAT"
 
 // Relation Catalog attribute name strings
 #define RELCAT_ATTR_RELNAME "RelName"
@@ -191,11 +187,4 @@
 #define SET 1
 #define UNSET 0
 
-
-
-
-
-
-
-
-#endif //NITCBASE_CONSTANTS_H
+#endif  // NITCBASE_CONSTANTS_H

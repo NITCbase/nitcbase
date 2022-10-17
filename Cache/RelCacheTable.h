@@ -35,6 +35,7 @@ public:
 	static int setRelCatEntry(int relId, RelCatEntry *relCatBuf);
 	static int getSearchIndex(int relId, RecId *searchIndex);
 	static int setSearchIndex(int relId, RecId *searchIndex);
+	static int resetSearchIndex(int relId);
 
 private:
 	//field
