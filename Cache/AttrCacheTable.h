@@ -1,14 +1,12 @@
 #ifndef NITCBASE_ATTRCACHETABLE_H
 #define NITCBASE_ATTRCACHETABLE_H
 
+#include "../Buffer/BlockBuffer.h"
 #include "../define/constants.h"
 #include "../define/errors.h"
-#include "../Buffer/BlockBuffer.h"
 #include "../define/id.h"
-#include <cstring>
 
 typedef struct AttrCatEntry {
-
 	char relName[ATTR_SIZE];
 	char attrName[ATTR_SIZE];
 	int attrType;
@@ -19,7 +17,6 @@ typedef struct AttrCatEntry {
 } AttrCatEntry;
 
 typedef struct AttrCacheEntry {
-
 	AttrCatEntry attrCatEntry;
 	bool dirty;
 	RecId recId;
@@ -29,11 +26,10 @@ typedef struct AttrCacheEntry {
 } AttrCacheEntry;
 
 class AttrCacheTable {
-
 	friend class OpenRelTable;
 
-public:
-	//methods
+ public:
+	// methods
 	static int getAttrCatEntry(int relId, char attrName[ATTR_SIZE], AttrCatEntry *attrCatBuf);
 	static int getAttrCatEntry(int relId, int attrOffset, AttrCatEntry *attrCatBuf);
 	static int setAttrCatEntry(int relId, char attrName[ATTR_SIZE], AttrCatEntry *attrCatBuf);
@@ -42,15 +38,16 @@ public:
 	static int getSearchIndex(int relId, int attrOffset, IndexId *searchIndex);
 	static int setSearchIndex(int relId, char attrName[ATTR_SIZE], IndexId *searchIndex);
 	static int setSearchIndex(int relId, int attrOffset, IndexId *searchIndex);
+	static int resetSearchIndex(int relId, char attrName[ATTR_SIZE]);
+	static int resetSearchIndex(int relId, int attrOffset);
 
-private:
-	//field
-	static AttrCacheEntry* attrCache[MAX_OPEN];
+ private:
+	// field
+	static AttrCacheEntry *attrCache[MAX_OPEN];
 
-	//methods
+	// methods
 	static void recordToAttrCacheEntry(union Attribute record[ATTRCAT_NO_ATTRS], AttrCacheEntry *attrCacheEntry);
 	static void attrCacheEntryToRecord(union Attribute record[ATTRCAT_NO_ATTRS], AttrCacheEntry *attrCacheEntry);
-
 };
 
-#endif //NITCBASE_ATTRCACHETABLE_H
+#endif  // NITCBASE_ATTRCACHETABLE_H

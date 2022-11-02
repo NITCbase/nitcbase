@@ -102,7 +102,7 @@
 // Greater than
 #define GT 105
 // Not equal to
-#define NE 106  // if considered
+#define NE 106
 
 // Data types
 // For an Integer or a Floating point number
@@ -183,8 +183,5 @@
 #define ATTRCAT_ATTR_PRIMARY_FLAG "PrimaryFlag"
 #define ATTRCAT_ATTR_ROOT_BLOCK "RootBlock"
 #define ATTRCAT_ATTR_OFFSET "Offset"
-
-#define SET 1
-#define UNSET 0
 
 #endif  // NITCBASE_CONSTANTS_H

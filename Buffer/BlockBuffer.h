@@ -1,9 +1,6 @@
 #ifndef NITCBASE_BLOCKBUFFER_H
 #define NITCBASE_BLOCKBUFFER_H
 
-#include <iostream>
-#include <cstdint>
-
 #include "../define/constants.h"
 #include "../define/errors.h"
 
@@ -23,6 +20,8 @@ typedef union Attribute {
     char sVal[ATTR_SIZE];
 } Attribute;
 
+int compareAttrs(Attribute attr1, Attribute attr2, int attrType);
+
 struct InternalEntry {
     int32_t lChild;
     union Attribute attrVal;
@@ -40,78 +39,55 @@ class BlockBuffer {
 protected:
     // field
     int blockNum;
-
     // methods
     int loadBlockAndGetBufferPtr(unsigned char **buffPtr);
-
     int getFreeBlock(int BlockType);
 
-public:
+ public:
     // methods
     BlockBuffer(char blockType);
-
     BlockBuffer(int blockNum);
-
     int getBlockNum();
-
     int getBlockType();
-
     int setBlockType(int blockType);
-
     int getHeader(struct HeadInfo *head);
-
     int setHeader(struct HeadInfo *head);
-
     void releaseBlock();
 };
 
 class RecBuffer : public BlockBuffer {
 public:
-
-    //methods
+    // methods
     RecBuffer();
-
     RecBuffer(int blockNum);
-
     int getSlotMap(unsigned char *slotMap);
-
     int setSlotMap(unsigned char *slotMap);
-
     int getRecord(union Attribute *rec, int slotNum);
-
     int setRecord(union Attribute *rec, int slotNum);
 };
 
 class IndBuffer : public BlockBuffer {
 public:
     IndBuffer(int blockNum);
-
     IndBuffer(char blockType);
-
     virtual int getEntry(void *ptr, int indexNum) = 0;
-
     virtual int setEntry(void *ptr, int indexNum) = 0;
 };
 
 class IndInternal : public IndBuffer {
 public:
-    IndInternal();//update in documentation
+    IndInternal();  // update in documentation
     IndInternal(int blockNum);
-
     int getEntry(void *ptr, int indexNum);
-
     int setEntry(void *ptr, int indexNum);
 };
 
 class IndLeaf : public IndBuffer {
 public:
     IndLeaf();
-
     IndLeaf(int blockNum);
-
     int getEntry(void *ptr, int indexNum);
-
     int setEntry(void *ptr, int indexNum);
 };
 
-#endif //NITCBASE_BLOCKBUFFER_H
+#endif  // NITCBASE_BLOCKBUFFER_H
