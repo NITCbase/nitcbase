@@ -1,6 +1,8 @@
 #ifndef NITCBASE_SCHEMA_H
 #define NITCBASE_SCHEMA_H
 
+#include "../BlockAccess/BlockAccess.h"
+#include "../Cache/OpenRelTable.h"
 #include "../define/constants.h"
 #include "../define/errors.h"
 

@@ -1,6 +1,7 @@
 #ifndef NITCBASE_BLOCKBUFFER_H
 #define NITCBASE_BLOCKBUFFER_H
 
+#include "StaticBuffer.h"
 #include "../define/constants.h"
 #include "../define/errors.h"
 

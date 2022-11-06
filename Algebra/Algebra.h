@@ -1,6 +1,8 @@
 #ifndef NITCBASE_ALGEBRA_H
 #define NITCBASE_ALGEBRA_H
 
+#include "../Cache/OpenRelTable.h"
+#include "../Schema/Schema.h"
 #include "../define/constants.h"
 
 class Algebra {

@@ -1,8 +1,8 @@
 #ifndef NITCBASE_RELCACHETABLE_H
 #define NITCBASE_RELCACHETABLE_H
 
-#include "../define/constants.h"
 #include "../Buffer/BlockBuffer.h"
+#include "../define/constants.h"
 #include "../define/id.h"
 
 typedef struct RelCatEntry {

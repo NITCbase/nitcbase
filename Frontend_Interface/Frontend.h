@@ -2,14 +2,16 @@
 #define FRONTEND_INTERFACE_FRONTEND_H
 
 #include <vector>
+
+#include "../Algebra/Algebra.h"
+#include "../Schema/Schema.h"
 #include "../define/constants.h"
 #include "../define/errors.h"
 
 using namespace std;
 
-// TODO: Complete DML Commands, DECIDE: Should the functions be static or not?
 class Frontend {
-public:
+ public:
     // DDL
     static int create_table(char relname[ATTR_SIZE], int no_attrs, char attributes[][ATTR_SIZE], int type_attrs[]);
 
@@ -54,5 +56,6 @@ public:
                                                int attr_count, char attr_list[][ATTR_SIZE]);
 };
 
+void print16(char char_string_thing[ATTR_SIZE], bool newline = true);
 
 #endif //FRONTEND_INTERFACE_FRONTEND_H

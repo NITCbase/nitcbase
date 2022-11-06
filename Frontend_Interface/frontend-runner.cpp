@@ -1,12 +1,14 @@
-#include <iostream>
-#include <fstream>
-#include <string>
+#include "frontend-runner.h"
+
 #include <cstring>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+#include "../Disk_Class/Disk.h"
 #include "../define/constants.h"
 #include "../define/errors.h"
-#include "frontend-runner.h"
 #include "Frontend.h"
-#include "../Disk_Class/Disk.h"
 
 using namespace std;
 
@@ -25,10 +27,6 @@ int getIndexOfFromToken(vector<string> command_tokens);
 int getIndexOfWhereToken(vector<string> command_tokens);
 
 string getAttrListStringFromCommand(string input_command, smatch m);
-
-void print16(char char_string_thing[ATTR_SIZE], bool newline);
-
-void print16(char char_string_thing[ATTR_SIZE]);
 
 int getOperator(string op_str);
 
@@ -520,6 +518,8 @@ int main(int argc, char *argv[]) {
 	/* Initialize the Run Copy of Disk */
 	Disk disk_run;
 	cout << "Run Copy of Disk Initialized\n";
+	StaticBuffer buffer;
+	OpenRelTable cache;
 
 	// Taking Run Command as Command Line Argument(if provided)
 	if(argc == 3 && strcmp(argv[1], "run") == 0) {
@@ -642,19 +642,12 @@ void string_to_char_array(string x, char *a, int size) {
 
 
 void display_help() {
-	printf("fdisk \n\t -Format disk \n\n");
-	printf("import <filename> \n\t -loads relations from the UNIX filesystem to the XFS disk. \n\n");
-	printf("export <tablename> <filename> \n\t -export a relation from XFS disk to UNIX file system. \n\n");
-	printf("ls \n\t  -list the names of all relations in the xfs disk. \n\n");
-	printf("dump bmap \n\t-dump the contents of the block allocation map.\n\n");
-	printf("dump relcat \n\t-copy the contents of relation catalog to relationcatalog.txt\n \n");
-	printf("dump attrcat \n\t-copy the contents of attribute catalog to an attributecatalog.txt. \n\n");
 	printf("CREATE TABLE tablename(attr1_name attr1_type ,attr2_name attr2_type....); \n\t -create a relation with given attribute names\n \n");
 	printf("DROP TABLE tablename ;\n\t-delete the relation\n  \n");
 	printf("OPEN TABLE tablename ;\n\t-open the relation \n\n");
 	printf("CLOSE TABLE tablename ;\n\t-close the relation \n \n");
 	printf("CREATE INDEX ON tablename.attributename;\n\t-create an index on a given attribute. \n\n");
-	printf(" DROP INDEX ON tablename.attributename ; \n\t-delete the index. \n\n");
+	printf("DROP INDEX ON tablename.attributename ; \n\t-delete the index. \n\n");
 	printf("ALTER TABLE RENAME tablename TO new_tablename ;\n\t-rename an existing relation to a given new name. \n\n");
 	printf("ALTER TABLE RENAME tablename COLUMN column_name TO new_column_name ;\n\t-rename an attribute of an existing relation.\n\n");
 	printf("INSERT INTO tablename VALUES ( value1,value2,value3,... );\n\t-insert a single record into the given relation. \n\n");
@@ -716,7 +709,10 @@ void printErrorMsg(int ret) {
         cout << "Error: Cannot create relation named 'temp' as it is used for internal purposes" << endl;
     else if (ret == E_TARGETNAMETEMP)
         cout << "Error: Cannot create a target relation named 'temp' as it is used for internal purposes" << endl;
-
+    else if (ret == E_NOTPERMITTED)
+        cout << "Error: This operation is not permitted" << endl;
+    else if (ret == E_INDEX_BLOCKS_RELEASED)
+        cout << "Warning: Operation succeeded, but some indexes had to be dropped." << endl;
 }
 
 vector<string> extract_tokens(string input_command) {
