@@ -1,7 +1,9 @@
 #ifndef NITCBASE_STATICBUFFER_H
 #define NITCBASE_STATICBUFFER_H
 
+#include "../Disk_Class/Disk.h"
 #include "../define/constants.h"
+#include "../define/errors.h"
 
 struct BufferMetaInfo {
   bool free;

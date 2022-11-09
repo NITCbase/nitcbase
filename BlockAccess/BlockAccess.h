@@ -1,7 +1,11 @@
 #ifndef NITCBASE_BLOCKACCESS_H
 #define NITCBASE_BLOCKACCESS_H
 
+#include "../BPlusTree/BPlusTree.h"
 #include "../Buffer/BlockBuffer.h"
+#include "../Cache/AttrCacheTable.h"
+#include "../Cache/RelCacheTable.h"
+#include "../define/constants.h"
 #include "../define/id.h"
 
 class BlockAccess {
