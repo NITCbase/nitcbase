@@ -1,6 +1,7 @@
 #ifndef FRONTEND_INTERFACE_FRONTEND_H
 #define FRONTEND_INTERFACE_FRONTEND_H
 
+#include <string>
 #include <vector>
 
 #include "../Algebra/Algebra.h"
@@ -55,7 +56,5 @@ class Frontend {
                                              char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE],
                                              int attr_count, char attr_list[][ATTR_SIZE]);
 };
-
-void print16(char char_string_thing[ATTR_SIZE], bool newline = true);
 
 #endif  // FRONTEND_INTERFACE_FRONTEND_H

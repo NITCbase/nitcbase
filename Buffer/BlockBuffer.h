@@ -1,6 +1,8 @@
 #ifndef NITCBASE_BLOCKBUFFER_H
 #define NITCBASE_BLOCKBUFFER_H
 
+#include <cstdint>
+
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "StaticBuffer.h"

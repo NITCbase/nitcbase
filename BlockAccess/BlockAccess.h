@@ -1,9 +1,6 @@
 #ifndef NITCBASE_BLOCKACCESS_H
 #define NITCBASE_BLOCKACCESS_H
 
-#include <cstring>
-#include <iostream>
-
 #include "../Buffer/BlockBuffer.h"
 #include "../define/id.h"
 

@@ -1,20 +1,19 @@
-#include "frontend-runner.h"
-
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <string>
 
 #include "../Disk_Class/Disk.h"
+#include "../Frontend/Frontend.h"
 #include "../define/constants.h"
 #include "../define/errors.h"
-#include "Frontend.h"
+#include "commands.h"
 
 using namespace std;
 
-void string_to_char_array(string x, char *a, int size);
+void stringToCharArray(string x, char *a, int size);
 
-void display_help();
+void displayHelp();
 
 void printErrorMsg(int ret);
 
@@ -30,11 +29,13 @@ string getAttrListStringFromCommand(string input_command, smatch m);
 
 int getOperator(string op_str);
 
+void print16(char char_string_thing[ATTR_SIZE], bool newline = true);
+
 // TODO: Call Frontend Class methods for Commands as well.
 int regexMatchAndExecute(const string input_command) {
   smatch m;
   if (regex_match(input_command, help)) {
-    display_help();
+    displayHelp();
   } else if (regex_match(input_command, ex)) {
     return EXIT;
   } else if (regex_match(input_command, echo)) {
@@ -51,7 +52,7 @@ int regexMatchAndExecute(const string input_command) {
     regex_search(input_command, m, open_table);
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
 
     int ret = Frontend::open_table(relname);
     if (ret == SUCCESS) {
@@ -67,7 +68,7 @@ int regexMatchAndExecute(const string input_command) {
     regex_search(input_command, m, close_table);
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
 
     int ret = Frontend::close_table(relname);
     if (ret == SUCCESS) {
@@ -82,7 +83,7 @@ int regexMatchAndExecute(const string input_command) {
     regex_search(input_command, m, create_table);
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
 
     // 'temp' is used for internal purposes as of now
     if (tablename == TEMP) {
@@ -105,7 +106,7 @@ int regexMatchAndExecute(const string input_command) {
     int type_attr[no_attrs];
 
     for (int i = 0, k = 0; i < no_attrs; i++, k += 2) {
-      string_to_char_array(words[k], attribute[i], ATTR_SIZE - 1);
+      stringToCharArray(words[k], attribute[i], ATTR_SIZE - 1);
       if (words[k + 1] == "STR")
         type_attr[i] = STRING;
       else if (words[k + 1] == "NUM")
@@ -126,7 +127,7 @@ int regexMatchAndExecute(const string input_command) {
     regex_search(input_command, m, drop_table);
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
 
     if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0) {
       cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
@@ -149,8 +150,8 @@ int regexMatchAndExecute(const string input_command) {
     string attrname = m[5];
     char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
 
-    string_to_char_array(tablename, relname, ATTR_SIZE - 1);
-    string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
+    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
+    stringToCharArray(attrname, attr_name, ATTR_SIZE - 1);
 
     int ret = Frontend::create_index(relname, attr_name);
     if (ret == SUCCESS) {
@@ -165,8 +166,8 @@ int regexMatchAndExecute(const string input_command) {
     string tablename = m[4];
     string attrname = m[5];
     char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
-    string_to_char_array(tablename, relname, ATTR_SIZE - 1);
-    string_to_char_array(attrname, attr_name, ATTR_SIZE - 1);
+    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
+    stringToCharArray(attrname, attr_name, ATTR_SIZE - 1);
 
     int ret = Frontend::drop_index(relname, attr_name);
     if (ret == SUCCESS) {
@@ -188,8 +189,8 @@ int regexMatchAndExecute(const string input_command) {
 
     char old_relation_name[ATTR_SIZE];
     char new_relation_name[ATTR_SIZE];
-    string_to_char_array(oldTableName, old_relation_name, ATTR_SIZE - 1);
-    string_to_char_array(newTableName, new_relation_name, ATTR_SIZE - 1);
+    stringToCharArray(oldTableName, old_relation_name, ATTR_SIZE - 1);
+    stringToCharArray(newTableName, new_relation_name, ATTR_SIZE - 1);
 
     int ret = Frontend::alter_table_rename(old_relation_name, new_relation_name);
     if (ret == SUCCESS) {
@@ -207,9 +208,9 @@ int regexMatchAndExecute(const string input_command) {
     char relname[ATTR_SIZE];
     char old_col[ATTR_SIZE];
     char new_col[ATTR_SIZE];
-    string_to_char_array(tablename, relname, ATTR_SIZE - 1);
-    string_to_char_array(oldcolumnname, old_col, ATTR_SIZE - 1);
-    string_to_char_array(newcolumnname, new_col, ATTR_SIZE - 1);
+    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
+    stringToCharArray(oldcolumnname, old_col, ATTR_SIZE - 1);
+    stringToCharArray(newcolumnname, new_col, ATTR_SIZE - 1);
 
     int ret = Frontend::alter_table_rename_column(relname, old_col, new_col);
     if (ret == SUCCESS) {
@@ -223,7 +224,7 @@ int regexMatchAndExecute(const string input_command) {
     regex_search(input_command, m, insert_single);
     string table_name = m[3];
     char rel_name[ATTR_SIZE];
-    string_to_char_array(table_name, rel_name, ATTR_SIZE - 1);
+    stringToCharArray(table_name, rel_name, ATTR_SIZE - 1);
     regex_search(input_command, m, temp);
     string attrs = m[0];
     vector<string> words = extract_tokens(attrs);
@@ -241,11 +242,11 @@ int regexMatchAndExecute(const string input_command) {
     string tablename = m[3];
     char relname[ATTR_SIZE];
     string p = INPUT_FILES_PATH;
-    string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
     string t = m[6];
     p = p + t;
     char Filepath[p.length() + 1];
-    string_to_char_array(p, Filepath, p.length() + 1);
+    stringToCharArray(p, Filepath, p.length() + 1);
     FILE *file = fopen(Filepath, "r");
     if (!file) {
       cout << "Invalid file path or file does not exist" << endl;
@@ -275,8 +276,8 @@ int regexMatchAndExecute(const string input_command) {
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
 
-    string_to_char_array(sourceRelName_str, sourceRelName, ATTR_SIZE - 1);
-    string_to_char_array(targetRelName_str, targetRelName, ATTR_SIZE - 1);
+    stringToCharArray(sourceRelName_str, sourceRelName, ATTR_SIZE - 1);
+    stringToCharArray(targetRelName_str, targetRelName, ATTR_SIZE - 1);
 
     int ret = Frontend::select_from_table(sourceRelName, targetRelName);
     if (ret == SUCCESS) {
@@ -304,10 +305,10 @@ int regexMatchAndExecute(const string input_command) {
     char targetRelName[ATTR_SIZE];
     char attribute[ATTR_SIZE];
     char value[ATTR_SIZE];
-    string_to_char_array(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
-    string_to_char_array(targetRel_str, targetRelName, ATTR_SIZE - 1);
-    string_to_char_array(attribute_str, attribute, ATTR_SIZE - 1);
-    string_to_char_array(value_str, value, ATTR_SIZE - 1);
+    stringToCharArray(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
+    stringToCharArray(targetRel_str, targetRelName, ATTR_SIZE - 1);
+    stringToCharArray(attribute_str, attribute, ATTR_SIZE - 1);
+    stringToCharArray(value_str, value, ATTR_SIZE - 1);
 
     int op = getOperator(op_str);
 
@@ -337,8 +338,8 @@ int regexMatchAndExecute(const string input_command) {
 
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
-    string_to_char_array(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
-    string_to_char_array(targetRel_str, targetRelName, ATTR_SIZE - 1);
+    stringToCharArray(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
+    stringToCharArray(targetRel_str, targetRelName, ATTR_SIZE - 1);
 
     /* Get the attribute list string from the input command */
     string attribute_list = getAttrListStringFromCommand(input_command, m);
@@ -347,7 +348,7 @@ int regexMatchAndExecute(const string input_command) {
     int attr_count = attr_tokens.size();
     char attr_list[attr_count][ATTR_SIZE];
     for (int attr_no = 0; attr_no < attr_count; attr_no++) {
-      string_to_char_array(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
+      stringToCharArray(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
     }
 
     int ret = Frontend::select_attrlist_from_table(sourceRelName, targetRelName, attr_count, attr_list);
@@ -385,10 +386,10 @@ int regexMatchAndExecute(const string input_command) {
     char value[ATTR_SIZE];
     int op = getOperator(op_str);
 
-    string_to_char_array(attribute_str, attribute, ATTR_SIZE - 1);
-    string_to_char_array(value_str, value, ATTR_SIZE - 1);
-    string_to_char_array(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
-    string_to_char_array(targetRel_str, targetRelName, ATTR_SIZE - 1);
+    stringToCharArray(attribute_str, attribute, ATTR_SIZE - 1);
+    stringToCharArray(value_str, value, ATTR_SIZE - 1);
+    stringToCharArray(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
+    stringToCharArray(targetRel_str, targetRelName, ATTR_SIZE - 1);
 
     string attribute_list = getAttrListStringFromCommand(input_command, m);
     vector<string> attr_tokens = extract_tokens(attribute_list);
@@ -396,7 +397,7 @@ int regexMatchAndExecute(const string input_command) {
     int attr_count = attr_tokens.size();
     char attr_list[attr_count][ATTR_SIZE];
     for (int attr_no = 0; attr_no < attr_count; attr_no++) {
-      string_to_char_array(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
+      stringToCharArray(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
     }
 
     int ret = Frontend::select_attrlist_from_table_where(sourceRelName, targetRelName, attr_count, attr_list,
@@ -429,11 +430,11 @@ int regexMatchAndExecute(const string input_command) {
       return FAILURE;
     }
 
-    string_to_char_array(m[4], sourceRelOneName, ATTR_SIZE - 1);
-    string_to_char_array(m[6], sourceRelTwoName, ATTR_SIZE - 1);
-    string_to_char_array(m[8], targetRelName, ATTR_SIZE - 1);
-    string_to_char_array(m[11], joinAttributeOne, ATTR_SIZE - 1);
-    string_to_char_array(m[13], joinAttributeTwo, ATTR_SIZE - 1);
+    stringToCharArray(m[4], sourceRelOneName, ATTR_SIZE - 1);
+    stringToCharArray(m[6], sourceRelTwoName, ATTR_SIZE - 1);
+    stringToCharArray(m[8], targetRelName, ATTR_SIZE - 1);
+    stringToCharArray(m[11], joinAttributeOne, ATTR_SIZE - 1);
+    stringToCharArray(m[13], joinAttributeTwo, ATTR_SIZE - 1);
 
     int ret = Frontend::select_from_join_where(sourceRelOneName, sourceRelTwoName, targetRelName,
                                                joinAttributeOne, joinAttributeTwo);
@@ -469,11 +470,11 @@ int regexMatchAndExecute(const string input_command) {
       return FAILURE;
     }
 
-    string_to_char_array(tokens[refIndex + 1], sourceRelOneName, ATTR_SIZE - 1);
-    string_to_char_array(tokens[refIndex + 3], sourceRelTwoName, ATTR_SIZE - 1);
-    string_to_char_array(tokens[refIndex + 5], targetRelName, ATTR_SIZE - 1);
-    string_to_char_array(tokens[refIndex + 8], joinAttributeOne, ATTR_SIZE - 1);
-    string_to_char_array(tokens[refIndex + 10], joinAttributeTwo, ATTR_SIZE - 1);
+    stringToCharArray(tokens[refIndex + 1], sourceRelOneName, ATTR_SIZE - 1);
+    stringToCharArray(tokens[refIndex + 3], sourceRelTwoName, ATTR_SIZE - 1);
+    stringToCharArray(tokens[refIndex + 5], targetRelName, ATTR_SIZE - 1);
+    stringToCharArray(tokens[refIndex + 8], joinAttributeOne, ATTR_SIZE - 1);
+    stringToCharArray(tokens[refIndex + 10], joinAttributeTwo, ATTR_SIZE - 1);
 
     int attrListPos = 1;
     string attributesListAsStrings;
@@ -490,7 +491,7 @@ int regexMatchAndExecute(const string input_command) {
     int attrCount = attributesListAsWords.size();
     char attributeList[attrCount][ATTR_SIZE];
     for (int i = 0; i < attrCount; i++) {
-      string_to_char_array(attributesListAsWords[i], attributeList[i], ATTR_SIZE - 1);
+      stringToCharArray(attributesListAsWords[i], attributeList[i], ATTR_SIZE - 1);
     }
 
     int ret = Frontend::select_attrlist_from_join_where(sourceRelOneName, sourceRelTwoName, targetRelName,
@@ -511,13 +512,7 @@ int regexMatchAndExecute(const string input_command) {
   return SUCCESS;
 }
 
-int main(int argc, char *argv[]) {
-  /* Initialize the Run Copy of Disk */
-  Disk disk_run;
-  cout << "Run Copy of Disk Initialized\n";
-  StaticBuffer buffer;
-  OpenRelTable cache;
-
+int handleFrontend(int argc, char *argv[]) {
   // Taking Run Command as Command Line Argument(if provided)
   if (argc == 3 && strcmp(argv[1], "run") == 0) {
     string run_command("run ");
@@ -622,7 +617,7 @@ int getOperator(string op_str) {
   return op;
 }
 
-void string_to_char_array(string x, char *a, int size) {
+void stringToCharArray(string x, char *a, int size) {
   // Reducing size of string to the size provided
   int i;
   if (size == ATTR_SIZE - 1) {
@@ -637,7 +632,7 @@ void string_to_char_array(string x, char *a, int size) {
   }
 }
 
-void display_help() {
+void displayHelp() {
   printf("CREATE TABLE tablename(attr1_name attr1_type ,attr2_name attr2_type....); \n\t -create a relation with given attribute names\n \n");
   printf("DROP TABLE tablename ;\n\t-delete the relation\n  \n");
   printf("OPEN TABLE tablename ;\n\t-open the relation \n\n");
@@ -739,4 +734,17 @@ vector<string> extract_tokens(string input_command) {
     tokens.push_back(token);
 
   return tokens;
+}
+
+void print16(char char_string_thing[ATTR_SIZE], bool newline) {
+  for (int i = 0; i < ATTR_SIZE; i++) {
+    if (char_string_thing[i] == '\0') {
+      break;
+    }
+    cout << char_string_thing[i];
+  }
+  if (newline) {
+    cout << endl;
+  }
+  return;
 }
