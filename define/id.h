@@ -6,26 +6,26 @@ typedef int relId;
 
 /* A record is identified by its block number and slot number */
 struct RecId {
-    int block;
-    int slot;
+  int block;
+  int slot;
 };
 
 /* An index is identified by its block number and index number */
 struct IndexId {
-    int block;
-    int index;
+  int block;
+  int index;
 };
 
 //--------------------------------- For XFS --------------------------------- //
 /* A record is identified by its block number and slot number */
 typedef struct recId {
-    int block;
-    int slot;
+  int block;
+  int slot;
 } recId;
 
 typedef struct SearchIndexId {
-    int sblock;
-    int sindex;
+  int sblock;
+  int sindex;
 } SearchIndexId;
 
-#endif //NITCBASE_ID_H
+#endif  // NITCBASE_ID_H

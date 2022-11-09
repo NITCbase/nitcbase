@@ -58,4 +58,4 @@
 // Error: Cannot rename a relation to 'temp'
 #define E_RENAMETOTEMP -26
 
-#endif //NITCBASE_ERRORS_H
+#endif  // NITCBASE_ERRORS_H

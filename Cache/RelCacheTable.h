@@ -6,44 +6,40 @@
 #include "../define/id.h"
 
 typedef struct RelCatEntry {
-
-	char relName[ATTR_SIZE];
-	int numAttrs;
-	int numRecs;
-	int firstBlk;
-	int lastBlk;
-	int numSlotsPerBlk;
+  char relName[ATTR_SIZE];
+  int numAttrs;
+  int numRecs;
+  int firstBlk;
+  int lastBlk;
+  int numSlotsPerBlk;
 
 } RelCatEntry;
 
 typedef struct RelCacheEntry {
-
-	RelCatEntry relCatEntry;
-	bool dirty;
-	RecId recId;
-	RecId searchIndex;
+  RelCatEntry relCatEntry;
+  bool dirty;
+  RecId recId;
+  RecId searchIndex;
 
 } RelCacheEntry;
 
 class RelCacheTable {
+  friend class OpenRelTable;
 
-	friend class OpenRelTable;
+ public:
+  // methods
+  static int getRelCatEntry(int relId, RelCatEntry *relCatBuf);
+  static int setRelCatEntry(int relId, RelCatEntry *relCatBuf);
+  static int getSearchIndex(int relId, RecId *searchIndex);
+  static int setSearchIndex(int relId, RecId *searchIndex);
+  static int resetSearchIndex(int relId);
 
-public:
-	//methods
-	static int getRelCatEntry(int relId, RelCatEntry *relCatBuf);
-	static int setRelCatEntry(int relId, RelCatEntry *relCatBuf);
-	static int getSearchIndex(int relId, RecId *searchIndex);
-	static int setSearchIndex(int relId, RecId *searchIndex);
-	static int resetSearchIndex(int relId);
+ private:
+  // field
+  static RelCacheEntry *relCache[MAX_OPEN];
 
-private:
-	//field
-	static RelCacheEntry* relCache[MAX_OPEN];
-
-	//methods
-	static void recordToRelCacheEntry(union Attribute record[RELCAT_NO_ATTRS], RelCacheEntry* relCacheEntry);
-	static void relCacheEntryToRecord(union Attribute record[RELCAT_NO_ATTRS], RelCacheEntry* relCacheEntry);
-
+  // methods
+  static void recordToRelCacheEntry(union Attribute record[RELCAT_NO_ATTRS], RelCacheEntry *relCacheEntry);
+  static void relCacheEntryToRecord(union Attribute record[RELCAT_NO_ATTRS], RelCacheEntry *relCacheEntry);
 };
-#endif //NITCBASE_RELCACHETABLE_H
+#endif  // NITCBASE_RELCACHETABLE_H

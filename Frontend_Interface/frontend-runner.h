@@ -1,7 +1,7 @@
 #ifndef XFS_INTERFACE_FRONTEND_H
 #define XFS_INTERFACE_FRONTEND_H
 
-#include<regex>
+#include <regex>
 
 /* External File System Commands */
 std::regex help("\\s*(HELP|help)\\s*");
@@ -37,4 +37,4 @@ std::regex filename("[A-Za-z0-9_-]+\\.csv");
 std::regex filepath("(/.*\\.csv)");
 std::regex temp("\\((.*)\\)");
 
-#endif //XFS_INTERFACE_FRONTEND_H
+#endif  // XFS_INTERFACE_FRONTEND_H

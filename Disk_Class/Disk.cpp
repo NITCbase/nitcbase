@@ -1,8 +1,10 @@
-#include <iostream>
+#include "Disk.h"
+
 #include <fstream>
+#include <iostream>
+
 #include "../define/constants.h"
 #include "../define/errors.h"
-#include "Disk.h"
 
 /*
  * Used to make a temporary copy of the disk contents before the starting of a new session.
@@ -10,14 +12,14 @@
  * the previous state of the disk is not lost.
  */
 Disk::Disk() {
-	/* An efficient method to copy files */
-	/* Copy Disk to Disk Run Copy */
-	std::ifstream src(DISK_PATH, std::ios::binary);
-	std::ofstream dst(DISK_RUN_COPY_PATH, std::ios::binary);
+  /* An efficient method to copy files */
+  /* Copy Disk to Disk Run Copy */
+  std::ifstream src(DISK_PATH, std::ios::binary);
+  std::ofstream dst(DISK_RUN_COPY_PATH, std::ios::binary);
 
-	dst << src.rdbuf();
-	src.close();
-	dst.close();
+  dst << src.rdbuf();
+  src.close();
+  dst.close();
 }
 
 /*
@@ -25,14 +27,14 @@ Disk::Disk() {
  * This ensures that these changes are visible in future sessions.
  */
 Disk::~Disk() {
-	/* An efficient method to copy files */
-	/* Copy Disk Run Copy to Disk */
-	std::ifstream src(DISK_RUN_COPY_PATH, std::ios::binary);
-	std::ofstream dst(DISK_PATH, std::ios::binary);
+  /* An efficient method to copy files */
+  /* Copy Disk Run Copy to Disk */
+  std::ifstream src(DISK_RUN_COPY_PATH, std::ios::binary);
+  std::ofstream dst(DISK_PATH, std::ios::binary);
 
-	dst << src.rdbuf();
-	src.close();
-	dst.close();
+  dst << src.rdbuf();
+  src.close();
+  dst.close();
 }
 
 /*
@@ -42,15 +44,15 @@ Disk::~Disk() {
  * blockNum - Block number of the disk block to be read.
  */
 int Disk::readBlock(unsigned char *block, int blockNum) {
-	FILE *disk = fopen(DISK_RUN_COPY_PATH, "rb");
-	if (blockNum < 0 || blockNum > DISK_BLOCKS - 1) {
-		return E_OUTOFBOUND;
-	}
-	const int offset = blockNum * BLOCK_SIZE;
-	fseek(disk, offset, SEEK_SET);
-	fread(block, BLOCK_SIZE, 1, disk);
-	fclose(disk);
-	return SUCCESS;
+  FILE *disk = fopen(DISK_RUN_COPY_PATH, "rb");
+  if (blockNum < 0 || blockNum > DISK_BLOCKS - 1) {
+    return E_OUTOFBOUND;
+  }
+  const int offset = blockNum * BLOCK_SIZE;
+  fseek(disk, offset, SEEK_SET);
+  fread(block, BLOCK_SIZE, 1, disk);
+  fclose(disk);
+  return SUCCESS;
 }
 
 /*
@@ -60,13 +62,13 @@ int Disk::readBlock(unsigned char *block, int blockNum) {
  * blockNum - Block number of the disk block to be written into.
  */
 int Disk::writeBlock(unsigned char *block, int blockNum) {
-	FILE *disk = fopen(DISK_RUN_COPY_PATH, "rb+");
-	if (blockNum < 0 || blockNum > DISK_BLOCKS - 1) {
-		return E_OUTOFBOUND;
-	}
-	const int offset = blockNum * BLOCK_SIZE;
-	fseek(disk, offset, SEEK_SET);
-	fwrite(block, BLOCK_SIZE, 1, disk);
-	fclose(disk);
-	return SUCCESS;
+  FILE *disk = fopen(DISK_RUN_COPY_PATH, "rb+");
+  if (blockNum < 0 || blockNum > DISK_BLOCKS - 1) {
+    return E_OUTOFBOUND;
+  }
+  const int offset = blockNum * BLOCK_SIZE;
+  fseek(disk, offset, SEEK_SET);
+  fwrite(block, BLOCK_SIZE, 1, disk);
+  fclose(disk);
+  return SUCCESS;
 }
