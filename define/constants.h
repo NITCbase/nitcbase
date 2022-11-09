@@ -1,172 +1,135 @@
 #ifndef NITCBASE_CONSTANTS_H
 #define NITCBASE_CONSTANTS_H
 
-// Path to disk
-#define DISK_PATH "Disk/disk"
-// Path to run copy of the disk
-#define DISK_RUN_COPY_PATH "Disk/disk_run_copy"
-// Path to Files directory
-#define Files_Path "Files/"
-// Path to Input_Files directory inside the Files directory
-#define INPUT_FILES_PATH "Files/Input_Files/"
-// Path to Output_Files directory inside the Files directory
-#define OUTPUT_FILES_PATH "Files/Output_Files/"
-// Path to Batch_Execution_Files directory inside the Files directory
-#define BATCH_FILES_PATH "Files/Batch_Execution_Files/"
+#define DISK_PATH "Disk/disk"                            // Path to disk
+#define DISK_RUN_COPY_PATH "Disk/disk_run_copy"          // Path to run copy of the disk
+#define Files_Path "Files/"                              // Path to Files directory
+#define INPUT_FILES_PATH "Files/Input_Files/"            // Path to Input_Files directory inside the Files directory
+#define OUTPUT_FILES_PATH "Files/Output_Files/"          // Path to Output_Files directory inside the Files directory
+#define BATCH_FILES_PATH "Files/Batch_Execution_Files/"  // Path to Batch_Execution_Files directory inside the Files directory
 
-// Size of Block in bytes
-#define BLOCK_SIZE 2048
-// Size of an attribute in bytes
-#define ATTR_SIZE 16
-// Size of Disk in bytes
-#define DISK_SIZE 16 * 1024 * 1024
-// Size of Header of a block in bytes (not including slotmap)
-#define HEADER_SIZE 32
-// Size of field Lchild in bytes
-#define LCHILD_SIZE 4
-// Size of field Rchild in bytes
-#define RCHILD_SIZE 4
-// Size of field Pblock in bytes
-#define PBLOCK_SIZE 4
-// Size of field BlockNum in bytes
-#define BLOCKNUM_SIZE 4
-// Size of field SlotNum in bytes
-#define SLOTNUM_SIZE 4
-// Size of unused field in index block (in bytes)
-#define INDEX_BLOCK_UNUSED_BYTES 8
-// Size of an Internal Index Entry in the Internal Index Block (in bytes)
-#define INTERNAL_ENTRY_SIZE 24
-// Size of an Leaf Index Entry in the Leaf Index Block (in bytes)
-#define LEAF_ENTRY_SIZE 32
+#define BLOCK_SIZE 2048             // Size of Block in bytes
+#define ATTR_SIZE 16                // Size of an attribute in bytes
+#define DISK_SIZE 16 * 1024 * 1024  // Size of Disk in bytes
+#define HEADER_SIZE 32              // Size of Header of a block in bytes (not including slotmap)
+#define LCHILD_SIZE 4               // Size of field Lchild in bytes
+#define RCHILD_SIZE 4               // Size of field Rchild in bytes
+#define PBLOCK_SIZE 4               // Size of field Pblock in bytes
+#define BLOCKNUM_SIZE 4             // Size of field BlockNum in bytes
+#define SLOTNUM_SIZE 4              // Size of field SlotNum in bytes
+#define INDEX_BLOCK_UNUSED_BYTES 8  // Size of unused field in index block (in bytes)
+#define INTERNAL_ENTRY_SIZE 24      // Size of an Internal Index Entry in the Internal Index Block (in bytes)
+#define LEAF_ENTRY_SIZE 32          // Size of an Leaf Index Entry in the Leaf Index Block (in bytes)
 
-// Number of block in disk
-#define DISK_BLOCKS 8192
-// Total number of blocks available in the Buffer (Capacity of the Buffer in blocks)
-#define BUFFER_CAPACITY 32
-// Maximum number of relations allowed to be open and cached in Cache Layer.
-#define MAX_OPEN 12
-// Number of blocks given for Block Allocation Map in the disk
-#define BLOCK_ALLOCATION_MAP_SIZE 4
+#define DISK_BLOCKS 8192             // Number of block in disk
+#define BUFFER_CAPACITY 32           // Total number of blocks available in the Buffer (Capacity of the Buffer in blocks)
+#define MAX_OPEN 12                  // Maximum number of relations allowed to be open and cached in Cache Layer.
+#define BLOCK_ALLOCATION_MAP_SIZE 4  // Number of blocks given for Block Allocation Map in the disk
 
-// Number of attributes present in one entry / record of the Relation Catalog
-#define RELCAT_NO_ATTRS 6
-// Number of attributes present in one entry / record of the Attribute Catalog
-#define ATTRCAT_NO_ATTRS 6
+#define RELCAT_NO_ATTRS 6   // Number of attributes present in one entry / record of the Relation Catalog
+#define ATTRCAT_NO_ATTRS 6  // Number of attributes present in one entry / record of the Attribute Catalog
 
-// Disk block number for the block of Relation Catalog
-#define RELCAT_BLOCK 4
-// Disk block number for the first block of Attribute Catalog
-#define ATTRCAT_BLOCK 5
+#define RELCAT_BLOCK 4   // Disk block number for the block of Relation Catalog
+#define ATTRCAT_BLOCK 5  // Disk block number for the first block of Attribute Catalog
 
-// Common variable to indicate the number of attributes present in one entry of Relation Catalog / Attribute Catalog
-#define NO_OF_ATTRS_RELCAT_ATTRCAT 6
-// Size of slotmap in both Relation Catalog and Attribute Catalog
-#define SLOTMAP_SIZE_RELCAT_ATTRCAT 20
+#define NO_OF_ATTRS_RELCAT_ATTRCAT 6    // Common variable to indicate the number of attributes present in one entry of Relation Catalog / Attribute Catalog
+#define SLOTMAP_SIZE_RELCAT_ATTRCAT 20  // Size of slotmap in both Relation Catalog and Attribute Catalog
 
-// Return variable to indicate Success
-#define SUCCESS 0
-// Return variable to indicate Failure
-#define FAILURE -1
-// Return variable to indicate Exit
-#define EXIT -2
+#define SLOT_OCCUPIED '1'    // Value to mark a slot in Slotmap as Occupied
+#define SLOT_UNOCCUPIED '0'  // Value to mark a slot in Slotmap as Unoccupied
 
-// Value to mark a slot in Slotmap as Occupied
-#define SLOT_OCCUPIED '1'
-// Value to mark a slot in Slotmap as Unoccupied
-#define SLOT_UNOCCUPIED '0'
+#define RELCAT_RELID 0   // Relid for Relation catalog
+#define ATTRCAT_RELID 1  // Relid for Attribute catalog
 
-// Value to mark an entry in Open relation table of Cache as Occupied
-#define OCCUPIED 1
-// Value to mark an entry in Open relation table of Cache as Free
-#define FREE 0
+#define RELCAT_SLOTNUM_FOR_RELCAT 0   // Slot number for relation catalog in relation catalog
+#define RELCAT_SLOTNUM_FOR_ATTRCAT 1  // Slot number for attribute catalog in relation catalog
 
-// Block Types
-// Block type for Record Block
-#define REC 0
-// Block type for Internal Index Block
-#define IND_INTERNAL 1
-// Block type for Leaf Index Block
-#define IND_LEAF 2
-// Block type for an Unused (Free) Block
-#define UNUSED_BLK 3
+#define INVALID_BLOCKNUM -1  // Indicates the Block number as Invalid.
 
-// Operators
-// Equal to
-#define EQ 101
-// Less than or equal to
-#define LE 102
-// Less than
-#define LT 103
-// Greater than or equal to
-#define GE 104
-// Greater than
-#define GT 105
-// Not equal to
-#define NE 106  // if considered
+enum AttributeType {
+  STRING,
+  NUMBER  // for an integer or a floating point number
+};
 
-// project operator used for project operation
-// todo remove this: only used in xfs
-#define PRJCT 107
+enum ConditionalOperators {
+  EQ,  // =
+  LE,  // <=
+  LT,  // <
+  GE,  // >=
+  GT,  // >
+  NE   // !=
+};
 
-// Data types
-// For an Integer or a Floating point number
-#define NUMBER 0
-// For a string of characters
-#define STRING 1
+enum BlockType {
+  REC,           // record block
+  IND_INTERNAL,  // internal index block
+  IND_LEAF,      // leaf index block
+  UNUSED_BLK     // unused block
+};
 
-// Relid for Relation catalog
-#define RELCAT_RELID 0
-// Relid for Attribute catalog
-#define ATTRCAT_RELID 1
-
-// Slot number for relation catalog in relation catalog
-#define RELCAT_SLOTNUM_FOR_RELCAT 0
-// Slot number for attribute catalog in relation catalog
-#define RELCAT_SLOTNUM_FOR_ATTRCAT 1
-
-// Indicates the Block number as Invalid.
-#define INVALID_BLOCKNUM -1
-
-// Used for internal purposes
-#define TEMP "temp"
+enum OpenRelationEntryStatus {
+  OCCUPIED = 1,
+  FREE = 0
+};
 
 // Indexes for Relation Catalog Attributes
-// Index for the Relation Name attribute of a relation catalog entry
-#define RELCAT_REL_NAME_INDEX 0
-// Index for the #Attributes attribute of a relation catalog entry
-#define RELCAT_NO_ATTRIBUTES_INDEX 1
-// Index for the #Records attribute of a relation catalog entry
-#define RELCAT_NO_RECORDS_INDEX 2
-// Index for the First Block attribute of a relation catalog entry
-#define RELCAT_FIRST_BLOCK_INDEX 3
-// Index for the Last Block attribute of a relation catalog entry
-#define RELCAT_LAST_BLOCK_INDEX 4
-// Index for the Number of slots per block attribute of a relation catalog entry
-#define RELCAT_NO_SLOTS_PER_BLOCK_INDEX 5
+enum RelCatFieldIndex {
+  RELCAT_REL_NAME_INDEX = 0,           // Relation Name
+  RELCAT_NO_ATTRIBUTES_INDEX = 1,      // #Attributes
+  RELCAT_NO_RECORDS_INDEX = 2,         // #Records
+  RELCAT_FIRST_BLOCK_INDEX = 3,        // First Block
+  RELCAT_LAST_BLOCK_INDEX = 4,         // Last Block
+  RELCAT_NO_SLOTS_PER_BLOCK_INDEX = 5  // #Slots
+};
 
 // Indexes for Attribute Catalog Attributes
-// Index for Relation Name attribute of an attribute catalog entry
-#define ATTRCAT_REL_NAME_INDEX 0
-// Index for Attribute Name attribute of an attribute catalog entry
-#define ATTRCAT_ATTR_NAME_INDEX 1
-// Index for Attribute Type attribute of an attribute catalog entry
-#define ATTRCAT_ATTR_TYPE_INDEX 2
-// Index for Primary Flag attribute of an attribute catalog entry
-#define ATTRCAT_PRIMARY_FLAG_INDEX 3
-// Index for Root Block attribute of an attribute catalog entry
-#define ATTRCAT_ROOT_BLOCK_INDEX 4
-// Index for Offset attribute of an attribute catalog entry
-#define ATTRCAT_OFFSET_INDEX 5
+enum AttrCatFieldIndex {
+  ATTRCAT_REL_NAME_INDEX = 0,      // Relation Name
+  ATTRCAT_ATTR_NAME_INDEX = 1,     // Attribute Name
+  ATTRCAT_ATTR_TYPE_INDEX = 2,     // Attribute Type
+  ATTRCAT_PRIMARY_FLAG_INDEX = 3,  // Primary Flag
+  ATTRCAT_ROOT_BLOCK_INDEX = 4,    // Root Block
+  ATTRCAT_OFFSET_INDEX = 5         // Offset
+};
+
+enum ReturnTypes {
+  SUCCESS = 0,
+  FAILURE = -1,
+  EXIT = -100,
+  E_OUTOFBOUND,             // Out of bound
+  E_FREESLOT,               // Free slot
+  E_NOINDEX,                // No index
+  E_DISKFULL,               // Insufficient space in Disk
+  E_INVALIDBLOCK,           // Invalid block
+  E_RELNOTEXIST,            // Relation does not exist
+  E_RELEXIST,               // Relation already exists
+  E_ATTRNOTEXIST,           // Attribute does not exist
+  E_ATTREXIST,              // Attribute already exists
+  E_CACHEFULL,              // Cache is full
+  E_RELNOTOPEN,             // Relation is not open
+  E_NATTRMISMATCH,          // Mismatch in number of attributes
+  E_DUPLICATEATTR,          // Duplicate attributes found
+  E_RELOPEN,                // Relation is open
+  E_ATTRTYPEMISMATCH,       // Mismatch in attribute type
+  E_INVALID,                // Invalid index or argument
+  E_MAXRELATIONS,           // Maximum number of relations already present
+  E_MAXATTRS,               // Maximum number of attributes allowed for a relation is 125
+  E_NOTPERMITTED,           // Operation not permitted
+  E_NOTFOUND,               // Search for requested record unsuccessful
+  E_BLOCKNOTINBUFFER,       // Block not found in buffer
+  E_INDEX_BLOCKS_RELEASED,  // Due to insufficient disk space, index blocks have been released from the disk
+  E_CREATETEMP,             // Cannot create relation named 'temp' as it is used for internal purposes
+  E_TARGETNAMETEMP,         // Cannot create a target relation named 'temp' as it is used for internal purposes
+  E_RENAMETOTEMP,           // Cannot rename a relation to 'temp'
+};
+
+#define TEMP "temp"  // Used for internal purposes
 
 // Global variables for B+ Tree Layer
-// Maximum number of keys allowed in an Internal Node of a B+ tree
-#define MAX_KEYS_INTERNAL 100
-// Index of the middle element in an Internal Node of a B+ tree
-#define MIDDLE_INDEX_INTERNAL 50
-// Maximum number of keys allowed in a Leaf Node of a B+ tree
-#define MAX_KEYS_LEAF 63
-// Index of the middle element in a Leaf Node of a B+ tree
-#define MIDDLE_INDEX_LEAF 31
+#define MAX_KEYS_INTERNAL 100     // Maximum number of keys allowed in an Internal Node of a B+ tree
+#define MIDDLE_INDEX_INTERNAL 50  // Index of the middle element in an Internal Node of a B+ tree
+#define MAX_KEYS_LEAF 63          // Maximum number of keys allowed in a Leaf Node of a B+ tree
+#define MIDDLE_INDEX_LEAF 31      // Index of the middle element in a Leaf Node of a B+ tree
 
 // Name strings for Relation Catalog and Attribute Catalog (as it is stored in the Relation catalog)
 #define RELCAT_RELNAME "RELATIONCAT"
