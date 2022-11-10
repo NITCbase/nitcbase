@@ -4,7 +4,6 @@
 #include "../Algebra/Algebra.h"
 #include "../Schema/Schema.h"
 #include "../define/constants.h"
-#include "../define/errors.h"
 
 using namespace std;
 

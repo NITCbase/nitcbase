@@ -4,7 +4,6 @@
 #include "../BlockAccess/BlockAccess.h"
 #include "../Buffer/BlockBuffer.h"
 #include "../define/constants.h"
-#include "../define/errors.h"
 #include "AttrCacheTable.h"
 #include "RelCacheTable.h"
 

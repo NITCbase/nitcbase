@@ -4,7 +4,6 @@
 #include "../BlockAccess/BlockAccess.h"
 #include "../Cache/OpenRelTable.h"
 #include "../define/constants.h"
-#include "../define/errors.h"
 
 class Schema {
  public:

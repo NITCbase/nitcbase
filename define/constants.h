@@ -118,12 +118,9 @@ enum ReturnTypes {
   E_NOTFOUND,               // Search for requested record unsuccessful
   E_BLOCKNOTINBUFFER,       // Block not found in buffer
   E_INDEX_BLOCKS_RELEASED,  // Due to insufficient disk space, index blocks have been released from the disk
-  E_CREATETEMP,             // Cannot create relation named 'temp' as it is used for internal purposes
-  E_TARGETNAMETEMP,         // Cannot create a target relation named 'temp' as it is used for internal purposes
-  E_RENAMETOTEMP,           // Cannot rename a relation to 'temp'
 };
 
-#define TEMP "temp"  // Used for internal purposes
+#define TEMP ".temp"  // Used for internal purposes
 
 // Global variables for B+ Tree Layer
 #define MAX_KEYS_INTERNAL 100     // Maximum number of keys allowed in an Internal Node of a B+ tree

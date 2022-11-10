@@ -6,7 +6,6 @@
 #include "../Disk_Class/Disk.h"
 #include "../Frontend/Frontend.h"
 #include "../define/constants.h"
-#include "../define/errors.h"
 #include "commands.h"
 
 void stringToCharArray(string x, char *a, int size);
@@ -82,12 +81,6 @@ int regexMatchAndExecute(const string input_command) {
     string tablename = m[3];
     char relname[ATTR_SIZE];
     stringToCharArray(tablename, relname, ATTR_SIZE - 1);
-
-    // 'temp' is used for internal purposes as of now
-    if (tablename == TEMP) {
-      printErrorMsg(E_CREATETEMP);
-      return FAILURE;
-    }
 
     regex_search(input_command, m, temp);
     string attrs = m[0];
@@ -179,11 +172,6 @@ int regexMatchAndExecute(const string input_command) {
     regex_search(input_command, m, rename_table);
     string oldTableName = m[4];
     string newTableName = m[6];
-
-    if (newTableName == TEMP) {
-      printErrorMsg(E_RENAMETOTEMP);
-      return FAILURE;
-    }
 
     char old_relation_name[ATTR_SIZE];
     char new_relation_name[ATTR_SIZE];
@@ -373,11 +361,6 @@ int regexMatchAndExecute(const string input_command) {
     string sourceRelName_str = m[4];
     string targetRelName_str = m[6];
 
-    if (targetRelName_str == TEMP) {
-      printErrorMsg(E_TARGETNAMETEMP);
-      return FAILURE;
-    }
-
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
 
@@ -399,11 +382,6 @@ int regexMatchAndExecute(const string input_command) {
     string attribute_str = m[8];
     string op_str = m[9];
     string value_str = m[10];
-
-    if (targetRel_str == TEMP) {
-      printErrorMsg(E_TARGETNAMETEMP);
-      return FAILURE;
-    }
 
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
@@ -433,11 +411,6 @@ int regexMatchAndExecute(const string input_command) {
 
     string sourceRel_str = command_tokens[index_of_from + 1];
     string targetRel_str = command_tokens[index_of_from + 3];
-
-    if (targetRel_str == TEMP) {
-      printErrorMsg(E_TARGETNAMETEMP);
-      return FAILURE;
-    }
 
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
@@ -476,11 +449,6 @@ int regexMatchAndExecute(const string input_command) {
     string attribute_str = command_tokens[index_of_where + 1];
     string op_str = command_tokens[index_of_where + 2];
     string value_str = command_tokens[index_of_where + 3];
-
-    if (targetRel_str == TEMP) {
-      printErrorMsg(E_TARGETNAMETEMP);
-      return FAILURE;
-    }
 
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
@@ -526,11 +494,6 @@ int regexMatchAndExecute(const string input_command) {
     char joinAttributeOne[ATTR_SIZE];
     char joinAttributeTwo[ATTR_SIZE];
 
-    if (m[8] == TEMP) {
-      printErrorMsg(E_TARGETNAMETEMP);
-      return FAILURE;
-    }
-
     stringToCharArray(m[4], sourceRelOneName, ATTR_SIZE - 1);
     stringToCharArray(m[6], sourceRelTwoName, ATTR_SIZE - 1);
     stringToCharArray(m[8], targetRelName, ATTR_SIZE - 1);
@@ -564,11 +527,6 @@ int regexMatchAndExecute(const string input_command) {
     char targetRelName[ATTR_SIZE];
     char joinAttributeOne[ATTR_SIZE];
     char joinAttributeTwo[ATTR_SIZE];
-
-    if (tokens[refIndex + 5] == TEMP) {
-      printErrorMsg(E_TARGETNAMETEMP);
-      return FAILURE;
-    }
 
     stringToCharArray(tokens[refIndex + 1], sourceRelOneName, ATTR_SIZE - 1);
     stringToCharArray(tokens[refIndex + 3], sourceRelTwoName, ATTR_SIZE - 1);
@@ -798,12 +756,6 @@ void printErrorMsg(int ret) {
     cout << "Error: Maximum number of relations already present" << endl;
   else if (ret == E_MAXATTRS)
     cout << "Error: Maximum number of attributes allowed for a relation is 125" << endl;
-  else if (ret == E_RENAMETOTEMP)
-    cout << "Error: Cannot rename a relation to 'temp'" << endl;
-  else if (ret == E_CREATETEMP)
-    cout << "Error: Cannot create relation named 'temp' as it is used for internal purposes" << endl;
-  else if (ret == E_TARGETNAMETEMP)
-    cout << "Error: Cannot create a target relation named 'temp' as it is used for internal purposes" << endl;
   else if (ret == E_NOTPERMITTED)
     cout << "Error: This operation is not permitted" << endl;
   else if (ret == E_INDEX_BLOCKS_RELEASED)

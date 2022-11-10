@@ -5,7 +5,6 @@
 #include "../Buffer/StaticBuffer.h"
 #include "../Cache/OpenRelTable.h"
 #include "../define/constants.h"
-#include "../define/errors.h"
 #include "../define/id.h"
 
 class BPlusTree {

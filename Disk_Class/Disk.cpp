@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "../define/constants.h"
-#include "../define/errors.h"
 
 /*
  * Used to make a temporary copy of the disk contents before the starting of a new session.

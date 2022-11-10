@@ -3,7 +3,6 @@
 
 #include "../Buffer/BlockBuffer.h"
 #include "../define/constants.h"
-#include "../define/errors.h"
 #include "../define/id.h"
 
 typedef struct AttrCatEntry {
