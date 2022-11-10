@@ -45,14 +45,8 @@ int Frontend::drop_index(char relname[ATTR_SIZE], char attrname[ATTR_SIZE]) {
   return SUCCESS;
 }
 
-int Frontend::insert_into_table_values(char relname[ATTR_SIZE], vector<string> attr_values) {
+int Frontend::insert_into_table_values(char relname[ATTR_SIZE], int attr_count, char attr_values[][ATTR_SIZE]) {
   // Algebra::insert
-  return SUCCESS;
-}
-
-// todo handle file operations and pass it to insert_into_table_values
-int Frontend::insert_into_table_from_file(char relname[ATTR_SIZE], char filepath[ATTR_SIZE]) {
-  // read from file and use Algebra::insert
   return SUCCESS;
 }
 
