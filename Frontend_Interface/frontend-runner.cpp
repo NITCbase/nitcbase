@@ -9,8 +9,6 @@
 #include "../define/errors.h"
 #include "commands.h"
 
-using namespace std;
-
 void stringToCharArray(string x, char *a, int size);
 
 void displayHelp();
@@ -219,6 +217,58 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
+  } else if (regex_match(input_command, show_columns)) {
+    regex_search(input_command, m, show_columns);
+    string tablename = m[4];
+    char relname[ATTR_SIZE];
+    // todo this
+    //  string_to_char_array(tablename, relname, ATTR_SIZE - 1);
+
+    // int ret = Frontend::get_schema(relname);
+    // if (ret != SUCCESS) {
+    //   printErrorMsg(ret);
+    //   return FAILURE;
+    // }
+    /*
+    int Frontend::get_schema(char relname[ATTR_SIZE]) {
+      cout << "In Get Schema\n\n";
+      int relId = OpenRelTable::getRelId(relname);
+      if (relId == E_RELNOTOPEN) {
+        return E_RELNOTOPEN;
+      }
+
+      RelCatEntry relCatEntry;
+      RelCacheTable::getRelCatEntry(relId, &relCatEntry);
+      int numAttrs = relCatEntry.numAttrs;
+
+      AttrCatEntry* attributes = (AttrCatEntry*)malloc(numAttrs * sizeof(AttrCatEntry));
+
+      for (int i = 0; i < numAttrs; ++i) {
+        AttrCacheTable::getAttrCatEntry(relId, i, attributes + i);
+      }
+
+      cout << "Relation: ";
+      print16(relname);
+      printTabular("Attribute", ATTR_SIZE + 1);
+      printTabular("Type", 5);
+      printTabular("Index", 5);
+      cout << "\n---------------- ---- -----\n";
+      for (int i = 0; i < numAttrs; ++i) {
+        printTabular(attributes[i].attrName, ATTR_SIZE + 1);
+        printTabular(attributes[i].attrType == NUMBER ? "NUM" : "STR", 5);
+        printTabular(attributes[i].rootBlock == -1 ? "no" : "yes", 5);
+        cout << endl;
+      }
+      free(attributes);
+      return SUCCESS;
+    }
+    template <typename T>
+    void printTabular(T t, const int& width) {
+      cout << left << setw(width) << setfill(' ') << t;
+    }
+    #include<iomanip>
+
+    */
 
   } else if (regex_match(input_command, insert_single)) {
     regex_search(input_command, m, insert_single);
@@ -229,39 +279,94 @@ int regexMatchAndExecute(const string input_command) {
     string attrs = m[0];
     vector<string> words = extract_tokens(attrs);
 
-    int ret = Frontend::insert_into_table_values(rel_name, words);
+    int attr_count = words.size();
+    char attr_values_arr[words.size()][ATTR_SIZE];
+    for (int i = 0; i < words.size(); ++i) {
+      strcpy(attr_values_arr[i], words[i].c_str());
+    }
+
+    int ret = Frontend::insert_into_table_values(rel_name, words.size(), attr_values_arr);
     if (ret == SUCCESS) {
       cout << "Inserted successfully" << endl;
     } else {
       printErrorMsg(ret);
-      return FAILURE;
     }
-
+    return ret;
   } else if (regex_match(input_command, insert_multiple)) {
     regex_search(input_command, m, insert_multiple);
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    string p = INPUT_FILES_PATH;
     stringToCharArray(tablename, relname, ATTR_SIZE - 1);
-    string t = m[6];
-    p = p + t;
-    char Filepath[p.length() + 1];
-    stringToCharArray(p, Filepath, p.length() + 1);
-    FILE *file = fopen(Filepath, "r");
-    if (!file) {
+
+    string filepath = string(INPUT_FILES_PATH) + string(m[6]);
+    std::cout << "File path: " << filepath << endl;
+
+    ifstream file(filepath);
+    if (!file.is_open()) {
       cout << "Invalid file path or file does not exist" << endl;
       return FAILURE;
     }
-    fclose(file);
-    cout << "File path: " << Filepath << endl;
 
-    int ret = Frontend::insert_into_table_from_file(relname, Filepath);
-    if (ret == SUCCESS) {
-      cout << "Inserted successfully" << endl;
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+    string errorMsg("");
+    string fileLine;
+
+    int retVal = SUCCESS;
+    int columnCount = -1, lineNumber = 1;
+    while (getline(file, fileLine)) {
+      vector<string> row;
+
+      stringstream lineStream(fileLine);
+
+      string item;
+      while (getline(lineStream, item, ',')) {
+        if (item.size() == 0) {
+          errorMsg += "Null values not allowed in attribute values\n";
+          retVal = FAILURE;
+          break;
+        }
+        row.push_back(item);
+      }
+      if (retVal == FAILURE) {
+        break;
+      }
+
+      if (columnCount == -1) {
+        columnCount = row.size();
+      } else if (columnCount != row.size()) {
+        errorMsg += "Mismatch in number of attributes\n";
+        retVal = FAILURE;
+        break;
+      }
+
+      char rowArray[columnCount][ATTR_SIZE];
+      for (int i = 0; i < columnCount; ++i) {
+        stringToCharArray(row[i], rowArray[i], ATTR_SIZE - 1);
+      }
+
+      retVal = Frontend::insert_into_table_values(relname, columnCount, rowArray);
+
+      if (retVal != SUCCESS) {
+        break;
+      }
+
+      lineNumber++;
     }
+
+    file.close();
+
+    if (retVal == SUCCESS) {
+      cout << lineNumber - 1 << " rows inserted successfully" << endl;
+    } else {
+      if (lineNumber > 1) {
+        std::cout << "Rows till line " << lineNumber - 1 << " successfully inserted\n";
+      }
+      std::cout << "Insertion error at line " << lineNumber << " in file \n";
+      std::cout << "Error:" << errorMsg;
+      printErrorMsg(retVal);
+      std::cout << "Subsequent lines will be skipped\n";
+    }
+
+    return retVal;
 
   } else if (regex_match(input_command, select_from)) {
     regex_search(input_command, m, select_from);
@@ -287,7 +392,6 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
-
   } else if (regex_match(input_command, select_from_where)) {
     regex_search(input_command, m, select_from_where);
     string sourceRel_str = m[4];
@@ -320,7 +424,6 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
-
   } else if (regex_match(input_command, select_attr_from)) {
     regex_search(input_command, m, select_attr_from);
     vector<string> command_tokens;
@@ -359,8 +462,7 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
-
-  } else if ((regex_match(input_command, select_attr_from_where))) {
+  } else if (regex_match(input_command, select_attr_from_where)) {
     regex_search(input_command, m, select_attr_from_where);
     vector<string> command_tokens;
     for (auto token : m)
@@ -409,7 +511,6 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
-
   } else if (regex_match(input_command, select_from_join)) {
     regex_search(input_command, m, select_from_join);
 
@@ -445,7 +546,6 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
-
   } else if (regex_match(input_command, select_attr_from_join)) {
     regex_search(input_command, m, select_attr_from_join);
 
@@ -504,7 +604,11 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
-
+  } else if (regex_match(input_command, show_rows)) {
+    regex_search(input_command, m, show_columns);
+    string tablename = m[4];
+    char relname[ATTR_SIZE];
+    // todo this
   } else {
     cout << "Syntax Error" << endl;
     return FAILURE;

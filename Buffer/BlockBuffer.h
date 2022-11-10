@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#include "../Disk_Class/Disk.h"
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include "StaticBuffer.h"

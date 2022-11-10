@@ -1,9 +1,6 @@
 #ifndef FRONTEND_INTERFACE_FRONTEND_H
 #define FRONTEND_INTERFACE_FRONTEND_H
 
-#include <string>
-#include <vector>
-
 #include "../Algebra/Algebra.h"
 #include "../Schema/Schema.h"
 #include "../define/constants.h"
@@ -31,9 +28,7 @@ class Frontend {
   static int alter_table_rename_column(char relname[ATTR_SIZE], char attrname_from[16], char attrname_to[16]);
 
   // DML
-  static int insert_into_table_from_file(char relname[ATTR_SIZE], char filepath[ATTR_SIZE]);
-
-  static int insert_into_table_values(char relname[ATTR_SIZE], vector<string> attr_values);
+  static int insert_into_table_values(char relname[ATTR_SIZE], int attr_count, char attr_values[][ATTR_SIZE]);
 
   static int select_from_table(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE]);
 
