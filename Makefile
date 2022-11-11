@@ -1,7 +1,18 @@
-default: nitcbase
+TARGET = nitcbase
 
-nitcbase: Algebra/* BlockAccess/* BPlusTree/* Buffer/* Cache/* define/* Disk_Class/* Frontend/* Frontend_Interface/* Schema/* main.cpp
-	g++ Algebra/*.cpp BlockAccess/*.cpp BPlusTree/*.cpp Buffer/*.cpp Cache/*.cpp Disk_Class/*.cpp Frontend/*.cpp Frontend_Interface/*.cpp Schema/*.cpp main.cpp -o nitcbase
+SUBDIR = Frontend_Interface Frontend Algebra Schema BlockAccess BPlusTree Cache Buffer Disk_Class
+BUILD_DIR = ./build
+
+HEADERS = $(wildcard define/*.h $(foreach fd, $(SUBDIR), $(fd)/*.h))
+SRCS = $(wildcard main.cpp $(foreach fd, $(SUBDIR), $(fd)/*.cpp))
+OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:cpp=o))
+
+$(TARGET): $(OBJS)
+	g++ -o $@ $(OBJS)
+
+$(BUILD_DIR)/%.o: %.cpp $(HEADERS)
+	mkdir -p $(@D)
+	g++ -o $@ -c $<
 
 clean:
-	$(RM) nitcbase *.o
+	rm -rf $(BUILD_DIR)/*
