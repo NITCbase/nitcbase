@@ -205,59 +205,6 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
-  } else if (regex_match(input_command, show_columns)) {
-    regex_search(input_command, m, show_columns);
-    string tablename = m[4];
-    char relname[ATTR_SIZE];
-    // todo this
-    //  string_to_char_array(tablename, relname, ATTR_SIZE - 1);
-
-    // int ret = Frontend::get_schema(relname);
-    // if (ret != SUCCESS) {
-    //   printErrorMsg(ret);
-    //   return FAILURE;
-    // }
-    /*
-    int Frontend::get_schema(char relname[ATTR_SIZE]) {
-      cout << "In Get Schema\n\n";
-      int relId = OpenRelTable::getRelId(relname);
-      if (relId == E_RELNOTOPEN) {
-        return E_RELNOTOPEN;
-      }
-
-      RelCatEntry relCatEntry;
-      RelCacheTable::getRelCatEntry(relId, &relCatEntry);
-      int numAttrs = relCatEntry.numAttrs;
-
-      AttrCatEntry* attributes = (AttrCatEntry*)malloc(numAttrs * sizeof(AttrCatEntry));
-
-      for (int i = 0; i < numAttrs; ++i) {
-        AttrCacheTable::getAttrCatEntry(relId, i, attributes + i);
-      }
-
-      cout << "Relation: ";
-      print16(relname);
-      printTabular("Attribute", ATTR_SIZE + 1);
-      printTabular("Type", 5);
-      printTabular("Index", 5);
-      cout << "\n---------------- ---- -----\n";
-      for (int i = 0; i < numAttrs; ++i) {
-        printTabular(attributes[i].attrName, ATTR_SIZE + 1);
-        printTabular(attributes[i].attrType == NUMBER ? "NUM" : "STR", 5);
-        printTabular(attributes[i].rootBlock == -1 ? "no" : "yes", 5);
-        cout << endl;
-      }
-      free(attributes);
-      return SUCCESS;
-    }
-    template <typename T>
-    void printTabular(T t, const int& width) {
-      cout << left << setw(width) << setfill(' ') << t;
-    }
-    #include<iomanip>
-
-    */
-
   } else if (regex_match(input_command, insert_single)) {
     regex_search(input_command, m, insert_single);
     string table_name = m[3];
@@ -562,11 +509,6 @@ int regexMatchAndExecute(const string input_command) {
       printErrorMsg(ret);
       return FAILURE;
     }
-  } else if (regex_match(input_command, show_rows)) {
-    regex_search(input_command, m, show_columns);
-    string tablename = m[4];
-    char relname[ATTR_SIZE];
-    // todo this
   } else {
     cout << "Syntax Error" << endl;
     return FAILURE;
