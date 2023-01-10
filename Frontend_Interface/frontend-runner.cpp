@@ -28,7 +28,6 @@ int getOperator(string op_str);
 
 void print16(char char_string_thing[ATTR_SIZE], bool newline = true);
 
-// TODO: Call Frontend Class methods for Commands as well.
 int regexMatchAndExecute(const string input_command) {
   smatch m;
   if (regex_match(input_command, help)) {
