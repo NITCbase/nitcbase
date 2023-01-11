@@ -51,7 +51,7 @@ int regexMatchAndExecute(const string input_command) {
     stringToCharArray(tablename, relname, ATTR_SIZE - 1);
 
     int ret = Frontend::open_table(relname);
-    if (ret == SUCCESS) {
+    if (ret >= 0) {
       cout << "Relation ";
       print16(relname, false);
       cout << " opened successfully\n";
