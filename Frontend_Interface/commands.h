@@ -30,10 +30,10 @@ std::regex select_attr_from_join("\\s*(select|SELECT)\\s+([A-Za-z0-9_-]+\\s*,\\s
 std::regex insert_single("\\s*(INSERT|insert)\\s+(INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(VALUES|values)\\s*\\(\\s*(([A-Za-z0-9_-]+|[0-9]+\\.[0-9]+)\\s*,\\s*)*([A-Za-z0-9_-]+|[0-9]+\\.[0-9]+)\\s*\\)\\s*;?");
 std::regex insert_multiple("\\s*(INSERT|insert)\\s+(INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(VALUES|values)\\s+(FROM|from)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*;?");
 
-std::regex attrlist("([A-Za-z0-9_-]+\\s*\\,\\s*)*[A-Za-z0-9_-]+;?");
-std::regex condition("([A-Za-z0-9_-]+)\\s*(<|<=|>|>=|=|!=)\\s*([A-Za-z0-9_-]+|([0-9]+(\\.)[0-9]+));?");
-std::regex filename("[A-Za-z0-9_-]+\\.csv;?");
-std::regex filepath("(/.*\\.csv);?");
-std::regex temp("\\((.*)\\);?");
+std::regex attrlist("([A-Za-z0-9_-]+\\s*\\,\\s*)*[A-Za-z0-9_-]+");
+std::regex condition("([A-Za-z0-9_-]+)\\s*(<|<=|>|>=|=|!=)\\s*([A-Za-z0-9_-]+|([0-9]+(\\.)[0-9]+))");
+std::regex filename("[A-Za-z0-9_-]+\\.csv");
+std::regex filepath("(/.*\\.csv)");
+std::regex temp("\\((.*)\\)");
 
 #endif  // COMMANDS_H
