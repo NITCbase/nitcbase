@@ -1,7 +1,11 @@
+// clang-format off
 #include <cstring>
 #include <fstream>
-#include <iostream>
 #include <string>
+#include <iostream>
+#include <readline/history.h>
+#include <readline/readline.h>
+// clang-format on
 
 #include "../Disk_Class/Disk.h"
 #include "../Frontend/Frontend.h"
@@ -525,17 +529,19 @@ int handleFrontend(int argc, char *argv[]) {
       return 0;
     }
   }
-
-  while (true) {
-    cout << "# ";
-    string input_command;
-    smatch m;
-    getline(cin, input_command);
-    int ret = regexMatchAndExecute(input_command);
+  char *buf;
+  rl_bind_key('\t', rl_insert);
+  while ((buf = readline("# ")) != nullptr) {
+    if (strlen(buf) > 0) {
+      add_history(buf);
+    }
+    int ret = regexMatchAndExecute(string(buf));
+    free(buf);
     if (ret == EXIT) {
       return 0;
     }
   }
+  return 0;
 }
 
 int executeCommandsFromFile(const string fileName) {
@@ -653,7 +659,7 @@ void displayHelp() {
   printf("SELECT * FROM source_relation1 JOIN source_relation2 INTO target_relation WHERE source_relation1.attribute1 = source_relation2.attribute2; \n\t-creates a new relation with by equi-join of both the source relations\n\n");
   printf("SELECT Attribute1,Attribute2,.. FROM source_relation1 JOIN source_relation2 INTO target_relation WHERE source_relation1.attribute1 = source_relation2.attribute2; \n\t-creates a new relation by equi-join of both the source relations with the attributes specified \n\n");
   printf("echo <any message> \n\t  -echo back the given string. \n\n");
-	printf("run <filename> \n\t  -run commands from an input file in sequence. \n\n");
+  printf("run <filename> \n\t  -run commands from an input file in sequence. \n\n");
   printf("exit \n\t-Exit the interface\n");
   return;
 }

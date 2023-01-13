@@ -1,7 +1,8 @@
 TARGET = nitcbase
+CFLAGS := -lreadline
 
 ifeq ($(debug),true)
-	CFLAGS = -g
+	CFLAGS := $(CFLAGS) -g
 	BUILD_DIR = ./build/debug
 else
 	BUILD_DIR = ./build
