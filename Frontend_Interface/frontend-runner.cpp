@@ -652,6 +652,8 @@ void displayHelp() {
   printf("SELECT Attribute1,Attribute2,....FROM source_relation INTO target_relation;\n\t-creates a relation with the attributes specified and inserts those records which satisfy the given condition.\n\n");
   printf("SELECT * FROM source_relation1 JOIN source_relation2 INTO target_relation WHERE source_relation1.attribute1 = source_relation2.attribute2; \n\t-creates a new relation with by equi-join of both the source relations\n\n");
   printf("SELECT Attribute1,Attribute2,.. FROM source_relation1 JOIN source_relation2 INTO target_relation WHERE source_relation1.attribute1 = source_relation2.attribute2; \n\t-creates a new relation by equi-join of both the source relations with the attributes specified \n\n");
+  printf("echo <any message> \n\t  -echo back the given string. \n\n");
+	printf("run <filename> \n\t  -run commands from an input file in sequence. \n\n");
   printf("exit \n\t-Exit the interface\n");
   return;
 }
