@@ -8,7 +8,6 @@
 int main(int argc, char *argv[]) {
   /* Initialize the Run Copy of Disk */
   Disk disk_run;
-  std::cout << "Run Copy of Disk Initialized\n";
   // StaticBuffer buffer;
   // OpenRelTable cache;
 
