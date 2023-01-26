@@ -1,8 +1,7 @@
 TARGET = nitcbase
-CFLAGS := -lreadline
 
 ifeq ($(mode),debug)
-	CFLAGS := $(CFLAGS) -g
+	CFLAGS := -g
 	BUILD_DIR = ./build/debug
 else
 	BUILD_DIR = ./build
@@ -15,7 +14,7 @@ SRCS = $(wildcard main.cpp $(foreach fd, $(SUBDIR), $(fd)/*.cpp))
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:cpp=o))
 
 $(TARGET): $(OBJS)
-	g++ $(CFLAGS) -o $@ $(OBJS)
+	g++ $(CFLAGS) -o $@ $(OBJS) -lreadline
 
 $(BUILD_DIR)/%.o: %.cpp $(HEADERS)
 	mkdir -p $(@D)
