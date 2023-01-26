@@ -12,95 +12,118 @@
 #include "../define/constants.h"
 #include "commands.h"
 
-void stringToCharArray(string x, char *a, int size);
-
-void displayHelp();
-
-void printErrorMsg(int ret);
-
-vector<string> extract_tokens(string input_command);
-
-int executeCommandsFromFile(string fileName);
-
-int getIndexOfFromToken(vector<string> command_tokens);
-
-int getIndexOfWhereToken(vector<string> command_tokens);
-
-string getAttrListStringFromCommand(string input_command, smatch m);
+using namespace std;
 
 int getOperator(string op_str);
 
-void print16(char char_string_thing[ATTR_SIZE], bool newline = true);
+void nameToTruncatedArray(string nameString, char *nameArray);
 
-int regexMatchAndExecute(const string input_command) {
+void printErrorMsg(int error);
+
+void printHelp();
+
+class RegexHandler {
+  typedef int (RegexHandler::*handlerFunction)(void);  // function pointer type
+
+ private:
+  // extract tokens delimited by whitespace and comma
+  vector<string> extractTokens(string input) {
+    regex re("\\s*,\\s*|\\s+");
+    sregex_token_iterator first(input.begin(), input.end(), re, -1), last;
+    vector<string> tokens(first, last);
+    return tokens;
+  }
+
+  // handler functions
   smatch m;
-  if (regex_match(input_command, help)) {
-    displayHelp();
-  } else if (regex_match(input_command, ex)) {
+  int helpHandler() {
+    printHelp();
+    return SUCCESS;
+  };
+
+  int exitHandler() {
     return EXIT;
-  } else if (regex_match(input_command, echo)) {
-    regex_search(input_command, m, echo);
+  };
+
+  int echoHandler() {
     string message = m[2];
     cout << message << endl;
-  } else if (regex_match(input_command, run)) {
-    regex_search(input_command, m, run);
-    string file_name = m[2];
-    if (executeCommandsFromFile(file_name) == EXIT) {
-      return EXIT;
+    return SUCCESS;
+  }
+
+  int runHandler() {
+    string fileName = m[2];
+    const string filePath = BATCH_FILES_PATH;
+    fstream commandsFile;
+    commandsFile.open(filePath + fileName, ios::in);
+    string command;
+    if (!commandsFile.is_open()) {
+      cout << "The file " << fileName << " does not exist\n";
+      return FAILURE;
     }
-  } else if (regex_match(input_command, open_table)) {
-    regex_search(input_command, m, open_table);
+
+    int lineNumber = 1;
+    while (getline(commandsFile, command)) {
+      int ret = this->handle(command);
+      if (ret == EXIT) {
+        break;
+      } else if (ret != SUCCESS) {
+        cout << "Executed up till line " << lineNumber - 1 << ".\n";
+        cout << "Error at line number " << lineNumber << ". Subsequent lines will be skipped.\n";
+        break;
+      }
+      lineNumber++;
+    }
+
+    commandsFile.close();
+
+    return SUCCESS;  // error messages if any will be printed in recursive call to handle
+  }
+
+  int openHandler() {
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
+    nameToTruncatedArray(tablename, relname);
 
     int ret = Frontend::open_table(relname);
     if (ret >= 0) {
-      cout << "Relation ";
-      print16(relname, false);
-      cout << " opened successfully\n";
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Relation " << relname << " opened successfully\n";
+      return SUCCESS;
     }
+    return ret;
+  }
 
-  } else if (regex_match(input_command, close_table)) {
-    regex_search(input_command, m, close_table);
+  int closeHandler() {
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
+    nameToTruncatedArray(tablename, relname);
 
     int ret = Frontend::close_table(relname);
     if (ret == SUCCESS) {
-      cout << "Relation ";
-      print16(relname, false);
-      cout << " closed successfully\n";
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Relation " << relname << " closed successfully\n";
     }
-  } else if (regex_match(input_command, create_table)) {
-    regex_search(input_command, m, create_table);
-    string tablename = m[3];
-    char relname[ATTR_SIZE];
-    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
 
-    regex_search(input_command, m, temp);
-    string attrs = m[0];
-    vector<string> words = extract_tokens(attrs);
+    return ret;
+  }
+
+  int createTableHandler() {
+    string tablename = m[1];
+    char relname[ATTR_SIZE];
+    nameToTruncatedArray(tablename, relname);
+
+    vector<string> words = extractTokens(m[2]);
 
     int no_attrs = words.size() / 2;
 
     if (no_attrs > 125) {
-      printErrorMsg(E_MAXATTRS);
-      return FAILURE;
+      return E_MAXATTRS;
     }
 
     char attribute[no_attrs][ATTR_SIZE];
     int type_attr[no_attrs];
 
     for (int i = 0, k = 0; i < no_attrs; i++, k += 2) {
-      stringToCharArray(words[k], attribute[i], ATTR_SIZE - 1);
+      nameToTruncatedArray(words[k], attribute[i]);
       if (words[k + 1] == "STR")
         type_attr[i] = STRING;
       else if (words[k + 1] == "NUM")
@@ -109,19 +132,16 @@ int regexMatchAndExecute(const string input_command) {
 
     int ret = Frontend::create_table(relname, no_attrs, attribute, type_attr);
     if (ret == SUCCESS) {
-      cout << "Relation ";
-      print16(relname, false);
-      cout << " created successfully" << endl;
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Relation " << relname << " created successfully" << endl;
     }
 
-  } else if (regex_match(input_command, drop_table)) {
-    regex_search(input_command, m, drop_table);
+    return ret;
+  }
+
+  int dropTableHandler() {
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
+    nameToTruncatedArray(tablename, relname);
 
     if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0) {
       cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
@@ -130,92 +150,84 @@ int regexMatchAndExecute(const string input_command) {
 
     int ret = Frontend::drop_table(relname);
     if (ret == SUCCESS) {
-      cout << "Relation ";
-      print16(relname, false);
-      cout << " deleted successfully" << endl;
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Relation " << relname << " deleted successfully" << endl;
     }
+    return ret;
+  }
 
-  } else if (regex_match(input_command, create_index)) {
-    regex_search(input_command, m, create_index);
+  int createIndexHandler() {
     string tablename = m[4];
     string attrname = m[5];
     char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
 
-    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
-    stringToCharArray(attrname, attr_name, ATTR_SIZE - 1);
+    nameToTruncatedArray(tablename, relname);
+    nameToTruncatedArray(attrname, attr_name);
 
     int ret = Frontend::create_index(relname, attr_name);
     if (ret == SUCCESS) {
       cout << "Index created successfully\n";
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
     }
 
-  } else if (regex_match(input_command, drop_index)) {
-    regex_search(input_command, m, drop_index);
+    return ret;
+  }
+
+  int dropIndexHandler() {
     string tablename = m[4];
     string attrname = m[5];
     char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
-    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
-    stringToCharArray(attrname, attr_name, ATTR_SIZE - 1);
+    nameToTruncatedArray(tablename, relname);
+    nameToTruncatedArray(attrname, attr_name);
 
     int ret = Frontend::drop_index(relname, attr_name);
     if (ret == SUCCESS) {
       cout << "Index deleted successfully\n";
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
     }
 
-  } else if (regex_match(input_command, rename_table)) {
-    regex_search(input_command, m, rename_table);
+    return ret;
+  }
+
+  int renameTableHandler() {
     string oldTableName = m[4];
     string newTableName = m[6];
 
     char old_relation_name[ATTR_SIZE];
     char new_relation_name[ATTR_SIZE];
-    stringToCharArray(oldTableName, old_relation_name, ATTR_SIZE - 1);
-    stringToCharArray(newTableName, new_relation_name, ATTR_SIZE - 1);
+    nameToTruncatedArray(oldTableName, old_relation_name);
+    nameToTruncatedArray(newTableName, new_relation_name);
 
     int ret = Frontend::alter_table_rename(old_relation_name, new_relation_name);
     if (ret == SUCCESS) {
       cout << "Renamed Relation Successfully" << endl;
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
     }
 
-  } else if (regex_match(input_command, rename_column)) {
-    regex_search(input_command, m, rename_column);
+    return ret;
+  }
+
+  int renameColumnHandler() {
     string tablename = m[4];
     string oldcolumnname = m[6];
     string newcolumnname = m[8];
     char relname[ATTR_SIZE];
     char old_col[ATTR_SIZE];
     char new_col[ATTR_SIZE];
-    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
-    stringToCharArray(oldcolumnname, old_col, ATTR_SIZE - 1);
-    stringToCharArray(newcolumnname, new_col, ATTR_SIZE - 1);
+    nameToTruncatedArray(tablename, relname);
+    nameToTruncatedArray(oldcolumnname, old_col);
+    nameToTruncatedArray(newcolumnname, new_col);
 
     int ret = Frontend::alter_table_rename_column(relname, old_col, new_col);
     if (ret == SUCCESS) {
       cout << "Renamed Attribute Successfully" << endl;
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
     }
-  } else if (regex_match(input_command, insert_single)) {
-    regex_search(input_command, m, insert_single);
-    string table_name = m[3];
+
+    return ret;
+  }
+
+  int insertSingleHandler() {
+    string table_name = m[1];
     char rel_name[ATTR_SIZE];
-    stringToCharArray(table_name, rel_name, ATTR_SIZE - 1);
-    regex_search(input_command, m, temp);
-    string attrs = m[0];
-    vector<string> words = extract_tokens(attrs);
+    nameToTruncatedArray(table_name, rel_name);
+
+    vector<string> words = extractTokens(m[2]);
 
     int attr_count = words.size();
     char attr_values_arr[words.size()][ATTR_SIZE];
@@ -226,15 +238,15 @@ int regexMatchAndExecute(const string input_command) {
     int ret = Frontend::insert_into_table_values(rel_name, words.size(), attr_values_arr);
     if (ret == SUCCESS) {
       cout << "Inserted successfully" << endl;
-    } else {
-      printErrorMsg(ret);
     }
+
     return ret;
-  } else if (regex_match(input_command, insert_multiple)) {
-    regex_search(input_command, m, insert_multiple);
+  }
+
+  int insertFromFileHandler() {
     string tablename = m[3];
     char relname[ATTR_SIZE];
-    stringToCharArray(tablename, relname, ATTR_SIZE - 1);
+    nameToTruncatedArray(tablename, relname);
 
     string filepath = string(INPUT_FILES_PATH) + string(m[6]);
     std::cout << "File path: " << filepath << endl;
@@ -278,7 +290,7 @@ int regexMatchAndExecute(const string input_command) {
 
       char rowArray[columnCount][ATTR_SIZE];
       for (int i = 0; i < columnCount; ++i) {
-        stringToCharArray(row[i], rowArray[i], ATTR_SIZE - 1);
+        nameToTruncatedArray(row[i], rowArray[i]);
       }
 
       retVal = Frontend::insert_into_table_values(relname, columnCount, rowArray);
@@ -299,34 +311,34 @@ int regexMatchAndExecute(const string input_command) {
         std::cout << "Rows till line " << lineNumber - 1 << " successfully inserted\n";
       }
       std::cout << "Insertion error at line " << lineNumber << " in file \n";
-      std::cout << "Error:" << errorMsg;
-      printErrorMsg(retVal);
       std::cout << "Subsequent lines will be skipped\n";
+      if (retVal == FAILURE) {
+        std::cout << "Error:" << errorMsg;
+      }
     }
 
     return retVal;
+  }
 
-  } else if (regex_match(input_command, select_from)) {
-    regex_search(input_command, m, select_from);
+  int selectFromHandler() {
     string sourceRelName_str = m[4];
     string targetRelName_str = m[6];
 
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
 
-    stringToCharArray(sourceRelName_str, sourceRelName, ATTR_SIZE - 1);
-    stringToCharArray(targetRelName_str, targetRelName, ATTR_SIZE - 1);
+    nameToTruncatedArray(sourceRelName_str, sourceRelName);
+    nameToTruncatedArray(targetRelName_str, targetRelName);
 
     int ret = Frontend::select_from_table(sourceRelName, targetRelName);
     if (ret == SUCCESS) {
-      cout << "Selected successfully into ";
-      print16(targetRelName);
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Selected successfully into " << targetRelName << endl;
     }
-  } else if (regex_match(input_command, select_from_where)) {
-    regex_search(input_command, m, select_from_where);
+
+    return ret;
+  }
+
+  int selectFromWhereHandler() {
     string sourceRel_str = m[4];
     string targetRel_str = m[6];
     string attribute_str = m[8];
@@ -337,68 +349,54 @@ int regexMatchAndExecute(const string input_command) {
     char targetRelName[ATTR_SIZE];
     char attribute[ATTR_SIZE];
     char value[ATTR_SIZE];
-    stringToCharArray(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
-    stringToCharArray(targetRel_str, targetRelName, ATTR_SIZE - 1);
-    stringToCharArray(attribute_str, attribute, ATTR_SIZE - 1);
-    stringToCharArray(value_str, value, ATTR_SIZE - 1);
+    nameToTruncatedArray(sourceRel_str, sourceRelName);
+    nameToTruncatedArray(targetRel_str, targetRelName);
+    nameToTruncatedArray(attribute_str, attribute);
+    nameToTruncatedArray(value_str, value);
 
     int op = getOperator(op_str);
 
     int ret = Frontend::select_from_table_where(sourceRelName, targetRelName, attribute, op, value);
     if (ret == SUCCESS) {
-      cout << "Selected successfully into ";
-      print16(targetRelName);
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Selected successfully into " << targetRelName << endl;
     }
-  } else if (regex_match(input_command, select_attr_from)) {
-    regex_search(input_command, m, select_attr_from);
-    vector<string> command_tokens;
-    for (auto token : m)
-      command_tokens.push_back(token);
-    int index_of_from = getIndexOfFromToken(command_tokens);
 
-    string sourceRel_str = command_tokens[index_of_from + 1];
-    string targetRel_str = command_tokens[index_of_from + 3];
+    return ret;
+  }
+
+  int selectAttrFromHandler() {
+    string attribute_list = m[1];
+    string sourceRel_str = m[2];
+    string targetRel_str = m[3];
 
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
-    stringToCharArray(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
-    stringToCharArray(targetRel_str, targetRelName, ATTR_SIZE - 1);
+    nameToTruncatedArray(sourceRel_str, sourceRelName);
+    nameToTruncatedArray(targetRel_str, targetRelName);
 
-    /* Get the attribute list string from the input command */
-    string attribute_list = getAttrListStringFromCommand(input_command, m);
-    vector<string> attr_tokens = extract_tokens(attribute_list);
+    vector<string> attr_tokens = extractTokens(attribute_list);
 
     int attr_count = attr_tokens.size();
     char attr_list[attr_count][ATTR_SIZE];
     for (int attr_no = 0; attr_no < attr_count; attr_no++) {
-      stringToCharArray(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
+      nameToTruncatedArray(attr_tokens[attr_no], attr_list[attr_no]);
     }
 
     int ret = Frontend::select_attrlist_from_table(sourceRelName, targetRelName, attr_count, attr_list);
     if (ret == SUCCESS) {
-      cout << "Selected successfully into ";
-      print16(targetRelName);
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Selected successfully into " << targetRelName << endl;
     }
-  } else if (regex_match(input_command, select_attr_from_where)) {
-    regex_search(input_command, m, select_attr_from_where);
-    vector<string> command_tokens;
-    for (auto token : m)
-      command_tokens.push_back(token);
 
-    int index_of_from = getIndexOfFromToken(command_tokens);
-    int index_of_where = getIndexOfWhereToken(command_tokens);
+    return ret;
+  }
 
-    string sourceRel_str = command_tokens[index_of_from + 1];
-    string targetRel_str = command_tokens[index_of_from + 3];
-    string attribute_str = command_tokens[index_of_where + 1];
-    string op_str = command_tokens[index_of_where + 2];
-    string value_str = command_tokens[index_of_where + 3];
+  int selectAttrFromWhereHandler() {
+    string attribute_list = m[1];
+    string sourceRel_str = m[2];
+    string targetRel_str = m[3];
+    string attribute_str = m[4];
+    string op_str = m[5];
+    string value_str = m[6];
 
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
@@ -406,32 +404,29 @@ int regexMatchAndExecute(const string input_command) {
     char value[ATTR_SIZE];
     int op = getOperator(op_str);
 
-    stringToCharArray(attribute_str, attribute, ATTR_SIZE - 1);
-    stringToCharArray(value_str, value, ATTR_SIZE - 1);
-    stringToCharArray(sourceRel_str, sourceRelName, ATTR_SIZE - 1);
-    stringToCharArray(targetRel_str, targetRelName, ATTR_SIZE - 1);
+    nameToTruncatedArray(attribute_str, attribute);
+    nameToTruncatedArray(value_str, value);
+    nameToTruncatedArray(sourceRel_str, sourceRelName);
+    nameToTruncatedArray(targetRel_str, targetRelName);
 
-    string attribute_list = getAttrListStringFromCommand(input_command, m);
-    vector<string> attr_tokens = extract_tokens(attribute_list);
+    vector<string> attr_tokens = extractTokens(attribute_list);
 
     int attr_count = attr_tokens.size();
     char attr_list[attr_count][ATTR_SIZE];
     for (int attr_no = 0; attr_no < attr_count; attr_no++) {
-      stringToCharArray(attr_tokens[attr_no], attr_list[attr_no], ATTR_SIZE - 1);
+      nameToTruncatedArray(attr_tokens[attr_no], attr_list[attr_no]);
     }
 
     int ret = Frontend::select_attrlist_from_table_where(sourceRelName, targetRelName, attr_count, attr_list,
                                                          attribute, op, value);
     if (ret == SUCCESS) {
-      cout << "Selected successfully into ";
-      print16(targetRelName);
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Selected successfully into " << targetRelName << endl;
     }
-  } else if (regex_match(input_command, select_from_join)) {
-    regex_search(input_command, m, select_from_join);
 
+    return ret;
+  }
+
+  int selectFromJoinHandler() {
     // m[4] and m[10] should be equal ( = sourceRelOneName)
     // m[6] and m[102 should be equal ( = sourceRelTwoName)
     if (m[4] != m[10] || m[6] != m[12]) {
@@ -444,87 +439,103 @@ int regexMatchAndExecute(const string input_command) {
     char joinAttributeOne[ATTR_SIZE];
     char joinAttributeTwo[ATTR_SIZE];
 
-    stringToCharArray(m[4], sourceRelOneName, ATTR_SIZE - 1);
-    stringToCharArray(m[6], sourceRelTwoName, ATTR_SIZE - 1);
-    stringToCharArray(m[8], targetRelName, ATTR_SIZE - 1);
-    stringToCharArray(m[11], joinAttributeOne, ATTR_SIZE - 1);
-    stringToCharArray(m[13], joinAttributeTwo, ATTR_SIZE - 1);
+    nameToTruncatedArray(m[4], sourceRelOneName);
+    nameToTruncatedArray(m[6], sourceRelTwoName);
+    nameToTruncatedArray(m[8], targetRelName);
+    nameToTruncatedArray(m[11], joinAttributeOne);
+    nameToTruncatedArray(m[13], joinAttributeTwo);
 
     int ret = Frontend::select_from_join_where(sourceRelOneName, sourceRelTwoName, targetRelName,
                                                joinAttributeOne, joinAttributeTwo);
     if (ret == SUCCESS) {
-      cout << "Selected successfully into ";
-      print16(targetRelName);
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
-    }
-  } else if (regex_match(input_command, select_attr_from_join)) {
-    regex_search(input_command, m, select_attr_from_join);
-
-    vector<string> tokens;
-    for (auto token : m)
-      tokens.push_back(token);
-
-    int refIndex;
-    for (refIndex = 0; refIndex < tokens.size(); refIndex++) {
-      if (tokens[refIndex] == "from" || tokens[refIndex] == "FROM")
-        break;
+      cout << "Selected successfully into " << targetRelName << endl;
     }
 
+    return ret;
+  }
+
+  int selectAttrFromJoinHandler() {
     char sourceRelOneName[ATTR_SIZE];
     char sourceRelTwoName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
     char joinAttributeOne[ATTR_SIZE];
     char joinAttributeTwo[ATTR_SIZE];
 
-    stringToCharArray(tokens[refIndex + 1], sourceRelOneName, ATTR_SIZE - 1);
-    stringToCharArray(tokens[refIndex + 3], sourceRelTwoName, ATTR_SIZE - 1);
-    stringToCharArray(tokens[refIndex + 5], targetRelName, ATTR_SIZE - 1);
-    stringToCharArray(tokens[refIndex + 8], joinAttributeOne, ATTR_SIZE - 1);
-    stringToCharArray(tokens[refIndex + 10], joinAttributeTwo, ATTR_SIZE - 1);
+    nameToTruncatedArray(m[2], sourceRelOneName);
+    nameToTruncatedArray(m[3], sourceRelTwoName);
+    nameToTruncatedArray(m[4], targetRelName);
+    nameToTruncatedArray(m[6], joinAttributeOne);
+    nameToTruncatedArray(m[8], joinAttributeTwo);
 
     int attrListPos = 1;
-    string attributesListAsStrings;
-    string inputCommand = input_command;
-    while (regex_search(inputCommand, m, attrlist)) {
-      if (attrListPos == 2)
-        attributesListAsStrings = m.str(0);
-      attrListPos++;
-      // suffix to find the rest of the string.
-      inputCommand = m.suffix().str();
-    }
+    string attributesList = m[1];
 
-    vector<string> attributesListAsWords = extract_tokens(attributesListAsStrings);
+    vector<string> attributesListAsWords = extractTokens(m[1]);
     int attrCount = attributesListAsWords.size();
     char attributeList[attrCount][ATTR_SIZE];
     for (int i = 0; i < attrCount; i++) {
-      stringToCharArray(attributesListAsWords[i], attributeList[i], ATTR_SIZE - 1);
+      nameToTruncatedArray(attributesListAsWords[i], attributeList[i]);
     }
 
     int ret = Frontend::select_attrlist_from_join_where(sourceRelOneName, sourceRelTwoName, targetRelName,
                                                         joinAttributeOne, joinAttributeTwo, attrCount,
                                                         attributeList);
     if (ret == SUCCESS) {
-      cout << "Selected successfully into ";
-      print16(targetRelName);
-    } else {
-      printErrorMsg(ret);
-      return FAILURE;
+      cout << "Selected successfully into " << targetRelName;
     }
-  } else {
+
+    return ret;
+  }
+
+  const vector<pair<regex, handlerFunction>> handlers = {
+      {help, &RegexHandler::helpHandler},
+      {ex, &RegexHandler::exitHandler},
+      {echo, &RegexHandler::echoHandler},
+      {run, &RegexHandler::runHandler},
+      {open_table, &RegexHandler::openHandler},
+      {close_table, &RegexHandler::closeHandler},
+      {create_table, &RegexHandler::createTableHandler},
+      {drop_table, &RegexHandler::dropTableHandler},
+      {create_index, &RegexHandler::createIndexHandler},
+      {drop_index, &RegexHandler::dropIndexHandler},
+      {rename_table, &RegexHandler::renameTableHandler},
+      {rename_column, &RegexHandler::renameColumnHandler},
+      {insert_single, &RegexHandler::insertSingleHandler},
+      {insert_multiple, &RegexHandler::insertFromFileHandler},
+      {select_from, &RegexHandler::selectFromHandler},
+      {select_from_where, &RegexHandler::selectFromWhereHandler},
+      {select_attr_from, &RegexHandler::selectAttrFromHandler},
+      {select_attr_from_where, &RegexHandler::selectAttrFromWhereHandler},
+      {select_from_join, &RegexHandler::selectFromJoinHandler},
+      {select_attr_from_join, &RegexHandler::selectAttrFromJoinHandler},
+  };
+
+ public:
+  int handle(const string command) {
+    for (auto iter = handlers.begin(); iter != handlers.end(); ++iter) {
+      regex testCommand = iter->first;
+      handlerFunction handler = iter->second;
+      if (regex_match(command, testCommand)) {
+        regex_search(command, m, testCommand);
+        int status = (this->*handler)();
+        if (status == SUCCESS || status == EXIT) {
+          return status;
+        }
+        printErrorMsg(status);
+        return FAILURE;
+      }
+    }
     cout << "Syntax Error" << endl;
     return FAILURE;
   }
-  return SUCCESS;
-}
+} regexHandler;
 
 int handleFrontend(int argc, char *argv[]) {
   // Taking Run Command as Command Line Argument(if provided)
   if (argc == 3 && strcmp(argv[1], "run") == 0) {
     string run_command("run ");
     run_command.append(argv[2]);
-    int ret = regexMatchAndExecute(run_command);
+    int ret = regexHandler.handle(run_command);
     if (ret == EXIT) {
       return 0;
     }
@@ -535,7 +546,7 @@ int handleFrontend(int argc, char *argv[]) {
     if (strlen(buf) > 0) {
       add_history(buf);
     }
-    int ret = regexMatchAndExecute(string(buf));
+    int ret = regexHandler.handle(string(buf));
     free(buf);
     if (ret == EXIT) {
       return 0;
@@ -544,71 +555,7 @@ int handleFrontend(int argc, char *argv[]) {
   return 0;
 }
 
-int executeCommandsFromFile(const string fileName) {
-  const string filePath = BATCH_FILES_PATH;
-  fstream commandsFile;
-  commandsFile.open(filePath + fileName, ios::in);
-  string command;
-  vector<string> commands;
-  if (commandsFile.is_open()) {
-    while (getline(commandsFile, command)) {
-      commands.push_back(command);
-    }
-  } else {
-    cout << "The file " << fileName << " does not exist\n";
-  }
-  int lineNumber = 1;
-  for (auto command : commands) {
-    int ret = regexMatchAndExecute(command);
-    if (ret == EXIT) {
-      return EXIT;
-    } else if (ret == FAILURE) {
-      cout << "At line number " << lineNumber << endl;
-      break;
-    }
-    lineNumber++;
-  }
-  return SUCCESS;
-}
-
-int getIndexOfFromToken(vector<string> command_tokens) {
-  int index_of_from;
-  for (index_of_from = 0; index_of_from < command_tokens.size(); index_of_from++) {
-    if (command_tokens[index_of_from] == "from" || command_tokens[index_of_from] == "FROM")
-      break;
-  }
-  return index_of_from;
-}
-
-int getIndexOfWhereToken(vector<string> command_tokens) {
-  int index_of_where;
-  for (index_of_where = 0; index_of_where < command_tokens.size(); index_of_where++) {
-    if (command_tokens[index_of_where] == "where" || command_tokens[index_of_where] == "WHERE")
-      break;
-  }
-  return index_of_where;
-}
-
-string getAttrListStringFromCommand(const string input_command, smatch m) {
-  int attrListPos = 1;
-  string attribute_list;
-  string inputCommand = input_command;
-  /*
-   * At second position of the input attribute list will be obtained
-   *      SELECT AttrList FROM  ...
-   *      1      2        3     ...
-   */
-  while (regex_search(inputCommand, m, attrlist)) {
-    if (attrListPos == 2)
-      attribute_list = m.str(0);
-    attrListPos++;
-    // suffix to find the rest of the string.
-    inputCommand = m.suffix().str();
-  }
-
-  return attribute_list;
-}
-
+// get the operator constant corresponding to the string
 int getOperator(string op_str) {
   int op = 0;
   if (op_str == "=")
@@ -626,22 +573,64 @@ int getOperator(string op_str) {
   return op;
 }
 
-void stringToCharArray(string x, char *a, int size) {
-  // Reducing size of string to the size provided
-  int i;
-  if (size == ATTR_SIZE - 1) {
-    for (i = 0; i < x.size() && i < ATTR_SIZE - 1; i++)
-      a[i] = x[i];
-    a[i] = '\0';
-  } else {
-    for (i = 0; i < size; i++) {
-      a[i] = x[i];
-    }
-    a[i] = '\0';
+// truncates a given name string to ATTR_NAME sized char array
+void nameToTruncatedArray(string nameString, char *nameArray) {
+  string truncated = nameString.substr(0, ATTR_SIZE - 1);
+  truncated.c_str();
+  strcpy(nameArray, truncated.c_str());
+  if (nameString.size() >= ATTR_SIZE) {
+    printf("(warning: \'%s\' truncated to \'%s\')\n", nameString.c_str(), nameArray);
   }
 }
 
-void displayHelp() {
+void printErrorMsg(int error) {
+  if (error == FAILURE)
+    cout << "Error: Command Failed" << endl;
+  else if (error == E_OUTOFBOUND)
+    cout << "Error: Out of bound" << endl;
+  else if (error == E_FREESLOT)
+    cout << "Error: Free slot" << endl;
+  else if (error == E_NOINDEX)
+    cout << "Error: No index" << endl;
+  else if (error == E_DISKFULL)
+    cout << "Error: Insufficient space in Disk" << endl;
+  else if (error == E_INVALIDBLOCK)
+    cout << "Error: Invalid block" << endl;
+  else if (error == E_RELNOTEXIST)
+    cout << "Error: Relation does not exist" << endl;
+  else if (error == E_RELEXIST)
+    cout << "Error: Relation already exists" << endl;
+  else if (error == E_ATTRNOTEXIST)
+    cout << "Error: Attribute does not exist" << endl;
+  else if (error == E_ATTREXIST)
+    cout << "Error: Attribute already exists" << endl;
+  else if (error == E_CACHEFULL)
+    cout << "Error: Cache is full" << endl;
+  else if (error == E_RELNOTOPEN)
+    cout << "Error: Relation is not open" << endl;
+  else if (error == E_RELNOTOPEN)
+    cout << "Error: Relation is not open" << endl;
+  else if (error == E_NATTRMISMATCH)
+    cout << "Error: Mismatch in number of attributes" << endl;
+  else if (error == E_DUPLICATEATTR)
+    cout << "Error: Duplicate attributes found" << endl;
+  else if (error == E_RELOPEN)
+    cout << "Error: Relation is open" << endl;
+  else if (error == E_ATTRTYPEMISMATCH)
+    cout << "Error: Mismatch in attribute type" << endl;
+  else if (error == E_INVALID)
+    cout << "Error: Invalid index or argument" << endl;
+  else if (error == E_MAXRELATIONS)
+    cout << "Error: Maximum number of relations already present" << endl;
+  else if (error == E_MAXATTRS)
+    cout << "Error: Maximum number of attributes allowed for a relation is 125" << endl;
+  else if (error == E_NOTPERMITTED)
+    cout << "Error: This operation is not permitted" << endl;
+  else if (error == E_INDEX_BLOCKS_RELEASED)
+    cout << "Warning: Operation succeeded, but some indexes had to be dropped." << endl;
+}
+
+void printHelp() {
   printf("CREATE TABLE tablename(attr1_name attr1_type ,attr2_name attr2_type....); \n\t -create a relation with given attribute names\n \n");
   printf("DROP TABLE tablename;\n\t-delete the relation\n  \n");
   printf("OPEN TABLE tablename;\n\t-open the relation \n\n");
@@ -661,95 +650,4 @@ void displayHelp() {
   printf("echo <any message> \n\t  -echo back the given string. \n\n");
   printf("run <filename> \n\t  -run commands from an input file in sequence. \n\n");
   printf("exit \n\t-Exit the interface\n");
-  return;
-}
-
-void printErrorMsg(int ret) {
-  if (ret == FAILURE)
-    cout << "Error: Command Failed" << endl;
-  else if (ret == E_OUTOFBOUND)
-    cout << "Error: Out of bound" << endl;
-  else if (ret == E_FREESLOT)
-    cout << "Error: Free slot" << endl;
-  else if (ret == E_NOINDEX)
-    cout << "Error: No index" << endl;
-  else if (ret == E_DISKFULL)
-    cout << "Error: Insufficient space in Disk" << endl;
-  else if (ret == E_INVALIDBLOCK)
-    cout << "Error: Invalid block" << endl;
-  else if (ret == E_RELNOTEXIST)
-    cout << "Error: Relation does not exist" << endl;
-  else if (ret == E_RELEXIST)
-    cout << "Error: Relation already exists" << endl;
-  else if (ret == E_ATTRNOTEXIST)
-    cout << "Error: Attribute does not exist" << endl;
-  else if (ret == E_ATTREXIST)
-    cout << "Error: Attribute already exists" << endl;
-  else if (ret == E_CACHEFULL)
-    cout << "Error: Cache is full" << endl;
-  else if (ret == E_RELNOTOPEN)
-    cout << "Error: Relation is not open" << endl;
-  else if (ret == E_RELNOTOPEN)
-    cout << "Error: Relation is not open" << endl;
-  else if (ret == E_NATTRMISMATCH)
-    cout << "Error: Mismatch in number of attributes" << endl;
-  else if (ret == E_DUPLICATEATTR)
-    cout << "Error: Duplicate attributes found" << endl;
-  else if (ret == E_RELOPEN)
-    cout << "Error: Relation is open" << endl;
-  else if (ret == E_ATTRTYPEMISMATCH)
-    cout << "Error: Mismatch in attribute type" << endl;
-  else if (ret == E_INVALID)
-    cout << "Error: Invalid index or argument" << endl;
-  else if (ret == E_MAXRELATIONS)
-    cout << "Error: Maximum number of relations already present" << endl;
-  else if (ret == E_MAXATTRS)
-    cout << "Error: Maximum number of attributes allowed for a relation is 125" << endl;
-  else if (ret == E_NOTPERMITTED)
-    cout << "Error: This operation is not permitted" << endl;
-  else if (ret == E_INDEX_BLOCKS_RELEASED)
-    cout << "Warning: Operation succeeded, but some indexes had to be dropped." << endl;
-}
-
-vector<string> extract_tokens(string input_command) {
-  // tokenize with whitespace and brackets as delimiter
-  vector<string> tokens;
-  string token;
-  for (int i = 0; i < input_command.length(); i++) {
-    if (input_command[i] == '(' || input_command[i] == ')') {
-      if (!token.empty()) {
-        tokens.push_back(token);
-      }
-      token = "";
-    } else if (input_command[i] == ',') {
-      if (!token.empty()) {
-        tokens.push_back(token);
-      }
-      token = "";
-    } else if (input_command[i] == ' ' || input_command[i] == ';') {
-      if (!token.empty()) {
-        tokens.push_back(token);
-      }
-      token = "";
-    } else {
-      token += input_command[i];
-    }
-  }
-  if (!token.empty())
-    tokens.push_back(token);
-
-  return tokens;
-}
-
-void print16(char char_string_thing[ATTR_SIZE], bool newline) {
-  for (int i = 0; i < ATTR_SIZE; i++) {
-    if (char_string_thing[i] == '\0') {
-      break;
-    }
-    cout << char_string_thing[i];
-  }
-  if (newline) {
-    cout << endl;
-  }
-  return;
 }
