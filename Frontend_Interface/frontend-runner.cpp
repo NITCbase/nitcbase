@@ -16,7 +16,7 @@ using namespace std;
 
 int getOperator(string op_str);
 
-void nameToTruncatedArray(string nameString, char *nameArray);
+void attrToTruncatedArray(string nameString, char *nameArray);
 
 void printErrorMsg(int error);
 
@@ -81,89 +81,83 @@ class RegexHandler {
   }
 
   int openHandler() {
-    string tablename = m[3];
-    char relname[ATTR_SIZE];
-    nameToTruncatedArray(tablename, relname);
+    char relName[ATTR_SIZE];
+    attrToTruncatedArray(m[3], relName);
 
-    int ret = Frontend::open_table(relname);
+    int ret = Frontend::open_table(relName);
     if (ret >= 0) {
-      cout << "Relation " << relname << " opened successfully\n";
+      cout << "Relation " << relName << " opened successfully\n";
       return SUCCESS;
     }
     return ret;
   }
 
   int closeHandler() {
-    string tablename = m[3];
-    char relname[ATTR_SIZE];
-    nameToTruncatedArray(tablename, relname);
+    char relName[ATTR_SIZE];
+    attrToTruncatedArray(m[3], relName);
 
-    int ret = Frontend::close_table(relname);
+    int ret = Frontend::close_table(relName);
     if (ret == SUCCESS) {
-      cout << "Relation " << relname << " closed successfully\n";
+      cout << "Relation " << relName << " closed successfully\n";
     }
 
     return ret;
   }
 
   int createTableHandler() {
-    string tablename = m[1];
-    char relname[ATTR_SIZE];
-    nameToTruncatedArray(tablename, relname);
+    char relName[ATTR_SIZE];
+    attrToTruncatedArray(m[1], relName);
 
     vector<string> words = extractTokens(m[2]);
 
-    int no_attrs = words.size() / 2;
+    int attrCount = words.size() / 2;
 
-    if (no_attrs > 125) {
+    if (attrCount > 125) {
       return E_MAXATTRS;
     }
 
-    char attribute[no_attrs][ATTR_SIZE];
-    int type_attr[no_attrs];
+    char attrNames[attrCount][ATTR_SIZE];
+    int attrTypes[attrCount];
 
-    for (int i = 0, k = 0; i < no_attrs; i++, k += 2) {
-      nameToTruncatedArray(words[k], attribute[i]);
+    for (int i = 0, k = 0; i < attrCount; i++, k += 2) {
+      attrToTruncatedArray(words[k], attrNames[i]);
       if (words[k + 1] == "STR")
-        type_attr[i] = STRING;
+        attrTypes[i] = STRING;
       else if (words[k + 1] == "NUM")
-        type_attr[i] = NUMBER;
+        attrTypes[i] = NUMBER;
     }
 
-    int ret = Frontend::create_table(relname, no_attrs, attribute, type_attr);
+    int ret = Frontend::create_table(relName, attrCount, attrNames, attrTypes);
     if (ret == SUCCESS) {
-      cout << "Relation " << relname << " created successfully" << endl;
+      cout << "Relation " << relName << " created successfully" << endl;
     }
 
     return ret;
   }
 
   int dropTableHandler() {
-    string tablename = m[3];
-    char relname[ATTR_SIZE];
-    nameToTruncatedArray(tablename, relname);
+    char relName[ATTR_SIZE];
+    attrToTruncatedArray(m[3], relName);
 
-    if (strcmp(relname, "RELATIONCAT") == 0 || strcmp(relname, "ATTRIBUTECAT") == 0) {
+    if (strcmp(relName, "RELATIONCAT") == 0 || strcmp(relName, "ATTRIBUTECAT") == 0) {
       cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
       return FAILURE;
     }
 
-    int ret = Frontend::drop_table(relname);
+    int ret = Frontend::drop_table(relName);
     if (ret == SUCCESS) {
-      cout << "Relation " << relname << " deleted successfully" << endl;
+      cout << "Relation " << relName << " deleted successfully" << endl;
     }
     return ret;
   }
 
   int createIndexHandler() {
-    string tablename = m[4];
-    string attrname = m[5];
-    char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
+    char relName[ATTR_SIZE], attrName[ATTR_SIZE];
 
-    nameToTruncatedArray(tablename, relname);
-    nameToTruncatedArray(attrname, attr_name);
+    attrToTruncatedArray(m[4], relName);
+    attrToTruncatedArray(m[5], attrName);
 
-    int ret = Frontend::create_index(relname, attr_name);
+    int ret = Frontend::create_index(relName, attrName);
     if (ret == SUCCESS) {
       cout << "Index created successfully\n";
     }
@@ -172,13 +166,11 @@ class RegexHandler {
   }
 
   int dropIndexHandler() {
-    string tablename = m[4];
-    string attrname = m[5];
-    char relname[ATTR_SIZE], attr_name[ATTR_SIZE];
-    nameToTruncatedArray(tablename, relname);
-    nameToTruncatedArray(attrname, attr_name);
+    char relName[ATTR_SIZE], attrName[ATTR_SIZE];
+    attrToTruncatedArray(m[4], relName);
+    attrToTruncatedArray(m[5], attrName);
 
-    int ret = Frontend::drop_index(relname, attr_name);
+    int ret = Frontend::drop_index(relName, attrName);
     if (ret == SUCCESS) {
       cout << "Index deleted successfully\n";
     }
@@ -187,15 +179,12 @@ class RegexHandler {
   }
 
   int renameTableHandler() {
-    string oldTableName = m[4];
-    string newTableName = m[6];
+    char oldRelName[ATTR_SIZE];
+    char newRelName[ATTR_SIZE];
+    attrToTruncatedArray(m[4], oldRelName);
+    attrToTruncatedArray(m[6], newRelName);
 
-    char old_relation_name[ATTR_SIZE];
-    char new_relation_name[ATTR_SIZE];
-    nameToTruncatedArray(oldTableName, old_relation_name);
-    nameToTruncatedArray(newTableName, new_relation_name);
-
-    int ret = Frontend::alter_table_rename(old_relation_name, new_relation_name);
+    int ret = Frontend::alter_table_rename(oldRelName, newRelName);
     if (ret == SUCCESS) {
       cout << "Renamed Relation Successfully" << endl;
     }
@@ -204,17 +193,14 @@ class RegexHandler {
   }
 
   int renameColumnHandler() {
-    string tablename = m[4];
-    string oldcolumnname = m[6];
-    string newcolumnname = m[8];
-    char relname[ATTR_SIZE];
-    char old_col[ATTR_SIZE];
-    char new_col[ATTR_SIZE];
-    nameToTruncatedArray(tablename, relname);
-    nameToTruncatedArray(oldcolumnname, old_col);
-    nameToTruncatedArray(newcolumnname, new_col);
+    char relName[ATTR_SIZE];
+    char oldColName[ATTR_SIZE];
+    char newColName[ATTR_SIZE];
+    attrToTruncatedArray(m[4], relName);
+    attrToTruncatedArray(m[6], oldColName);
+    attrToTruncatedArray(m[8], newColName);
 
-    int ret = Frontend::alter_table_rename_column(relname, old_col, new_col);
+    int ret = Frontend::alter_table_rename_column(relName, oldColName, newColName);
     if (ret == SUCCESS) {
       cout << "Renamed Attribute Successfully" << endl;
     }
@@ -223,19 +209,18 @@ class RegexHandler {
   }
 
   int insertSingleHandler() {
-    string table_name = m[1];
-    char rel_name[ATTR_SIZE];
-    nameToTruncatedArray(table_name, rel_name);
+    char relName[ATTR_SIZE];
+    attrToTruncatedArray(m[1], relName);
 
     vector<string> words = extractTokens(m[2]);
 
-    int attr_count = words.size();
-    char attr_values_arr[words.size()][ATTR_SIZE];
-    for (int i = 0; i < words.size(); ++i) {
-      strcpy(attr_values_arr[i], words[i].c_str());
+    int attrCount = words.size();
+    char attrValues[attrCount][ATTR_SIZE];
+    for (int i = 0; i < attrCount; ++i) {
+      attrToTruncatedArray(words[i], attrValues[i]);
     }
 
-    int ret = Frontend::insert_into_table_values(rel_name, words.size(), attr_values_arr);
+    int ret = Frontend::insert_into_table_values(relName, attrCount, attrValues);
     if (ret == SUCCESS) {
       cout << "Inserted successfully" << endl;
     }
@@ -244,14 +229,13 @@ class RegexHandler {
   }
 
   int insertFromFileHandler() {
-    string tablename = m[3];
-    char relname[ATTR_SIZE];
-    nameToTruncatedArray(tablename, relname);
+    char relName[ATTR_SIZE];
+    attrToTruncatedArray(m[3], relName);
 
-    string filepath = string(INPUT_FILES_PATH) + string(m[6]);
-    std::cout << "File path: " << filepath << endl;
+    string filePath = string(INPUT_FILES_PATH) + m[6].str();
+    std::cout << "File path: " << filePath << endl;
 
-    ifstream file(filepath);
+    ifstream file(filePath);
     if (!file.is_open()) {
       cout << "Invalid file path or file does not exist" << endl;
       return FAILURE;
@@ -290,10 +274,10 @@ class RegexHandler {
 
       char rowArray[columnCount][ATTR_SIZE];
       for (int i = 0; i < columnCount; ++i) {
-        nameToTruncatedArray(row[i], rowArray[i]);
+        attrToTruncatedArray(row[i], rowArray[i]);
       }
 
-      retVal = Frontend::insert_into_table_values(relname, columnCount, rowArray);
+      retVal = Frontend::insert_into_table_values(relName, columnCount, rowArray);
 
       if (retVal != SUCCESS) {
         break;
@@ -321,14 +305,10 @@ class RegexHandler {
   }
 
   int selectFromHandler() {
-    string sourceRelName_str = m[4];
-    string targetRelName_str = m[6];
-
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
-
-    nameToTruncatedArray(sourceRelName_str, sourceRelName);
-    nameToTruncatedArray(targetRelName_str, targetRelName);
+    attrToTruncatedArray(m[4], sourceRelName);
+    attrToTruncatedArray(m[6], targetRelName);
 
     int ret = Frontend::select_from_table(sourceRelName, targetRelName);
     if (ret == SUCCESS) {
@@ -339,24 +319,17 @@ class RegexHandler {
   }
 
   int selectFromWhereHandler() {
-    string sourceRel_str = m[4];
-    string targetRel_str = m[6];
-    string attribute_str = m[8];
-    string op_str = m[9];
-    string value_str = m[10];
-
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
     char attribute[ATTR_SIZE];
-    char value[ATTR_SIZE];
-    nameToTruncatedArray(sourceRel_str, sourceRelName);
-    nameToTruncatedArray(targetRel_str, targetRelName);
-    nameToTruncatedArray(attribute_str, attribute);
-    nameToTruncatedArray(value_str, value);
+    char valueStr[ATTR_SIZE];
+    attrToTruncatedArray(m[4], sourceRelName);
+    attrToTruncatedArray(m[6], targetRelName);
+    attrToTruncatedArray(m[8], attribute);
+    int op = getOperator(m[9]);
+    attrToTruncatedArray(m[10], valueStr);
 
-    int op = getOperator(op_str);
-
-    int ret = Frontend::select_from_table_where(sourceRelName, targetRelName, attribute, op, value);
+    int ret = Frontend::select_from_table_where(sourceRelName, targetRelName, attribute, op, valueStr);
     if (ret == SUCCESS) {
       cout << "Selected successfully into " << targetRelName << endl;
     }
@@ -365,24 +338,20 @@ class RegexHandler {
   }
 
   int selectAttrFromHandler() {
-    string attribute_list = m[1];
-    string sourceRel_str = m[2];
-    string targetRel_str = m[3];
-
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
-    nameToTruncatedArray(sourceRel_str, sourceRelName);
-    nameToTruncatedArray(targetRel_str, targetRelName);
+    attrToTruncatedArray(m[2], sourceRelName);
+    attrToTruncatedArray(m[3], targetRelName);
 
-    vector<string> attr_tokens = extractTokens(attribute_list);
+    vector<string> words = extractTokens(m[1]);
 
-    int attr_count = attr_tokens.size();
-    char attr_list[attr_count][ATTR_SIZE];
-    for (int attr_no = 0; attr_no < attr_count; attr_no++) {
-      nameToTruncatedArray(attr_tokens[attr_no], attr_list[attr_no]);
+    int attrCount = words.size();
+    char attrNames[attrCount][ATTR_SIZE];
+    for (int i = 0; i < attrCount; i++) {
+      attrToTruncatedArray(words[i], attrNames[i]);
     }
 
-    int ret = Frontend::select_attrlist_from_table(sourceRelName, targetRelName, attr_count, attr_list);
+    int ret = Frontend::select_attrlist_from_table(sourceRelName, targetRelName, attrCount, attrNames);
     if (ret == SUCCESS) {
       cout << "Selected successfully into " << targetRelName << endl;
     }
@@ -391,33 +360,26 @@ class RegexHandler {
   }
 
   int selectAttrFromWhereHandler() {
-    string attribute_list = m[1];
-    string sourceRel_str = m[2];
-    string targetRel_str = m[3];
-    string attribute_str = m[4];
-    string op_str = m[5];
-    string value_str = m[6];
-
     char sourceRelName[ATTR_SIZE];
     char targetRelName[ATTR_SIZE];
     char attribute[ATTR_SIZE];
     char value[ATTR_SIZE];
-    int op = getOperator(op_str);
 
-    nameToTruncatedArray(attribute_str, attribute);
-    nameToTruncatedArray(value_str, value);
-    nameToTruncatedArray(sourceRel_str, sourceRelName);
-    nameToTruncatedArray(targetRel_str, targetRelName);
+    attrToTruncatedArray(m[2], sourceRelName);
+    attrToTruncatedArray(m[3], targetRelName);
+    attrToTruncatedArray(m[4], attribute);
+    int op = getOperator(m[5]);
+    attrToTruncatedArray(m[6], value);
 
-    vector<string> attr_tokens = extractTokens(attribute_list);
+    vector<string> attrTokens = extractTokens(m[1]);
 
-    int attr_count = attr_tokens.size();
-    char attr_list[attr_count][ATTR_SIZE];
-    for (int attr_no = 0; attr_no < attr_count; attr_no++) {
-      nameToTruncatedArray(attr_tokens[attr_no], attr_list[attr_no]);
+    int attrCount = attrTokens.size();
+    char attrNames[attrCount][ATTR_SIZE];
+    for (int i = 0; i < attrCount; i++) {
+      attrToTruncatedArray(attrTokens[i], attrNames[i]);
     }
 
-    int ret = Frontend::select_attrlist_from_table_where(sourceRelName, targetRelName, attr_count, attr_list,
+    int ret = Frontend::select_attrlist_from_table_where(sourceRelName, targetRelName, attrCount, attrNames,
                                                          attribute, op, value);
     if (ret == SUCCESS) {
       cout << "Selected successfully into " << targetRelName << endl;
@@ -428,7 +390,7 @@ class RegexHandler {
 
   int selectFromJoinHandler() {
     // m[4] and m[10] should be equal ( = sourceRelOneName)
-    // m[6] and m[102 should be equal ( = sourceRelTwoName)
+    // m[6] and m[12] should be equal ( = sourceRelTwoName)
     if (m[4] != m[10] || m[6] != m[12]) {
       cout << "Syntax Error" << endl;
       return FAILURE;
@@ -439,11 +401,11 @@ class RegexHandler {
     char joinAttributeOne[ATTR_SIZE];
     char joinAttributeTwo[ATTR_SIZE];
 
-    nameToTruncatedArray(m[4], sourceRelOneName);
-    nameToTruncatedArray(m[6], sourceRelTwoName);
-    nameToTruncatedArray(m[8], targetRelName);
-    nameToTruncatedArray(m[11], joinAttributeOne);
-    nameToTruncatedArray(m[13], joinAttributeTwo);
+    attrToTruncatedArray(m[4], sourceRelOneName);
+    attrToTruncatedArray(m[6], sourceRelTwoName);
+    attrToTruncatedArray(m[8], targetRelName);
+    attrToTruncatedArray(m[11], joinAttributeOne);
+    attrToTruncatedArray(m[13], joinAttributeTwo);
 
     int ret = Frontend::select_from_join_where(sourceRelOneName, sourceRelTwoName, targetRelName,
                                                joinAttributeOne, joinAttributeTwo);
@@ -461,25 +423,22 @@ class RegexHandler {
     char joinAttributeOne[ATTR_SIZE];
     char joinAttributeTwo[ATTR_SIZE];
 
-    nameToTruncatedArray(m[2], sourceRelOneName);
-    nameToTruncatedArray(m[3], sourceRelTwoName);
-    nameToTruncatedArray(m[4], targetRelName);
-    nameToTruncatedArray(m[6], joinAttributeOne);
-    nameToTruncatedArray(m[8], joinAttributeTwo);
+    attrToTruncatedArray(m[2], sourceRelOneName);
+    attrToTruncatedArray(m[3], sourceRelTwoName);
+    attrToTruncatedArray(m[4], targetRelName);
+    attrToTruncatedArray(m[6], joinAttributeOne);
+    attrToTruncatedArray(m[8], joinAttributeTwo);
 
-    int attrListPos = 1;
-    string attributesList = m[1];
-
-    vector<string> attributesListAsWords = extractTokens(m[1]);
-    int attrCount = attributesListAsWords.size();
-    char attributeList[attrCount][ATTR_SIZE];
+    vector<string> attrTokens = extractTokens(m[1]);
+    int attrCount = attrTokens.size();
+    char attrNames[attrCount][ATTR_SIZE];
     for (int i = 0; i < attrCount; i++) {
-      nameToTruncatedArray(attributesListAsWords[i], attributeList[i]);
+      attrToTruncatedArray(attrTokens[i], attrNames[i]);
     }
 
     int ret = Frontend::select_attrlist_from_join_where(sourceRelOneName, sourceRelTwoName, targetRelName,
                                                         joinAttributeOne, joinAttributeTwo, attrCount,
-                                                        attributeList);
+                                                        attrNames);
     if (ret == SUCCESS) {
       cout << "Selected successfully into " << targetRelName;
     }
@@ -556,25 +515,25 @@ int handleFrontend(int argc, char *argv[]) {
 }
 
 // get the operator constant corresponding to the string
-int getOperator(string op_str) {
+int getOperator(string opStr) {
   int op = 0;
-  if (op_str == "=")
+  if (opStr == "=")
     op = EQ;
-  else if (op_str == "<")
+  else if (opStr == "<")
     op = LT;
-  else if (op_str == "<=")
+  else if (opStr == "<=")
     op = LE;
-  else if (op_str == ">")
+  else if (opStr == ">")
     op = GT;
-  else if (op_str == ">=")
+  else if (opStr == ">=")
     op = GE;
-  else if (op_str == "!=")
+  else if (opStr == "!=")
     op = NE;
   return op;
 }
 
 // truncates a given name string to ATTR_NAME sized char array
-void nameToTruncatedArray(string nameString, char *nameArray) {
+void attrToTruncatedArray(string nameString, char *nameArray) {
   string truncated = nameString.substr(0, ATTR_SIZE - 1);
   truncated.c_str();
   strcpy(nameArray, truncated.c_str());
@@ -593,7 +552,7 @@ void printErrorMsg(int error) {
   else if (error == E_NOINDEX)
     cout << "Error: No index" << endl;
   else if (error == E_DISKFULL)
-    cout << "Error: Insufficient space in Disk" << endl;
+    cout << "Error: Insufficient space in disk" << endl;
   else if (error == E_INVALIDBLOCK)
     cout << "Error: Invalid block" << endl;
   else if (error == E_RELNOTEXIST)
@@ -627,7 +586,7 @@ void printErrorMsg(int error) {
   else if (error == E_NOTPERMITTED)
     cout << "Error: This operation is not permitted" << endl;
   else if (error == E_INDEX_BLOCKS_RELEASED)
-    cout << "Warning: Operation succeeded, but some indexes had to be dropped." << endl;
+    cout << "Warning: Operation succeeded, but some indexes had to be dropped" << endl;
 }
 
 void printHelp() {
