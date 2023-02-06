@@ -1,9 +1,7 @@
-#include <iostream>
-
 #include "Buffer/StaticBuffer.h"
 #include "Cache/OpenRelTable.h"
 #include "Disk_Class/Disk.h"
-#include "Frontend_Interface/frontend-runner.h"
+#include "FrontendInterface/FrontendInterface.h"
 
 int main(int argc, char *argv[]) {
   /* Initialize the Run Copy of Disk */
@@ -11,5 +9,6 @@ int main(int argc, char *argv[]) {
   // StaticBuffer buffer;
   // OpenRelTable cache;
 
-  return handleFrontend(argc, argv);
+  FrontendInterface interface;
+  return interface.handleFrontend(argc, argv);
 }

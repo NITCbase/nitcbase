@@ -5,8 +5,6 @@
 #include "../Schema/Schema.h"
 #include "../define/constants.h"
 
-using namespace std;
-
 class Frontend {
  public:
   // DDL
