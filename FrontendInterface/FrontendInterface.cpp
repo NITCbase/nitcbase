@@ -7,10 +7,11 @@
 #include <readline/readline.h>
 // clang-format on
 
+#include "FrontendInterface.h"
+
 #include "../Disk_Class/Disk.h"
 #include "../Frontend/Frontend.h"
 #include "../define/constants.h"
-#include "FrontendInterface.h"
 
 using namespace std;
 
@@ -459,6 +460,7 @@ int RegexHandler::handle(const string command) {
   return FAILURE;
 }
 
+RegexHandler FrontendInterface::regexHandler;
 int FrontendInterface::handleFrontend(int argc, char *argv[]) {
   // Taking Run Command as Command Line Argument(if provided)
   if (argc == 3 && strcmp(argv[1], "run") == 0) {

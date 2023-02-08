@@ -5,10 +5,10 @@
 
 class FrontendInterface {
  private:
-  RegexHandler regexHandler;
+  static RegexHandler regexHandler;
 
  public:
-  int handleFrontend(int argc, char *argv[]);
+  static int handleFrontend(int argc, char *argv[]);
 };
 
 #endif

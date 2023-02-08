@@ -9,6 +9,5 @@ int main(int argc, char *argv[]) {
   // StaticBuffer buffer;
   // OpenRelTable cache;
 
-  FrontendInterface interface;
-  return interface.handleFrontend(argc, argv);
+  return FrontendInterface::handleFrontend(argc, argv);
 }
