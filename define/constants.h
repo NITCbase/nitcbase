@@ -64,7 +64,8 @@ enum BlockType {
   REC,           // record block
   IND_INTERNAL,  // internal index block
   IND_LEAF,      // leaf index block
-  UNUSED_BLK     // unused block
+  UNUSED_BLK,    // unused block
+  BMAP           // block allocation map
 };
 
 enum OpenRelationEntryStatus {
