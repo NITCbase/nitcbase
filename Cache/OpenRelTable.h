@@ -9,7 +9,7 @@
 
 typedef struct OpenRelTableMetaInfo {
   bool free;
-  char rel_name[ATTR_SIZE];
+  char relName[ATTR_SIZE];
 
 } OpenRelTableMetaInfo;
 
