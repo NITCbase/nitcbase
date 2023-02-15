@@ -79,7 +79,7 @@ class IndBuffer : public BlockBuffer {
 
 class IndInternal : public IndBuffer {
  public:
-  IndInternal();  // update in documentation
+  IndInternal();
   IndInternal(int blockNum);
   int getEntry(void *ptr, int indexNum);
   int setEntry(void *ptr, int indexNum);
