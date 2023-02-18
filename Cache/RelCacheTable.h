@@ -39,7 +39,7 @@ class RelCacheTable {
   static RelCacheEntry *relCache[MAX_OPEN];
 
   // methods
-  static void recordToRelCacheEntry(union Attribute record[RELCAT_NO_ATTRS], RelCacheEntry *relCacheEntry);
-  static void relCacheEntryToRecord(union Attribute record[RELCAT_NO_ATTRS], RelCacheEntry *relCacheEntry);
+  static void recordToRelCatEntry(union Attribute record[RELCAT_NO_ATTRS], RelCatEntry *relCatEntry);
+  static void relCatEntryToRecord(RelCatEntry *relCatEntry, union Attribute record[RELCAT_NO_ATTRS]);
 };
 #endif  // NITCBASE_RELCACHETABLE_H

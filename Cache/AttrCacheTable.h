@@ -45,8 +45,8 @@ class AttrCacheTable {
   static AttrCacheEntry *attrCache[MAX_OPEN];
 
   // methods
-  static void recordToAttrCacheEntry(union Attribute record[ATTRCAT_NO_ATTRS], AttrCacheEntry *attrCacheEntry);
-  static void attrCacheEntryToRecord(union Attribute record[ATTRCAT_NO_ATTRS], AttrCacheEntry *attrCacheEntry);
+  static void recordToAttrCatEntry(union Attribute record[ATTRCAT_NO_ATTRS], AttrCatEntry *attrCatEntry);
+  static void attrCatEntryToRecord(AttrCatEntry *attrCatEntry, union Attribute record[ATTRCAT_NO_ATTRS]);
 };
 
 #endif  // NITCBASE_ATTRCACHETABLE_H
