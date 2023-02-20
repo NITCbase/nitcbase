@@ -12,22 +12,22 @@
 #define ECHO_CMD "\\s*(ECHO|echo)\\s+([a-zA-Z0-9 _,()'?:+*.-]+)\\s*;?"
 
 /* DDL Commands*/
-#define CREATE_TABLE_CMD "\\s*(?:CREATE|create)\\s+(?:TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*\\(\\s*((?:[A-Za-z0-9_-]+\\s+(?:STR|NUM)\\s*,\\s*)*(?:[A-Za-z0-9_-]+\\s+(?:STR|NUM)))\\s*\\)\\s*;?"
+#define CREATE_TABLE_CMD "\\s*(?:CREATE|create)\\s+(?:TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*\\(\\s*((?:[#A-Za-z0-9_-]+\\s+(?:STR|NUM)\\s*,\\s*)*(?:[#A-Za-z0-9_-]+\\s+(?:STR|NUM)))\\s*\\)\\s*;?"
 #define DROP_TABLE_CMD "\\s*(DROP|drop)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*;?"
 #define OPEN_TABLE_CMD "\\s*(OPEN|open)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*;?"
 #define CLOSE_TABLE_CMD "\\s*(CLOSE|close)\\s+(TABLE|table)\\s+([A-Za-z0-9_-]+)\\s*;?"
-#define CREATE_INDEX_CMD "\\s*(CREATE|create)\\s+(INDEX|index)\\s+(ON|on)\\s+([A-Za-z0-9_-]+)\\s*\\.\\s*([A-Za-z0-9_-]+)\\s*;?"
-#define DROP_INDEX_CMD "\\s*(DROP|drop)\\s+(INDEX|index)\\s+(ON|on)\\s+([A-Za-z0-9_-]+)\\s*\\.\\s*([A-Za-z0-9_-]+)\\s*;?"
+#define CREATE_INDEX_CMD "\\s*(CREATE|create)\\s+(INDEX|index)\\s+(ON|on)\\s+([A-Za-z0-9_-]+)\\s*\\.\\s*([#A-Za-z0-9_-]+)\\s*;?"
+#define DROP_INDEX_CMD "\\s*(DROP|drop)\\s+(INDEX|index)\\s+(ON|on)\\s+([A-Za-z0-9_-]+)\\s*\\.\\s*([#A-Za-z0-9_-]+)\\s*;?"
 #define RENAME_TABLE_CMD "\\s*(ALTER|alter)\\s+(TABLE|table)\\s+(RENAME|rename)\\s+([a-zA-Z0-9_-]+)\\s+(TO|to)\\s+([a-zA-Z0-9_-]+)\\s*;?"
-#define RENAME_COLUMN_CMD "\\s*(ALTER|alter)\\s+(TABLE|table)\\s+(RENAME|rename)\\s+([a-zA-Z0-9_-]+)\\s+(COLUMN|column)\\s+([a-zA-Z0-9_-]+)\\s+(TO|to)\\s+([a-zA-Z0-9_-]+)\\s*;?"
+#define RENAME_COLUMN_CMD "\\s*(ALTER|alter)\\s+(TABLE|table)\\s+(RENAME|rename)\\s+([a-zA-Z0-9_-]+)\\s+(COLUMN|column)\\s+([#a-zA-Z0-9_-]+)\\s+(TO|to)\\s+([#a-zA-Z0-9_-]+)\\s*;?"
 
 /* DML Commands */
 #define SELECT_FROM_CMD "\\s*(select|SELECT)\\s+([*])\\s+(FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(INTO|into)\\s+([A-Za-z0-9_-]+)\\s*;?"
-#define SELECT_ATTR_FROM_CMD "\\s*(?:select|SELECT)\\s+((?:[A-Za-z0-9_-]+\\s*,\\s*)*(?:[A-Za-z0-9_-]+))\\s+(?:FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(?:INTO|into)\\s+([A-Za-z0-9_-]+)\\s*;?"
-#define SELECT_FROM_WHERE_CMD "\\s*(select|SELECT)\\s+([*])\\s+(FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(WHERE|where)\\s+([A-Za-z0-9_-]+)\\s*(<|<=|>|>=|=|!=)\\s*([A-Za-z0-9_-]+|([0-9]+(\\.)[0-9]+))\\s*;?"
-#define SELECT_ATTR_FROM_WHERE_CMD "\\s*(?:select|SELECT)\\s+((?:[A-Za-z0-9_-]+\\s*,\\s*)*(?:[A-Za-z0-9_-]+))\\s+(?:FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(?:INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(?:WHERE|where)\\s+([A-Za-z0-9_-]+)\\s*(<|<=|>|>=|=|!=)\\s*([A-Za-z0-9_-]+|([0-9]+(\\.)[0-9]+))\\s*;?"
-#define SELECT_FROM_JOIN_CMD "\\s*(select|SELECT)\\s+([*])\\s+(FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(JOIN|join)\\s+([A-Za-z0-9_-]+)\\s+(INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(WHERE|where)\\s+([A-Za-z0-9_-]+)\\s*\\.([A-Za-z0-9_-]+)\\s*\\=\\s*([A-Za-z0-9_-]+)\\s*\\.([A-Za-z0-9_-]+)\\s*;?"
-#define SELECT_ATTR_FROM_JOIN_CMD "\\s*(?:select|SELECT)\\s+((?:[A-Za-z0-9_-]+\\s*,\\s*)*(?:[A-Za-z0-9_-]+))\\s+(?:FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(?:JOIN|join)\\s+([A-Za-z0-9_-]+)\\s+(?:INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(?:WHERE|where)\\s+([A-Za-z0-9_-]+)\\s*\\.([A-Za-z0-9_-]+)\\s*\\=\\s*([A-Za-z0-9_-]+)\\s*\\.([A-Za-z0-9_-]+)\\s*;?"
+#define SELECT_ATTR_FROM_CMD "\\s*(?:select|SELECT)\\s+((?:[#A-Za-z0-9_-]+\\s*,\\s*)*(?:[#A-Za-z0-9_-]+))\\s+(?:FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(?:INTO|into)\\s+([A-Za-z0-9_-]+)\\s*;?"
+#define SELECT_FROM_WHERE_CMD "\\s*(select|SELECT)\\s+([*])\\s+(FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(WHERE|where)\\s+([#A-Za-z0-9_-]+)\\s*(<|<=|>|>=|=|!=)\\s*([A-Za-z0-9_-]+|([0-9]+(\\.)[0-9]+))\\s*;?"
+#define SELECT_ATTR_FROM_WHERE_CMD "\\s*(?:select|SELECT)\\s+((?:[#A-Za-z0-9_-]+\\s*,\\s*)*(?:[#A-Za-z0-9_-]+))\\s+(?:FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(?:INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(?:WHERE|where)\\s+([#A-Za-z0-9_-]+)\\s*(<|<=|>|>=|=|!=)\\s*([A-Za-z0-9_-]+|([0-9]+(\\.)[0-9]+))\\s*;?"
+#define SELECT_FROM_JOIN_CMD "\\s*(select|SELECT)\\s+([*])\\s+(FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(JOIN|join)\\s+([A-Za-z0-9_-]+)\\s+(INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(WHERE|where)\\s+([A-Za-z0-9_-]+)\\s*\\.([#A-Za-z0-9_-]+)\\s*\\=\\s*([A-Za-z0-9_-]+)\\s*\\.([#A-Za-z0-9_-]+)\\s*;?"
+#define SELECT_ATTR_FROM_JOIN_CMD "\\s*(?:select|SELECT)\\s+((?:[#A-Za-z0-9_-]+\\s*,\\s*)*(?:[#A-Za-z0-9_-]+))\\s+(?:FROM|from)\\s+([A-Za-z0-9_-]+)\\s+(?:JOIN|join)\\s+([A-Za-z0-9_-]+)\\s+(?:INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(?:WHERE|where)\\s+([A-Za-z0-9_-]+)\\s*\\.([#A-Za-z0-9_-]+)\\s*\\=\\s*([A-Za-z0-9_-]+)\\s*\\.([#A-Za-z0-9_-]+)\\s*;?"
 #define INSERT_SINGLE_CMD "\\s*(?:INSERT|insert)\\s+(?:INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(?:VALUES|values)\\s*\\(\\s*((?:(?:[A-Za-z0-9_-]+|[0-9]+\\.[0-9]+)\\s*,\\s*)*(?:[A-Za-z0-9_-]+|[0-9]+\\.[0-9]+))\\s*\\)\\s*;?"
 #define INSERT_MULTIPLE_CMD "\\s*(INSERT|insert)\\s+(INTO|into)\\s+([A-Za-z0-9_-]+)\\s+(VALUES|values)\\s+(FROM|from)\\s+([a-zA-Z0-9_-]+\\.csv)\\s*;?"
 
