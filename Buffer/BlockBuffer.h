@@ -44,15 +44,14 @@ class BlockBuffer {
   int blockNum;
   // methods
   int loadBlockAndGetBufferPtr(unsigned char **buffPtr);
-  int getFreeBlock(int BlockType);
+  int getFreeBlock(int blockType);
+  int setBlockType(int blockType);
 
  public:
   // methods
   BlockBuffer(char blockType);
   BlockBuffer(int blockNum);
   int getBlockNum();
-  int getBlockType();
-  int setBlockType(int blockType);
   int getHeader(struct HeadInfo *head);
   int setHeader(struct HeadInfo *head);
   void releaseBlock();
