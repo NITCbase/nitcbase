@@ -1,9 +1,9 @@
-TARGET = nitcbase
-
 ifeq ($(mode),debug)
 	CFLAGS := -g
 	BUILD_DIR = ./build/debug
+	TARGET = nitcbase-debug
 else
+	TARGET = nitcbase
 	BUILD_DIR = ./build
 endif
 
