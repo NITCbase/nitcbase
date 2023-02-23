@@ -81,9 +81,8 @@ int RegexHandler::openHandler() {
   attrToTruncatedArray(m[3], relName);
 
   int ret = Frontend::open_table(relName);
-  if (ret >= 0) {
+  if (ret == SUCCESS) {
     cout << "Relation " << relName << " opened successfully\n";
-    return SUCCESS;
   }
   return ret;
 }
