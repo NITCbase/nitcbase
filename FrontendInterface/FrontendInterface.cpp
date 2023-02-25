@@ -42,13 +42,13 @@ int RegexHandler::exitHandler() {
 };
 
 int RegexHandler::echoHandler() {
-  string message = m[2];
+  string message = m[1];
   cout << message << endl;
   return SUCCESS;
 }
 
 int RegexHandler::runHandler() {
-  string fileName = m[2];
+  string fileName = m[1];
   const string filePath = BATCH_FILES_PATH;
   fstream commandsFile;
   commandsFile.open(filePath + fileName, ios::in);
@@ -78,7 +78,7 @@ int RegexHandler::runHandler() {
 
 int RegexHandler::openHandler() {
   char relName[ATTR_SIZE];
-  attrToTruncatedArray(m[3], relName);
+  attrToTruncatedArray(m[1], relName);
 
   int ret = Frontend::open_table(relName);
   if (ret == SUCCESS) {
@@ -89,7 +89,7 @@ int RegexHandler::openHandler() {
 
 int RegexHandler::closeHandler() {
   char relName[ATTR_SIZE];
-  attrToTruncatedArray(m[3], relName);
+  attrToTruncatedArray(m[1], relName);
 
   int ret = Frontend::close_table(relName);
   if (ret == SUCCESS) {
@@ -132,7 +132,7 @@ int RegexHandler::createTableHandler() {
 
 int RegexHandler::dropTableHandler() {
   char relName[ATTR_SIZE];
-  attrToTruncatedArray(m[3], relName);
+  attrToTruncatedArray(m[1], relName);
 
   if (strcmp(relName, "RELATIONCAT") == 0 || strcmp(relName, "ATTRIBUTECAT") == 0) {
     cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
@@ -149,8 +149,8 @@ int RegexHandler::dropTableHandler() {
 int RegexHandler::createIndexHandler() {
   char relName[ATTR_SIZE], attrName[ATTR_SIZE];
 
-  attrToTruncatedArray(m[4], relName);
-  attrToTruncatedArray(m[5], attrName);
+  attrToTruncatedArray(m[1], relName);
+  attrToTruncatedArray(m[2], attrName);
 
   int ret = Frontend::create_index(relName, attrName);
   if (ret == SUCCESS) {
@@ -162,8 +162,8 @@ int RegexHandler::createIndexHandler() {
 
 int RegexHandler::dropIndexHandler() {
   char relName[ATTR_SIZE], attrName[ATTR_SIZE];
-  attrToTruncatedArray(m[4], relName);
-  attrToTruncatedArray(m[5], attrName);
+  attrToTruncatedArray(m[1], relName);
+  attrToTruncatedArray(m[2], attrName);
 
   int ret = Frontend::drop_index(relName, attrName);
   if (ret == SUCCESS) {
@@ -176,8 +176,8 @@ int RegexHandler::dropIndexHandler() {
 int RegexHandler::renameTableHandler() {
   char oldRelName[ATTR_SIZE];
   char newRelName[ATTR_SIZE];
-  attrToTruncatedArray(m[4], oldRelName);
-  attrToTruncatedArray(m[6], newRelName);
+  attrToTruncatedArray(m[1], oldRelName);
+  attrToTruncatedArray(m[2], newRelName);
 
   int ret = Frontend::alter_table_rename(oldRelName, newRelName);
   if (ret == SUCCESS) {
@@ -191,9 +191,9 @@ int RegexHandler::renameColumnHandler() {
   char relName[ATTR_SIZE];
   char oldColName[ATTR_SIZE];
   char newColName[ATTR_SIZE];
-  attrToTruncatedArray(m[4], relName);
-  attrToTruncatedArray(m[6], oldColName);
-  attrToTruncatedArray(m[8], newColName);
+  attrToTruncatedArray(m[1], relName);
+  attrToTruncatedArray(m[2], oldColName);
+  attrToTruncatedArray(m[3], newColName);
 
   int ret = Frontend::alter_table_rename_column(relName, oldColName, newColName);
   if (ret == SUCCESS) {
@@ -225,9 +225,9 @@ int RegexHandler::insertSingleHandler() {
 
 int RegexHandler::insertFromFileHandler() {
   char relName[ATTR_SIZE];
-  attrToTruncatedArray(m[3], relName);
+  attrToTruncatedArray(m[1], relName);
 
-  string filePath = string(INPUT_FILES_PATH) + m[6].str();
+  string filePath = string(INPUT_FILES_PATH) + m[2].str();
   std::cout << "File path: " << filePath << endl;
 
   ifstream file(filePath);
@@ -302,8 +302,8 @@ int RegexHandler::insertFromFileHandler() {
 int RegexHandler::selectFromHandler() {
   char sourceRelName[ATTR_SIZE];
   char targetRelName[ATTR_SIZE];
-  attrToTruncatedArray(m[4], sourceRelName);
-  attrToTruncatedArray(m[6], targetRelName);
+  attrToTruncatedArray(m[1], sourceRelName);
+  attrToTruncatedArray(m[2], targetRelName);
 
   int ret = Frontend::select_from_table(sourceRelName, targetRelName);
   if (ret == SUCCESS) {
@@ -318,11 +318,11 @@ int RegexHandler::selectFromWhereHandler() {
   char targetRelName[ATTR_SIZE];
   char attribute[ATTR_SIZE];
   char valueStr[ATTR_SIZE];
-  attrToTruncatedArray(m[4], sourceRelName);
-  attrToTruncatedArray(m[6], targetRelName);
-  attrToTruncatedArray(m[8], attribute);
-  int op = getOperator(m[9]);
-  attrToTruncatedArray(m[10], valueStr);
+  attrToTruncatedArray(m[1], sourceRelName);
+  attrToTruncatedArray(m[2], targetRelName);
+  attrToTruncatedArray(m[3], attribute);
+  int op = getOperator(m[4]);
+  attrToTruncatedArray(m[5], valueStr);
 
   int ret = Frontend::select_from_table_where(sourceRelName, targetRelName, attribute, op, valueStr);
   if (ret == SUCCESS) {
@@ -384,9 +384,9 @@ int RegexHandler::selectAttrFromWhereHandler() {
 }
 
 int RegexHandler::selectFromJoinHandler() {
-  // m[4] and m[10] should be equal ( = sourceRelOneName)
-  // m[6] and m[12] should be equal ( = sourceRelTwoName)
-  if (m[4] != m[10] || m[6] != m[12]) {
+  // m[1] and m[4] should be equal ( = sourceRelOneName)
+  // m[2] and m[6] should be equal ( = sourceRelTwoName)
+  if (m[1] != m[4] || m[2] != m[6]) {
     cout << "Syntax Error" << endl;
     return FAILURE;
   }
@@ -396,11 +396,11 @@ int RegexHandler::selectFromJoinHandler() {
   char joinAttributeOne[ATTR_SIZE];
   char joinAttributeTwo[ATTR_SIZE];
 
-  attrToTruncatedArray(m[4], sourceRelOneName);
-  attrToTruncatedArray(m[6], sourceRelTwoName);
-  attrToTruncatedArray(m[8], targetRelName);
-  attrToTruncatedArray(m[11], joinAttributeOne);
-  attrToTruncatedArray(m[13], joinAttributeTwo);
+  attrToTruncatedArray(m[1], sourceRelOneName);
+  attrToTruncatedArray(m[2], sourceRelTwoName);
+  attrToTruncatedArray(m[3], targetRelName);
+  attrToTruncatedArray(m[5], joinAttributeOne);
+  attrToTruncatedArray(m[7], joinAttributeTwo);
 
   int ret = Frontend::select_from_join_where(sourceRelOneName, sourceRelTwoName, targetRelName,
                                              joinAttributeOne, joinAttributeTwo);
@@ -412,6 +412,11 @@ int RegexHandler::selectFromJoinHandler() {
 }
 
 int RegexHandler::selectAttrFromJoinHandler() {
+  if (m[2] != m[5] || m[3] != m[7]) {
+    cout << "Syntax Error" << endl;
+    return FAILURE;
+  }
+
   char sourceRelOneName[ATTR_SIZE];
   char sourceRelTwoName[ATTR_SIZE];
   char targetRelName[ATTR_SIZE];
