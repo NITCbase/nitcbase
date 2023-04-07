@@ -446,6 +446,18 @@ int RegexHandler::selectAttrFromJoinHandler() {
   return ret;
 }
 
+int RegexHandler::customFunctionHandler() {
+  vector<string> tokens = extractTokens(m[1]);
+
+  char tokensAsArray[tokens.size()][ATTR_SIZE];
+  for (int i = 0; i < tokens.size(); ++i) {
+    attrToTruncatedArray(tokens[i], tokensAsArray[i]);
+  }
+
+  int ret = Frontend::custom_function(tokens.size(), tokensAsArray);
+  return ret;
+}
+
 int RegexHandler::handle(const string command) {
   for (auto iter = handlers.begin(); iter != handlers.end(); ++iter) {
     regex testCommand = iter->first;

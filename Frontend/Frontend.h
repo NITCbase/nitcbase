@@ -47,6 +47,8 @@ class Frontend {
                                              char relname_target[ATTR_SIZE],
                                              char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE],
                                              int attr_count, char attr_list[][ATTR_SIZE]);
+
+  static int custom_function(int argc, char argv[][ATTR_SIZE]);
 };
 
 #endif  // FRONTEND_INTERFACE_FRONTEND_H

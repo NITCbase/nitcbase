@@ -88,3 +88,12 @@ int Frontend::select_attrlist_from_join_where(char relname_source_one[ATTR_SIZE]
   // Algebra::join + project
   return SUCCESS;
 }
+
+int Frontend::custom_function(int argc, char argv[][ATTR_SIZE]) {
+  // argc gives the size of the argv array
+  // argv stores every token delimited by space and comma
+
+  // implement whatever you desire
+
+  return SUCCESS;
+}
