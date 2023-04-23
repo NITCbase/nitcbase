@@ -8,6 +8,13 @@
 #include "../define/id.h"
 
 class BPlusTree {
+ private:
+  static int insertIntoLeaf(int relId, char attrName[ATTR_SIZE], int blockNum, Attribute attrVal, RecId recId);
+  static int splitLeaf(int leafBlockNum, Index indices[]);
+  static int insertIntoInternal(int relId, char attrName[ATTR_SIZE], int intBlockNum, Attribute attrVal, int lChild, int rChild);
+  static int splitInternal(int intBlockNum, InternalEntry internalEntries[]);
+  static int createNewRoot(int relId, char attrName[ATTR_SIZE], Attribute attrVal, int lChild, int rChild);
+
  public:
   static int bPlusCreate(int relId, char attrName[ATTR_SIZE]);
   static int bPlusInsert(int relId, char attrName[ATTR_SIZE], union Attribute attrVal, RecId recordId);
