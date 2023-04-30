@@ -9,7 +9,7 @@
 #define HELP_CMD "\\s*HELP\\s*;?"
 #define EXIT_CMD "\\s*EXIT\\s*;?"
 #define RUN_CMD "\\s*RUN\\s+([a-zA-Z0-9_/.-]+)\\s*;?"
-#define ECHO_CMD "\\s*ECHO\\s+([a-zA-Z0-9 _,()'?:+*.-]+)\\s*;?"
+#define ECHO_CMD "\\s*ECHO\\s*([a-zA-Z0-9 _,()'?:+*.-]*)\\s*;?"
 
 /* DDL Commands*/
 #define CREATE_TABLE_CMD "\\s*CREATE\\s+TABLE\\s+([A-Za-z0-9_-]+)\\s*\\(\\s*((?:[#A-Za-z0-9_-]+\\s+(?:STR|NUM)\\s*,\\s*)*(?:[#A-Za-z0-9_-]+\\s+(?:STR|NUM)))\\s*\\)\\s*;?"
