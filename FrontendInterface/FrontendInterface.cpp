@@ -134,11 +134,6 @@ int RegexHandler::dropTableHandler() {
   char relName[ATTR_SIZE];
   attrToTruncatedArray(m[1], relName);
 
-  if (strcmp(relName, "RELATIONCAT") == 0 || strcmp(relName, "ATTRIBUTECAT") == 0) {
-    cout << "Error: Cannot Delete Relation Catalog or Attribute Catalog" << endl;
-    return FAILURE;
-  }
-
   int ret = Frontend::drop_table(relName);
   if (ret == SUCCESS) {
     cout << "Relation " << relName << " deleted successfully" << endl;
