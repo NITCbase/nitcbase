@@ -379,12 +379,6 @@ int RegexHandler::selectAttrFromWhereHandler() {
 }
 
 int RegexHandler::selectFromJoinHandler() {
-  // m[1] and m[4] should be equal ( = sourceRelOneName)
-  // m[2] and m[6] should be equal ( = sourceRelTwoName)
-  if (m[1] != m[4] || m[2] != m[6]) {
-    cout << "Syntax Error: Relation names do not match" << endl;
-    return FAILURE;
-  }
   char sourceRelOneName[ATTR_SIZE];
   char sourceRelTwoName[ATTR_SIZE];
   char targetRelName[ATTR_SIZE];
@@ -394,8 +388,18 @@ int RegexHandler::selectFromJoinHandler() {
   attrToTruncatedArray(m[1], sourceRelOneName);
   attrToTruncatedArray(m[2], sourceRelTwoName);
   attrToTruncatedArray(m[3], targetRelName);
-  attrToTruncatedArray(m[5], joinAttributeOne);
-  attrToTruncatedArray(m[7], joinAttributeTwo);
+
+  if (m[1] == m[4] && m[2] == m[6]) {
+    attrToTruncatedArray(m[5], joinAttributeOne);
+    attrToTruncatedArray(m[7], joinAttributeTwo);
+  } else if (m[1] == m[6] && m[2] == m[4]) {
+    attrToTruncatedArray(m[7], joinAttributeOne);
+    attrToTruncatedArray(m[5], joinAttributeTwo);
+
+  } else {
+    cout << "Syntax Error: Relation names do not match" << endl;
+    return FAILURE;
+  }
 
   int ret = Frontend::select_from_join_where(sourceRelOneName, sourceRelTwoName, targetRelName,
                                              joinAttributeOne, joinAttributeTwo);
@@ -407,11 +411,6 @@ int RegexHandler::selectFromJoinHandler() {
 }
 
 int RegexHandler::selectAttrFromJoinHandler() {
-  if (m[2] != m[5] || m[3] != m[7]) {
-    cout << "Syntax Error: Relation names do not match" << endl;
-    return FAILURE;
-  }
-
   char sourceRelOneName[ATTR_SIZE];
   char sourceRelTwoName[ATTR_SIZE];
   char targetRelName[ATTR_SIZE];
@@ -421,6 +420,18 @@ int RegexHandler::selectAttrFromJoinHandler() {
   attrToTruncatedArray(m[2], sourceRelOneName);
   attrToTruncatedArray(m[3], sourceRelTwoName);
   attrToTruncatedArray(m[4], targetRelName);
+
+  if (m[2] == m[5] && m[3] == m[7]) {
+    attrToTruncatedArray(m[6], joinAttributeOne);
+    attrToTruncatedArray(m[8], joinAttributeTwo);
+  } else if (m[2] == m[7] && m[3] == m[5]) {
+    attrToTruncatedArray(m[8], joinAttributeOne);
+    attrToTruncatedArray(m[6], joinAttributeTwo);
+  } else {
+    cout << "Syntax Error: Relation names do not match" << endl;
+    return FAILURE;
+  }
+
   attrToTruncatedArray(m[6], joinAttributeOne);
   attrToTruncatedArray(m[8], joinAttributeTwo);
 
