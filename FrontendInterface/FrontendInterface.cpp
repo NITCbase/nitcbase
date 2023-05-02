@@ -382,7 +382,7 @@ int RegexHandler::selectFromJoinHandler() {
   // m[1] and m[4] should be equal ( = sourceRelOneName)
   // m[2] and m[6] should be equal ( = sourceRelTwoName)
   if (m[1] != m[4] || m[2] != m[6]) {
-    cout << "Syntax Error" << endl;
+    cout << "Syntax Error: Relation names do not match" << endl;
     return FAILURE;
   }
   char sourceRelOneName[ATTR_SIZE];
@@ -408,7 +408,7 @@ int RegexHandler::selectFromJoinHandler() {
 
 int RegexHandler::selectAttrFromJoinHandler() {
   if (m[2] != m[5] || m[3] != m[7]) {
-    cout << "Syntax Error" << endl;
+    cout << "Syntax Error: Relation names do not match" << endl;
     return FAILURE;
   }
 
